@@ -1,0 +1,73 @@
+doctype html
+html
+  head
+    title=title
+    link(rel='icon', type='image/svg+xml', href='/_static_/images/icon.svg')
+    link(rel='stylesheet', href='/_static_/css/styles.css')
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j",crossorigin="anonymous")
+
+  body
+    script(src="https://unpkg.com/web-animations-js@2.3.1/web-animations.min.js")
+    script(src="https://unpkg.com/hammerjs@2.0.8/hammer.min.js")
+    script(src="/_static_/js/muuri.js")
+    div.vert
+      div.VertA
+        div.item-content
+         div.cwikheader
+          div.headergrid
+            div.toolBar
+                div.item-content
+                  block toolBar
+            div.bchlogo
+                div.item-content
+                  a(href="/home")
+                    img#bchHeaderFlag(src="/_static_/images/BitcoinCashFlag.svg")
+            div.headerContent
+                div.item-content
+                  block header
+            div.userBar
+                div.item-content
+                  div.userBar
+                    if user && user.loggedIn
+                      span(onclick="logout()") logout | 
+                    else
+                      span(onclick="login()") login |
+                    span(onclick="commitEdits()") commit |
+                    span(onclick="settings()") settings
+      div.VertB
+        div.item-content
+          div.outergrid
+            div.leftsidebar
+              div.item-content
+                div.sidebargrid
+                  div.structure
+                    div.item-content
+                      block structure
+                  div.related
+                    div.item-content
+                      block related 
+                  div.history
+                    div.item-content
+                      block history
+            div.cwikcontent
+              div.item-content
+                block wikipage
+    textarea.cwikeditor
+    script.
+      var vertGrid = new Muuri('.vert');
+      var outerGrid = new Muuri('.outergrid', {
+      layout: {
+        horizontal: true
+        },      
+      });
+      var sidebarGrid = new Muuri('.sidebargrid', {
+        dragEnabled: true
+      });
+      var headerGrid = new Muuri('.headergrid', {
+      layout: {
+        horizontal: true
+        },
+        dragEnabled: true
+      });        
+    block endScript
+          

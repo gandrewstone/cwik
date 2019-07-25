@@ -1,0 +1,43 @@
+extends layout
+
+block header
+  strong
+    center #{title}
+
+block history
+  center Recently Viewed
+  div.historyI !{history}
+
+block related
+  center Related
+  div.relatedI !{ related }
+
+block structure
+  center Table Of Contents
+  div.structureI !{ structure }
+
+block wikipage
+  div.wikicontent !{ zzwikiPage }
+
+block toolBar
+  div.editBar
+    <span onclick="runeditor('!{urlPath}', document.querySelector('.cwikeditor'))">edit</span> |
+    <span onclick="voting('!{urlPath}')">voting</span> |
+    <span onclick="discussion('!{urlPath}')">talking</span>
+
+block endScript
+  script(src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js", integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ", crossorigin="anonymous")
+
+  script(src="https://d3js.org/d3.v5.min.js")
+  script(src="/_static_/js/he.js")
+  script(src="/_static_/js/mermaid/mermaid.js")
+  script.
+    mermaid.initialize({logLevel:5, startOnLoad:true});
+  script(src="/_static_/js/mathjax/MathJax.js?config=TeX-AMS_HTML", type="text/javascript")
+  script(src="/_static_/js/stackedit.js")
+  script(src="/_static_/js/edit.js")
+  script(type="module").
+    fetch("!{urlPath}?raw=1").then(function(data) { data.text().then(processFetchedMd); })
+          .catch(function(error) {
+          console.log(error);
+          })

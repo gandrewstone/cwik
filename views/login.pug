@@ -1,0 +1,61 @@
+extends layout
+
+block header
+  strong
+    center Login
+
+block history
+  center Recently Viewed
+
+block related
+  center Related
+  div.relatedI
+  
+block structure
+  center Table Of Contents
+  div.structureI
+
+block wikipage
+  div.login
+   form(action="/_login_", method="POST")
+    center
+      H2 Identity Manager
+    center#QRcode QR graphic here
+    center
+      small
+        a(href=QRsignCode) !{QRsignCode}
+      
+    center
+      H2 Manual Entry
+    center Challenge
+    center
+      input#challenge(type="text", name='challenge',readonly='true', value=challenge)
+    center Address
+    center
+      input#addr(name='addr')
+    center Signature
+    center
+      input#sig(name='sig')
+    center
+      input(type="submit", value="login")
+  script(type="text/javascript",src="/_static_/js/qrcode.js")
+  script.
+    var typeNumber = 12;
+    var errorCorrectionLevel = 'L';
+    var qr = qrcode(typeNumber, errorCorrectionLevel);
+    qr.addData("!{QRsignCode}");
+    qr.make();
+    document.getElementById('QRcode').innerHTML = qr.createImgTag();
+
+    var intervalID = setInterval(function() {
+      fetch("/_login_/check").then(response => {
+      console.log(response);
+      if (response.status == 200)
+      {
+        window.location.href = "/";
+      }
+      });
+      }, 5000);
+
+block toolBar
+  div.editBar
