@@ -4,6 +4,8 @@ var sanitizer = require("sanitize-html");
 var git = require("nodegit");
 var path = require("path");
 
+var PUSH_BRANCHES = ["refs/heads/master:refs/heads/master"];
+var UPSTREAM_REPO_NAME = "origin";
 
 var ncp = require('ncp').ncp;
 ncp.limit = 16;  // number of simultaneous copy operations allowed
@@ -44,6 +46,29 @@ commitEdits = function(req, res) {
                     console.log("worked " + oid);
                     changedFiles.clear();
                     saveChangedFiles(req.session.uid);
+                    git.Remote.lookup(repo,UPSTREAM_REPO_NAME).then(
+                        function(remote) {
+                            console.log("push");
+                            remote.push(PUSH_BRANCHES,
+                                {
+                                callbacks: {
+                                    credentials: function(url, userName) {
+                                        console.log("credentials requsted url: " + url + " username: " + userName);
+                                        return git.Cred.sshKeyFromAgent(userName);
+                                    }
+                                }
+                            }
+                                       ).then(function(number) {
+                                           console.log("push completed. returned " + number);
+                                       },
+                                              function(failure) {
+                                                  console.log("push failed " + failure);
+                                              }).catch(err => { console.error("push catch error ", err) });
+                        },
+                        function(failure) {
+                            console.log("remote create failed" + failure);
+                        }
+                    );
                 },
                 function (failure) {
                     console.log("failed" + failure);
