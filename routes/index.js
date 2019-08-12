@@ -4,10 +4,11 @@ var router = express.Router();
 var fs = require('fs');
 
 KnownUser = function(identity) {
-    if (identity == "bchreg:qrqvm7fuwh2ml7svvggmyk79pp0ymr9e5ywghhxuja")  // TODO store in config database or file
+    if (identity == "bchreg:qq02hj8r4cfw8pqtc47v4tt3rg0xn8p6qg2rrtcs2e")  // TODO store in config database or file
     {
         return true;
     }
+    
     return false;
 }
 
@@ -52,7 +53,7 @@ router.get('/_login_/auto', function(req, res, next) {
             if (!KnownUser(req.query.addr))
             {
                 console.log("unknown user " + req.query.addr);
-                res.status(401).send("unknown identity");
+                res.status(200).send("unknown identity");
                 return;
 
             }
