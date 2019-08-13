@@ -6,6 +6,7 @@ var path = require("path");
 
 var PUSH_BRANCHES = ["refs/heads/master:refs/heads/master"];
 var UPSTREAM_REPO_NAME = "origin";
+var REPO_BRANCH_NAME = "master";
 
 var ncp = require('ncp').ncp;
 ncp.limit = 16;  // number of simultaneous copy operations allowed
@@ -23,9 +24,38 @@ function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
 }
 
+/**
+ * Fetch from remote (credit https://stackoverflow.com/questions/20955393/nodegit-libgit2-for-node-js-how-to-push-and-pull/35656463)
+ *
+ * @param {string} repositoryPath - Path to local git repository
+ * @param {string} remoteName - Remote name
+ * @param {string} branch - Branch to fetch
+ */
+gitPull = function (repositoryPath, remoteName, branch, cb) {
+    var repository;
+    var remoteBranch = remoteName + '/' + branch;
+    git.Repository.open(repositoryPath)
+        .then(function (_repository) {
+            repository = _repository;
+            return repository.fetch(remoteName);
+        }, cb)
+        .then(function () {
+            return repository.mergeBranches(branch, remoteBranch);
+        }, cb)
+        .then(function (oid) {
+            cb(null, oid);
+        }, cb);
+};
+
 // All files that are modified are stored in a file so that we know what to commit.
 // Perhaps this can be better accomplished with a git command
 changedFiles = new Set();
+
+credentialFn = function(url, userName)
+{
+    console.log("credentials requsted url: " + url + " username: " + userName);
+    return git.Cred.sshKeyFromAgent(userName);
+}
 
 commitEdits = function(req, res) {
     var user = req.session.uid.split(":")[1];
@@ -79,6 +109,19 @@ commitEdits = function(req, res) {
         });
 }
 
+
+// do a git pull to sync the user's repo with the latest changes
+refreshRepo = function(uid)
+{
+    var user = uid.split(":")[1];
+    var userSpace = userForkRoot + "/" + user;
+    console.log("refresh repo: " + user + " repo " + userSpace);
+
+    gitPull(userSpace, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME, function(err, oid) {
+        if (err != null) console.log ("pull error " + err);
+    });
+}
+
 // Load the list of changed files from disk.
 loadChangedFiles = function(uid)
 {
@@ -124,18 +167,24 @@ handleAPage = function(req, res) {
     var userSpace = userForkRoot + "/" + req.session.uid.split(":")[1];
     var readFrom = userSpace;
     console.log("User space: " + userSpace);
+
     // Make a working space for this user if one does not yet exist
     if (!fs.existsSync(userSpace))
     {
-        ncp(contentHome, userSpace, function (err) {
-            if (err)
-            {
-                return console.error("ncp copy error: " + err);
-            }
-            console.log("user scratch space created!");
-            // TODO what?
-        });
+        // Refresh my local copy
+        gitPull(contentHome, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME,
+                function(err, oid) {
+                    if (err != null) console.log ("pull " + contentHome + " error " + err);
 
+                    // then copy it to the user's space
+                    ncp(contentHome, userSpace, function (err) {
+                        if (err)
+                        {
+                            return console.error("ncp copy error: " + err);
+                        }
+                        console.log("user scratch space created!");
+                    });
+                });
         readFrom = contentHome;  // While I'm waiting for the copy, allow the user to read
     }
 
@@ -145,7 +194,7 @@ handleAPage = function(req, res) {
         res.sendFile("public/images/icon.ico");
         return;
     }
-    
+
     urlPath = req.path;
     console.log(urlPath);
     console.log(decodeURI(urlPath));

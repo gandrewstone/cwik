@@ -1,7 +1,6 @@
 var auth = require("../auth.js");
 var express = require('express');
 var router = express.Router();
-var fs = require('fs');
 
 KnownUser = function(identity) {
     if (identity == "bchreg:qq02hj8r4cfw8pqtc47v4tt3rg0xn8p6qg2rrtcs2e")  // TODO store in config database or file
@@ -78,6 +77,7 @@ router.get('/_login_/auto', function(req, res, next) {
                         console.log("error?:" + JSON.stringify(err));
                     });
                 }
+                refreshRepo(req.query.addr);
                 loadChangedFiles(req.query.addr);
                 console.log("login accepted");
                 res.status(200).send("login accepted");
