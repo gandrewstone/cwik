@@ -24,6 +24,12 @@ function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
 }
 
+credentialFn = function(url, userName)
+{
+    console.log("credentials requsted url: " + url + " username: " + userName);
+    return git.Cred.sshKeyFromAgent(userName);
+}
+
 /**
  * Fetch from remote (credit https://stackoverflow.com/questions/20955393/nodegit-libgit2-for-node-js-how-to-push-and-pull/35656463)
  *
@@ -36,13 +42,16 @@ gitPull = function (repositoryPath, remoteName, branch, cb) {
     var remoteBranch = remoteName + '/' + branch;
     git.Repository.open(repositoryPath)
         .then(function (_repository) {
+	    console.log("gitPull.open ok"); 
             repository = _repository;
-            return repository.fetch(remoteName);
+            return repository.fetch(remoteName, { callbacks: { credentials: credentialFn }});
         }, cb)
         .then(function () {
+	    console.log("gitPull.fetch ok"); 	    
             return repository.mergeBranches(branch, remoteBranch);
         }, cb)
         .then(function (oid) {
+	    console.log("gitPull.merge ok");
             cb(null, oid);
         }, cb);
 };
@@ -50,12 +59,6 @@ gitPull = function (repositoryPath, remoteName, branch, cb) {
 // All files that are modified are stored in a file so that we know what to commit.
 // Perhaps this can be better accomplished with a git command
 changedFiles = new Set();
-
-credentialFn = function(url, userName)
-{
-    console.log("credentials requsted url: " + url + " username: " + userName);
-    return git.Cred.sshKeyFromAgent(userName);
-}
 
 commitEdits = function(req, res) {
     var user = req.session.uid.split(":")[1];
