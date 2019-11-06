@@ -160,15 +160,20 @@ saveChangedFiles = function(uid)
 }
 
 
-handleAPage = function(req, res) {
+handleAPage = function(req, res)
+{
 
-    if (req.session.uid == undefined)  // For now, require login
+    var userSpace = "";
+    var readFrom = contentHome;
+    if (req.session.uid == undefined)
     {
-        return res.redirect(307,"/_login_")
+        // For now, require login
+        // return res.redirect(307,"/_login_")
     }
-
-    var userSpace = userForkRoot + "/" + req.session.uid.split(":")[1];
-    var readFrom = userSpace;
+    else
+    {
+        userSpace = userForkRoot + "/" + req.session.uid.split(":")[1];
+        readFrom = userSpace;
     console.log("User space: " + userSpace);
 
     // Make a working space for this user if one does not yet exist
@@ -190,6 +195,7 @@ handleAPage = function(req, res) {
                 });
         readFrom = contentHome;  // While I'm waiting for the copy, allow the user to read
     }
+}
 
     console.log("handle a page: " + req.path);
     if (req.path == "/favicon.ico")
@@ -208,12 +214,22 @@ handleAPage = function(req, res) {
     if (decodedPath.includes("..")) return BadURL(req, res);
     if (decodedPath == "/") decodedPath = "/home";  // hard code / to home.md
     if (decodedPath.endsWith("/")) decodedPath = decodedPath.substring(0,decodedPath.length-1);
-    var filepath = readFrom + decodedPath + ".md";
+    var filepath = readFrom + decodedPath; //  + ".md";
+    if (!filepath.endsWith(".md"))
+    {
+        filepath = filepath + ".md";
+    }
     console.log("access " + filepath);
 
     if (req.method == "POST")
     {
-        var repoRelativeFilePath = decodedPath.slice(1) + ".md";  // Chop off the initial /
+        var repoRelativeFilePath = decodedPath.slice(1);
+
+        if (!repoRelativeFilePath.endsWith(".md"))
+        {
+            repoRelativeFilePath = repoRelativeFilePath + ".md";
+        }
+
         var writeFilePath = userSpace + repoRelativeFilePath;
         // requires app.use(bodyParser.text({type: 'text/plain'}));
         console.log(writeFilePath + ": POST of " + JSON.stringify(req.body));
