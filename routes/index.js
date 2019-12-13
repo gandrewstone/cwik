@@ -3,11 +3,14 @@ var express = require('express');
 var router = express.Router();
 
 KnownUser = function(identity) {
-    if (identity == "bchtest:qp4l3qyjczayf5vfzsg04g5t2vk9lh0ztugrtpavkg")  // TODO store in config database or file
+    if (identity == "bitcoincash:qq6la308a4ml44sm57trzd7h4qjvlxw5gg4gswksq8")  // TODO store in config database or file
     {
         return true;
     }
-    
+    if (identity == "bitcoincash:qrwddp7gxl50fpl2tgz003zfahysks4w7yylm72h0m")
+    {
+        return true;
+    }
     return false;
 }
 
@@ -78,7 +81,6 @@ router.get('/_login_/auto', function(req, res, next) {
                     });
                 }
                 refreshRepo(req.query.addr);
-                loadChangedFiles(req.query.addr);
                 console.log("login accepted");
                 res.status(200).send("login accepted");
                 return;

@@ -11,8 +11,8 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 
 gitrepo = null;
-contentHome = "./repo/mirror";
-userForkRoot = "./repo";
+contentHome = path.resolve("./repo/mirror");
+userForkRoot = path.resolve("./repo");
 var git = require("nodegit");
 
 var app = express();

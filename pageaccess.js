@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 var pagedown = require("pagedown");
 var sanitizer = require("sanitize-html");
 var git = require("nodegit");
@@ -42,12 +43,12 @@ gitPull = function (repositoryPath, remoteName, branch, cb) {
     var remoteBranch = remoteName + '/' + branch;
     git.Repository.open(repositoryPath)
         .then(function (_repository) {
-	    console.log("gitPull.open ok"); 
+	    console.log("gitPull.open ok");
             repository = _repository;
             return repository.fetch(remoteName, { callbacks: { credentials: credentialFn }});
         }, cb)
         .then(function () {
-	    console.log("gitPull.fetch ok"); 	    
+	    console.log("gitPull.fetch ok");
             return repository.mergeBranches(branch, remoteBranch);
         }, cb)
         .then(function (oid) {
@@ -58,27 +59,28 @@ gitPull = function (repositoryPath, remoteName, branch, cb) {
 
 // All files that are modified are stored in a file so that we know what to commit.
 // Perhaps this can be better accomplished with a git command
-changedFiles = new Set();
+changedFiles = {}; // This is a dictionary of uid, Set() pairs
 
 commitEdits = function(req, res) {
-    var user = req.session.uid.split(":")[1];
+    var uid = req.session.uid;
+    var user = uid.split(":")[1];
     var userSpace = userForkRoot + "/" + user;
     console.log("commit edits run: " + user + " repo " + userSpace);
     git.Repository.open(userSpace).then(
         function(repo)
         {
             console.log("then");
-            var author = git.Signature.now(user, user + "@bitcoin.cash");
+            var author = git.Signature.now(user, user + "@reference.cash");
             var committer = git.Signature.now("buwiki","buwiki@protonmail.com");
-            console.log("author " + user + "@bitcoin.cash");
+            console.log("author " + user + "@reference.cash");
             console.log("committer " + "buwiki@protonmail.com");
-            files = Array.from(changedFiles.keys());
+            files = Array.from(changedFiles[uid].keys());
             console.log("files " + JSON.stringify(files));
             repo.createCommitOnHead(files, author, committer, "wiki commit").then(
                 function (oid) {
                     console.log("worked " + oid);
-                    changedFiles.clear();
-                    saveChangedFiles(req.session.uid);
+                    changedFiles[uid].clear();
+                    saveChangedFiles(uid, changedFiles[uid]);
                     git.Remote.lookup(repo,UPSTREAM_REPO_NAME).then(
                         function(remote) {
                             console.log("push");
@@ -93,6 +95,7 @@ commitEdits = function(req, res) {
                             }
                                        ).then(function(number) {
                                            console.log("push completed. returned " + number);
+                                           refreshRepoEveryone();
                                        },
                                               function(failure) {
                                                   console.log("push failed " + failure);
@@ -112,21 +115,46 @@ commitEdits = function(req, res) {
         });
 }
 
+const getDirectories = source =>
+  fs.readdirSync(source, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name)
+
+/** Pull from the origin in every user's repo */
+refreshRepoEveryone = function()
+{
+    repoDirs = getDirectories(userForkRoot);
+    console.log("repo dirs: " + repoDirs);
+    for(i = 0; i < repoDirs.length; i++)
+    {
+        refreshRepoByDir(userForkRoot + "/" + repoDirs[i]);
+    }
+}
 
 // do a git pull to sync the user's repo with the latest changes
 refreshRepo = function(uid)
 {
     var user = uid.split(":")[1];
     var userSpace = userForkRoot + "/" + user;
-    console.log("refresh repo: " + user + " repo " + userSpace);
+    console.log("refresh repo: " + user + " dir: " + userSpace);
 
     gitPull(userSpace, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME, function(err, oid) {
         if (err != null) console.log ("pull error " + err);
     });
 }
 
+// do a git pull to sync a repo with the latest changes
+refreshRepoByDir = function(dir)
+{
+    console.log("refresh repo: " + dir);
+
+    gitPull(dir, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME, function(err, oid) {
+        if (err != null) console.log ("pull error " + err);
+    });
+}
+
 // Load the list of changed files from disk.
-loadChangedFiles = function(uid)
+loadChangedFiles = function(uid, sess)
 {
     var userSpace = userForkRoot + "/" + uid.split(":")[1];
     var filepath = userSpace + "/.changedFiles.lst";
@@ -134,16 +162,18 @@ loadChangedFiles = function(uid)
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err)
         {
-            console.log("load error: " + err);
+            console.log("file doesn't exist: " + err);
+            changedFiles[uid] = new Set();
+            console.log("assigned changedFiles ");
             return;
         }
-        changedFiles = new Set(JSON.parse(data));
-        console.log("edited file list: " + JSON.stringify(Array.from(changedFiles.keys())));
+        changedFiles[uid] = new Set(JSON.parse(data));
+        console.log("edited file list: " + JSON.stringify(Array.from(changedFiles[uid].keys())));
     });
 }
 
 // Save the list of changed files to a file on disk.
-saveChangedFiles = function(uid)
+saveChangedFiles = function(uid, changedFiles)
 {
     console.log("saveChangedFiles " + uid);
     var userSpace = userForkRoot + "/" + uid.split(":")[1];
@@ -195,9 +225,16 @@ handleAPage = function(req, res)
                 });
         readFrom = contentHome;  // While I'm waiting for the copy, allow the user to read
     }
-}
+
+    if (changedFiles[req.session.uid] == undefined)
+    {
+        loadChangedFiles(req.session.uid, req.session);
+    }
+
+    }
 
     console.log("handle a page: " + req.path);
+
     if (req.path == "/favicon.ico")
     {
         res.sendFile("public/images/icon.ico");
@@ -241,18 +278,22 @@ handleAPage = function(req, res)
             return;
         }
 
-        if (!changedFiles.has(repoRelativeFilePath))
+        var chFiles = changedFiles[req.session.uid];
+
+        if (!chFiles.has(repoRelativeFilePath))
         {
-            changedFiles.add(repoRelativeFilePath);
-            console.log("SCF");
-            saveChangedFiles(req.session.uid);
-            console.log("SCF DINE");
+            chFiles.add(repoRelativeFilePath);
+            saveChangedFiles(req.session.uid, chFiles);
         }
-        
+
+        var dirOfPost = path.dirname(filepath);
+        if (!fs.existsSync(dirOfPost))
+            fs.mkdirSync(dirOfPost, { recursive: true });
+
         fs.writeFile(filepath, req.body, (err) => {
             if (err)
             {
-                console.log("file write error: " + err.message);
+                console.log("POST content file write error: " + err.message);
                 res.send(err.message);
             }
             else
