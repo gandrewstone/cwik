@@ -3,7 +3,7 @@ var express = require('express');
 var router = express.Router();
 
 KnownUser = function(identity) {
-    if (identity == "bitcoincash:qq6la308a4ml44sm57trzd7h4qjvlxw5gg4gswksq8")  // TODO store in config database or file
+    if (identity == "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs")  // TODO store in config database or file
     {
         return true;
     }
