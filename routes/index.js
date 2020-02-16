@@ -1,18 +1,7 @@
 var auth = require("../auth.js");
 var express = require('express');
 var router = express.Router();
-var users = require('../knownusers.json')["KnownUsers"]
-
-KnownUser = function(identity) {
-    for (i = 0; i < users.length; i++)
-    {
-        if (users[i] == identity)
-        {
-            return true;
-        }
-    }
-    return false;
-}
+var roles = require('../rbac/roles')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -136,7 +125,7 @@ router.post('/_login_', function(req, res, next) {
     {
         res.send("stale challenge string");
     }
-    else if (KnownUser(req.body.addr) == false)
+    else if (IsMemberOrAdmin(req.body.addr) === false)
     {
         res.send("unknown user");
     }
@@ -152,8 +141,5 @@ router.post('/_login_', function(req, res, next) {
 });
 
 router.use(handleAPage);
-
-
-
 
 module.exports = router;

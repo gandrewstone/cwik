@@ -65,3 +65,8 @@ The site is started like any nodejs project.  A simple way to start on port 8000
 export PORT=8000
 npm start
 ```
+
+To enable the use of regtest addresses in rbac turn on debug mode
+```
+export DEBUG=1
+```

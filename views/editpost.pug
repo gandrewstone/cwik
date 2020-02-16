@@ -17,10 +17,14 @@ block structure
   div.structureI !{ structure }
 
 block wikipage
-  div.wikicontent !{ zzwikiPage }
+    div.submission_options
+        form( action="./_edit_post" method="post")
+            textarea(rows="20" cols="100" id="edited_post_body" name="edited_post_body") !{pagecontent}
+            p
+            input(type="submit" value="Submit")
+        button
+            span(onclick="openInEditor(document.getElementById('edited_post_body'))") edit in MD editor
 
-block articleOptions
-    div.articleOptions !{ articleMenu }
 
 block endScript
   script(src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js", integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ", crossorigin="anonymous")
@@ -29,12 +33,7 @@ block endScript
   script(src="/_static_/js/he.js")
   script(src="/_static_/js/mermaid/mermaid.js")
   script.
-      mermaid.initialize({logLevel:5, startOnLoad:true});
+    mermaid.initialize({logLevel:5, startOnLoad:true});
   script(src="/_static_/js/mathjax/MathJax.js?config=TeX-AMS_HTML", type="text/javascript")
   script(src="/_static_/js/stackedit.js")
   script(src="/_static_/js/edit.js")
-  script(type="module").
-      fetch("!{urlPath}?raw=1").then(function(data) { data.text().then(processFetchedMd); })
-          .catch(function(error) {
-          console.log(error);
-      })

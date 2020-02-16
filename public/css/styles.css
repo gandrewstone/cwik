@@ -1,13 +1,3 @@
-html, body
-{
-    height: 100%;
-}
-
-.outergrid {
-    position: relative;
-    height: 100%;
-}
-
 .cwikheader {
   display: block;
   position: absolute;
@@ -18,16 +8,7 @@ html, body
   background: #197717;
   color: #fff;
 }
-.leftsidebar {
-  display: block;
-  position: absolute;
-  width: 200px;
-  margin: 5px;
-  z-index: 1;
-  background: #eeeeee;
-  background-image: linear-gradient(#106010, #ffffff);
-  color: #fff;
-}
+
 .cwikcontent {
   display: block;
   position: absolute;
@@ -66,43 +47,6 @@ html, body
 }
 .cwikheader.muuri-item-hidden {
   z-index: 0;
-}
-
-.item-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.vert {
-    position: relative;
-    height: 100%;
-}
-
-.VertA {
-  display: block;
-  position: absolute;
-  width: 100%;
-  height: 30px;
-  z-index: 2;
-}
-
-.VertB {
-  display: block;
-  position: absolute;
-  width: 100%;
-  z-index: 2;
-}
-
-
-.sidebargrid {
-    position: relative;
-    height: 100%;
-}
-
-.headergrid {
-    position: relative;
-    height: 100%;
 }
 
 .history {
@@ -145,28 +89,6 @@ html, body
   color: #000000;
 }
 
-.toolBar {
-  display: block;
-  position: absolute;
-  height:100%;
-  width: 200px;
-  z-index: 2;
-  color: #ffffff;
-  line-height: 30px;
-  text-align:center;
-}
-.userBar {
-  display: block;
-  position: absolute;
-  height:100%;
-  width: 50%;
-  z-index: 2;
-  color: #ffffff;
-  line-height: 30px;
-  text-align:right;
-  align: right;
-}
-
 .bchlogo {
   display: block;
   position: absolute;
@@ -182,20 +104,11 @@ html, body
     margin-left: 0%;
 }
 
-.headerContent {
-  display: block;
-  position: absolute;
-  height:100%;
-  z-index: 2;
-  color: #ffffff;
-  line-height: 30px;
-  text-align:center;
-}
-
+/*
 .toc_h2 {
     margin-left: 20px;
 }
-
+*/
 
 input#challenge
 {
@@ -231,4 +144,4 @@ td {
 }
 
 tr:nth-child(even) td { background: #F1F1F1; }
-tr:nth-child(odd) td { background: #FEFEFE; }  
+tr:nth-child(odd) td { background: #FEFEFE; }

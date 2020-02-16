@@ -192,6 +192,12 @@ saveChangedFiles = function(uid, changedFiles)
 
 handleAPage = function(req, res)
 {
+    // determine if handled here or needs to be sent to the forum section
+    urlPath = req.path;
+    if (urlPath.startsWith('/forum'))
+    {
+        return handleForum(req, res);
+    }
 
     var userSpace = "";
     var readFrom = contentHome;
@@ -242,6 +248,7 @@ handleAPage = function(req, res)
     }
 
     urlPath = req.path;
+
     console.log(urlPath);
     console.log(decodeURI(urlPath));
     decodedPath = decodeURI(urlPath);
@@ -304,7 +311,7 @@ handleAPage = function(req, res)
         });
         return;
     }
-    
+
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) data = "empty page";
             //return AskCreatePage(urlPath, req, res);
@@ -326,6 +333,12 @@ handleAPage = function(req, res)
         // Remove this url if we've already been there
         var historyPath = urlPath;
         if (urlPath == "/") historyPath = "/home";
+
+        articleMenu = ""
+        if (urlPath != "/" && urlPath != "/home")
+        {
+            articleMenu = "<div> <button onclick=\"quoteandcreate()\">Quote and create thread</button> </div>"
+        }
 
         var index = req.session.history.indexOf(historyPath);
         if (index !== -1) req.session.history.splice(index, 1);
@@ -355,7 +368,7 @@ handleAPage = function(req, res)
             }
         }
 */
-        
+
         // Convert markdown to html
         var cvt = new pagedown.Converter();
         var html = cvt.makeHtml(doc);
@@ -397,6 +410,6 @@ handleAPage = function(req, res)
         }
 
         user = { loggedIn: (req.session.uid != undefined) ? true: false };
-        res.render('wikibrowse', { zzwikiPage: "loading...", structure: headings, title: title, related: related, thisPage: urlPath, rawMarkdown:data, history: historyHtml, user: user });
+        res.render('wikibrowse', { zzwikiPage: "loading...", structure: headings, title: title, related: related, thisPage: urlPath, rawMarkdown:data, history: historyHtml, user: user, articleMenu: articleMenu });
     })
 }
