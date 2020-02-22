@@ -1,15 +1,15 @@
 var auth = require("../auth.js");
 var express = require('express');
 var router = express.Router();
+var users = require('../knownusers.json')["KnownUsers"]
 
 KnownUser = function(identity) {
-    if (identity == "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs")  // TODO store in config database or file
+    for (i = 0; i < users.length; i++)
     {
-        return true;
-    }
-    if (identity == "bitcoincash:qrwddp7gxl50fpl2tgz003zfahysks4w7yylm72h0m")
-    {
-        return true;
+        if (users[i] == identity)
+        {
+            return true;
+        }
     }
     return false;
 }
@@ -136,7 +136,7 @@ router.post('/_login_', function(req, res, next) {
     {
         res.send("stale challenge string");
     }
-    else if (req.body.addr != "bchreg:qrqvm7fuwh2ml7svvggmyk79pp0ymr9e5ywghhxuja")  // TODO store in config database or file
+    else if (KnownUser(req.body.addr) == false)
     {
         res.send("unknown user");
     }
