@@ -1,4 +1,4 @@
-extends layout
+extends layout_wiki
 
 block header
   strong
@@ -10,7 +10,7 @@ block history
 block related
   center Related
   div.relatedI
-  
+
 block structure
   center Table Of Contents
   div.structureI
@@ -22,7 +22,7 @@ block wikipage
     center
       small
         a(href=QRsignCode, id="bchidentity_op_login") login with local app
-      
+
     center
       H2 Manual Entry
     center Challenge
@@ -54,6 +54,3 @@ block wikipage
       }
       });
       }, 5000);
-
-block toolBar
-  div.editBar

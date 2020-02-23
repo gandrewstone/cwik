@@ -7,19 +7,34 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var memoryStore = require('memorystore')(session);
 var pageaccess = require("./pageaccess");
+var forumgit = require("./forum/gitapi");
+var forummain = require("./forum/main");
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 gitrepo = null;
+gitforumrepo = null;
+
 contentHome = path.resolve("./repo/mirror");
 userForkRoot = path.resolve("./repo");
+
+userForumRoot = path.resolve("./forum_repo");
+forumHome = path.resolve("./forum_repo/mirror");
+
 var git = require("nodegit");
 
 var app = express();
 
-git.Clone("https://github.com/bitcoin-unlimited/BUwiki",contentHome).then(function(repo) {
+git.Clone("https://github.com/bitcoin-unlimited/BUwiki",contentHome).then(function(repo)
+{
     gitrepo = repo;
     console.log("repo cloned");
+})
+
+git.Clone("git@github.com:Greg-Griffith/forum_test.git",forumHome).then(function(repo)
+{
+    gitforumrepo = repo;
+    console.log("forum repo cloned");
 })
 
 sessionStore = new memoryStore({

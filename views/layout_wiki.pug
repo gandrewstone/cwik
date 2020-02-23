@@ -1,0 +1,87 @@
+doctype html
+head
+    title=title
+    link(rel='icon', type='image/svg+xml', href='/_static_/images/icon.svg')
+    link(rel='stylesheet', href='/_static_/css/styles.css')
+    link(rel='stylesheet', href='/_static_/css/sidenav.css')
+    link(rel='stylesheet', href='/_static_/css/topnav.css')
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css", integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j",crossorigin="anonymous")
+
+    // slim does not have ajax
+    // script(src="https://code.jquery.com/jquery-3.4.1.slim.min.js", integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous")
+    // so use min
+    script(src="https://code.jquery.com/jquery-3.4.1.js")
+    script(src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js", integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js", integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous")
+
+    script(src="https://unpkg.com/web-animations-js@2.3.1/web-animations.min.js")
+    script(src="https://unpkg.com/hammerjs@2.0.8/hammer.min.js")
+    script(src="/_static_/js/muuri.js")
+    script(src="/_static_/js/menubar.js")
+    script(src="/_static_/js/wiki_forum_actions.js")
+
+body(class="container-fluid")
+    div(class="row no-gutter")
+        div("class=col-sm-2")
+            div(class="sidenav")
+
+                block structure
+                    center Table Of Contents
+                    div.structure !{ structure }
+
+                block related
+                    center Related
+                    div.related !{ related }
+
+                block history
+                    center Recently Viewed
+                    div.history !{history}
+
+
+
+        div(class="col-sm-10")
+            div(class="row")
+                div(class="col-sm-12")
+                    nav(class="navbar navbar-expand-sm")
+                        div(class="navbar-header")
+                            a(class="navbar-brand" href="/home")
+                                img#bchHeaderFlag(src="/_static_/images/BitcoinCashFlag.svg")
+                        div(class="collapse navbar-collapse" d="navbarNav")
+                            ul(class="navbar-nav mr-auto")
+                                li(class="nav-item top-nav-link")
+                                    a(class="nav-link")
+                                        span(onclick="runeditor('!{urlPath}', document.querySelector('.cwikeditor'))") edit
+                                li(class="nav-item top-nav-link")
+                                    a(class="nav-link")
+                                        span(onclick="voting('!{urlPath}')") voting
+                                li(class="nav-item top-nav-link")
+                                    a(class="nav-link")
+                                        span(onclick="discussion('!{urlPath}')") talking
+                            ul(class="navbar-nav")
+                                li(class="nav-item top-nav-link")
+                                    if user && user.loggedIn
+                                        a(class="nav-link")
+                                            span(onclick="logout()") logout
+                                    else
+                                        a(class="nav-link")
+                                            span(onclick="login()") login
+                                li(class="nav-item top-nav-link")
+                                    a(class="nav-link")
+                                        span(onclick="commitEdits()") commit
+                                li(class="nav-item top-nav-link")
+                                    a(class="nav-link")
+                                        span(onclick="forum()") forum
+                div(class="col-sm-12")
+                    div.headerContent
+                        block header
+
+                div(class="col-sm-12")
+                    div.cwikcontent
+                        block wikipage
+
+                div(class="col-sm-12")
+                    textarea.cwikeditor
+                    block endScript
+                    div.articleOptions
+                        block articleOptions

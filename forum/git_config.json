@@ -1,0 +1,9 @@
+{
+  "repo_url": "git@github.com:Greg-Griffith/forum_test.git",
+  "repo_upstream_name" : "origin",
+  "repo_branch": "master",
+  "local_only": "",
+  "commiter_name" : "",
+  "commiter_email": "",
+  "push_branches" : ["refs/heads/master:refs/heads/master"]
+}

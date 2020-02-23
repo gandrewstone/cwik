@@ -73,17 +73,11 @@ function logout()
     });
 }
 
-function login()
-{
-    window.location.href = "/_login_";
-}
-
 function commitEdits() {
     fetch("/_commit_").then(
         response =>
             console.log(response));
 }
-
 
 function uploadEdit(url, text) {
     fetch(url, {
@@ -98,7 +92,7 @@ function uploadEdit(url, text) {
         referrer: 'no-referrer', // no-referrer, *client
         body: text, // body data type must match "Content-Type" header
     })
-        .then(response => console.log(response)); // parses JSON response into native JavaScript objects 
+        .then(response => console.log(response)); // parses JSON response into native JavaScript objects
 }
 
 function runeditor(url, domElem) {
