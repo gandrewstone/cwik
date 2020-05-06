@@ -30,7 +30,9 @@ sessions = session({
     secret: 'cwik secret',
     saveUninitialized: true,
     resave: true,
-    cookie: { maxAge: 86400000 },
+    // You can stay logged in for a month.  This should be reduced for other apps but for this wiki you will silently lose your page edit if
+    // your session expires while editing a page.
+    cookie: { maxAge: 86400000*31 },
     store: sessionStore
 });
 app.use(sessions);
