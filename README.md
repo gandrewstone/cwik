@@ -15,7 +15,7 @@ export NODEJS_VER=v10.16.3
 wget https://nodejs.org/dist/${NODEJS_VER}/node-${NODEJS_VER}-linux-x64.tar.xz /tmp
 cd /opt
 sudo tar xvf /tmp/node-${NODEJS_VER}-linux-x64.tar.xz
-ln -s node-${NODEJS_VER}-linux-x64 nodejs
+sudo ln -s node-${NODEJS_VER}-linux-x64 nodejs
 export PATH=/opt/nodejs/bin:$PATH
 ```
 

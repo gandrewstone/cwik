@@ -25,10 +25,16 @@ function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
 }
 
-credentialFn = function(url, userName)
-{
-    console.log("credentials requsted url: " + url + " username: " + userName);
+
+function ccred() {
+    var nCalls = 0;
+    function f(url, userName)
+    {
+    console.log("credentials requsted url: " + url + " username: " + userName) + "Call Num: " + nCalls;
     return git.Cred.sshKeyFromAgent(userName);
+    }
+
+    return f;
 }
 
 /**
@@ -45,7 +51,10 @@ gitPull = function (repositoryPath, remoteName, branch, cb) {
         .then(function (_repository) {
 	    console.log("gitPull.open ok");
             repository = _repository;
-            return repository.fetch(remoteName, { callbacks: { credentials: credentialFn }});
+            var result = repository.fetch(remoteName, { callbacks: { credentials: ccred() }}).then(function() { console.log("fetch worked!"); },
+                                                                                                  function() { console.log(" fetch failed!"); });
+            console.log("fetch started");
+            return result;
         }, cb)
         .then(function () {
 	    console.log("gitPull.fetch ok");
