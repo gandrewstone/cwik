@@ -30,8 +30,10 @@ function ccred() {
     var nCalls = 0;
     function f(url, userName)
     {
-    console.log("credentials requsted url: " + url + " username: " + userName) + "Call Num: " + nCalls;
-    return git.Cred.sshKeyFromAgent(userName);
+	console.log("credentials requsted url: " + url + " username: " + userName + "Call Num: " + nCalls);
+	if (nCalls > 5) throw "Credential failure";
+	nCalls +=1;
+        return git.Cred.sshKeyFromAgent(userName);
     }
 
     return f;
