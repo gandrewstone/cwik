@@ -97,13 +97,8 @@ commitEdits = function(req, res) {
                             console.log("push");
                             remote.push(PUSH_BRANCHES,
                                 {
-                                callbacks: {
-                                    credentials: function(url, userName) {
-                                        console.log("credentials requsted url: " + url + " username: " + userName);
-                                        return git.Cred.sshKeyFromAgent(userName);
-                                    }
+                                callbacks: { credentials: ccred() }
                                 }
-                            }
                                        ).then(function(number) {
                                            console.log("push completed. returned " + number);
                                            refreshRepoEveryone();
