@@ -1,16 +1,26 @@
+const stackedit = new Stackedit({
+    url: STACKEDITOR_URL
+});
+
+const stackedit2 = new Stackedit();
+
 /* Take a markdown file place it in the hidden textarea, and render it into html into the appropriate locations */
 function processFetchedMd(text)
 {
+    console.log("processing data");
     document.querySelector('textarea.cwikeditor').value = text;
     stackedit.openFile({
-        name: "!{urlPath}",
+        name: "",
         content: { text: text }
     }, true);  // true == silent mode
     stackedit.on('fileChange', (file) => {
+        console.log("FILE CHANGE");
         document.querySelector('.wikicontent').innerHTML = file.content.html;
         // Give time for innerHTML to be rendered into DOM
-        setTimeout(xformMermaids, 100);
-        setTimeout(xformKatex, 100);
+        setTimeout(xformMermaids, 50);
+        setTimeout(xformKatex, 50);
+        setTimeout(xformMermaids, 200);
+        setTimeout(xformKatex, 200);
     });
 }
 
@@ -63,8 +73,6 @@ function xformMermaids()
     xformMermaids();
 }
 
-
-const stackedit = new Stackedit();
 
 function logout()
 {

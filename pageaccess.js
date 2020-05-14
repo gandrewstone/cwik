@@ -418,6 +418,6 @@ handleAPage = function(req, res)
         }
 
         user = { loggedIn: (req.session.uid != undefined) ? true: false };
-        res.render('wikibrowse', { zzwikiPage: "loading...", structure: headings, title: title, related: related, thisPage: urlPath, rawMarkdown:data, history: historyHtml, user: user, notificationData: notification });
+        res.render('wikibrowse', { zzwikiPage: "loading...", structure: headings, title: title, related: related, thisPage: urlPath, rawMarkdown:data, history: historyHtml, user: user, notificationData: notification, STACKEDITOR_URL: config.STACKEDIT_URL });
     })
 }
