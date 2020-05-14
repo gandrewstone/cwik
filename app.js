@@ -6,6 +6,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var memoryStore = require('memorystore')(session);
+
+var config = require("./config");
 var pageaccess = require("./pageaccess");
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -17,13 +19,18 @@ var git = require("nodegit");
 
 var app = express();
 
-git.Clone("https://github.com/bitcoin-unlimited/BUwiki",contentHome).then(function(repo) {
+console.log("repo clone: " + config.REPO_URL);
+git.Clone(config.REPO_URL,contentHome).then(function(repo) {
     gitrepo = repo;
     console.log("repo cloned");
+}, function(error) {
+    console.log("repo clone error" + error);
 })
 
+refreshRepoByDir(contentHome)
+
 sessionStore = new memoryStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
+      checkPeriod: 86400000 // prune expired entries every 24hrs
 });
 // set up session
 sessions = session({

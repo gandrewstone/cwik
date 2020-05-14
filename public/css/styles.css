@@ -196,6 +196,9 @@ html, body
     margin-left: 20px;
 }
 
+.notification {
+    background-color: orange;
+}
 
 input#challenge
 {

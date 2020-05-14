@@ -28,7 +28,7 @@ router.get('/_logout_', function (req, res, next) {
 router.get('/_commit_', function (req, res, next) {
     if (req.session.uid == undefined)
     {
-        res.send("must log in first");
+        res.json({notification: "unauthorized commit: log in first!"});
         return;
     }
     console.log("commit to repo");

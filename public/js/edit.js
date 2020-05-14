@@ -79,11 +79,17 @@ function login()
 }
 
 function commitEdits() {
-    fetch("/_commit_").then(
-        response =>
-            console.log(response));
+    fetch("/_commit_").then(response => response.json().then(notification));
 }
 
+function notification(json) {
+    console.log(JSON.stringify(json));
+    console.log(json.notification);
+    if (json.notification)
+    {
+        document.querySelector('center.notifyText').innerText = json.notification;
+    }
+}
 
 function uploadEdit(url, text) {
     fetch(url, {
@@ -98,7 +104,7 @@ function uploadEdit(url, text) {
         referrer: 'no-referrer', // no-referrer, *client
         body: text, // body data type must match "Content-Type" header
     })
-        .then(response => console.log(response)); // parses JSON response into native JavaScript objects 
+        .then(response => response.json().then(notification)); // parses JSON response into native JavaScript objects 
 }
 
 function runeditor(url, domElem) {

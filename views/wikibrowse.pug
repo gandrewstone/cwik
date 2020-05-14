@@ -19,6 +19,10 @@ block structure
 block wikipage
   div.wikicontent !{ zzwikiPage }
 
+block notification
+  if notificationData
+     | !{ notificationData }
+
 block toolBar
   div.editBar
     <span onclick="runeditor('!{urlPath}', document.querySelector('.cwikeditor'))">edit</span> |

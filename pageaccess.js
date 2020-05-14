@@ -5,9 +5,10 @@ var sanitizer = require("sanitize-html");
 var git = require("nodegit");
 var path = require("path");
 
-var PUSH_BRANCHES = ["refs/heads/master:refs/heads/master"];
-var UPSTREAM_REPO_NAME = "origin";
-var REPO_BRANCH_NAME = "master";
+var config = require("./config");
+var PUSH_BRANCHES = config.PUSH_BRANCHES;
+var UPSTREAM_REPO_NAME = config.UPSTREAM_REPO_NAME;
+var REPO_BRANCH_NAME = config.REPO_BRANCH_NAME;
 
 var ncp = require('ncp').ncp;
 ncp.limit = 16;  // number of simultaneous copy operations allowed
@@ -206,6 +207,7 @@ saveChangedFiles = function(uid, changedFiles)
 handleAPage = function(req, res)
 {
 
+    var notification = undefined;
     var userSpace = "";
     var readFrom = contentHome;
     if (req.session.uid == undefined)
@@ -217,7 +219,7 @@ handleAPage = function(req, res)
     {
         userSpace = userForkRoot + "/" + req.session.uid.split(":")[1];
         readFrom = userSpace;
-    console.log("User space: " + userSpace);
+        console.log("User space: " + userSpace);
 
     // Make a working space for this user if one does not yet exist
     if (!fs.existsSync(userSpace))
@@ -270,6 +272,7 @@ handleAPage = function(req, res)
         filepath = filepath + ".md";
     }
     console.log("access " + filepath);
+    // notification = "access " + filepath;
 
     if (req.method == "POST")
     {
@@ -286,8 +289,9 @@ handleAPage = function(req, res)
         console.log("user: " + req.session.uid);
         if (req.session.uid == undefined)
         {
-            console.log("unauthorized edit attempt!");
-            res.status(401).send("login required");
+            console.log("unauthorized edit attempt! Test2");
+            //res.status(401).send("login required");
+            res.json({notification:"unauthorized edit attempt, log in first!"});
             return;
         }
 
@@ -307,7 +311,7 @@ handleAPage = function(req, res)
             if (err)
             {
                 console.log("POST content file write error: " + err.message);
-                res.send(err.message);
+                res.json({notification:err.message});
             }
             else
             {
@@ -319,8 +323,12 @@ handleAPage = function(req, res)
     }
     
     fs.readFile(filepath, 'utf8', function(err, data) {
-        if (err) data = "empty page";
+        if (err)
+        {
+            data = "";
+            notification = "nonexistent page, click 'edit' to create";
             //return AskCreatePage(urlPath, req, res);
+        }
 
         if (req.query.raw)
         {
@@ -410,6 +418,6 @@ handleAPage = function(req, res)
         }
 
         user = { loggedIn: (req.session.uid != undefined) ? true: false };
-        res.render('wikibrowse', { zzwikiPage: "loading...", structure: headings, title: title, related: related, thisPage: urlPath, rawMarkdown:data, history: historyHtml, user: user });
+        res.render('wikibrowse', { zzwikiPage: "loading...", structure: headings, title: title, related: related, thisPage: urlPath, rawMarkdown:data, history: historyHtml, user: user, notificationData: notification });
     })
 }
