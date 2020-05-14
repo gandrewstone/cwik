@@ -100,7 +100,14 @@ commitEdits = function(req, res) {
                                 callbacks: { credentials: ccred() }
                                 }
                                        ).then(function(number) {
-                                           console.log("push completed. returned " + number);
+					   if (number == undefined)
+					   {
+					       console.log("push failed, authorization problem");
+					   }
+					   else
+					   {
+					       console.log("push completed. returned " + number);
+					   }
                                            refreshRepoEveryone();
                                        },
                                               function(failure) {
