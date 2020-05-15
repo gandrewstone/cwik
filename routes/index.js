@@ -32,8 +32,7 @@ router.get('/_commit_', function (req, res, next) {
         return;
     }
     console.log("commit to repo");
-    commitEdits(req,res);
-    res.send("OK");
+    commitEdits(req,res); // sets res to a json response detailing whether the commit was successful
 });
 
 router.get('/_login_/auto', function(req, res, next) {

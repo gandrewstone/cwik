@@ -2,8 +2,6 @@ const stackedit = new Stackedit({
     url: STACKEDITOR_URL
 });
 
-const stackedit2 = new Stackedit();
-
 /* Take a markdown file place it in the hidden textarea, and render it into html into the appropriate locations */
 function processFetchedMd(text)
 {

@@ -101,19 +101,14 @@ commitEdits = function(req, res) {
                                 callbacks: { credentials: ccred() }
                                 }
                                        ).then(function(number) {
-					   if (number == undefined)
-					   {
-					       console.log("push failed, authorization problem");
-					   }
-					   else
-					   {
-					       console.log("push completed. returned " + number);
-					   }
+                                           console.log("push completed. returned " + number);
+                                           res.json({notification: "commit and push completed" });
                                            refreshRepoEveryone();
                                        },
-                                              function(failure) {
-                                                  console.log("push failed " + failure);
-                                              }).catch(err => { console.error("push catch error ", err) });
+                                       function(failure) {
+                                                  console.log("push failed " + failure.message);
+                                                  res.json({notification: "push failed " + failure.message });
+                                       }).catch(err => { console.error("push catch error ", err); });
                         },
                         function(failure) {
                             console.log("remote create failed" + failure);
