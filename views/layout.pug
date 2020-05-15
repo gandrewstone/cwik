@@ -12,7 +12,9 @@ html
     script(src="/_static_/js/muuri.js")
     script.
       var STACKEDITOR_URL="!{STACKEDITOR_URL}";
-    block endScript
+    script(src="/_static_/js/layout.js")
+    script.
+      setupLayout(document, window);
     div.vert
       div.VertA
         div.item-content
@@ -59,6 +61,7 @@ html
               div.item-content
                 block wikipage
     textarea.cwikeditor
+      
     script.
       var vertGrid = new Muuri('.vert');
       var outerGrid = new Muuri('.outergrid', {

@@ -86,9 +86,7 @@ commitEdits = function(req, res) {
     var user = uid.split(":")[1];
     var userSpace = userForkRoot + "/" + user;
     console.log("commit edits run: " + user + " repo " + userSpace);
-    git.Repository.open(userSpace).then(
-        function(repo) {
-            console.log("then");
+    git.Repository.open(userSpace).then(function(repo) {
             var author = git.Signature.now(user, user + "@reference.cash");
             var committer = git.Signature.now("buwiki", "buwiki@protonmail.com");
             console.log("author " + user + "@reference.cash");
@@ -208,8 +206,8 @@ saveChangedFiles = function(uid, changedFiles) {
 }
 
 
+// Return a requested page
 handleAPage = function(req, res) {
-
     var notification = undefined;
     var userSpace = "";
     var readFrom = contentHome;
@@ -246,6 +244,9 @@ handleAPage = function(req, res) {
     }
 
     console.log("handle a page: " + req.path);
+    console.log("url: " + req.baseUrl);
+    console.log("hostname: " + req.hostname);
+    console.log("originalUrl: " + req.originalUrl);
 
     if (req.path == "/favicon.ico") {
         res.sendFile("public/images/icon.ico");
@@ -267,7 +268,6 @@ handleAPage = function(req, res) {
         filepath = filepath + ".md";
     }
     console.log("access " + filepath);
-    // notification = "access " + filepath;
 
     if (req.method == "POST") {
         var repoRelativeFilePath = decodedPath.slice(1);
@@ -278,7 +278,7 @@ handleAPage = function(req, res) {
 
         var writeFilePath = userSpace + repoRelativeFilePath;
         // requires app.use(bodyParser.text({type: 'text/plain'}));
-        console.log(writeFilePath + ": POST of " + JSON.stringify(req.body));
+        // console.log(writeFilePath + ": POST of " + JSON.stringify(req.body));
         console.log("user: " + req.session.uid);
         if (req.session.uid == undefined) {
             console.log("unauthorized edit attempt! Test2");
@@ -316,11 +316,27 @@ handleAPage = function(req, res) {
         return;
     }
 
+    
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
             data = "";
             notification = "nonexistent page, click 'edit' to create";
-            //return AskCreatePage(urlPath, req, res);
+            var user = {
+            loggedIn: (req.session.uid != undefined) ? true : false
+        };
+
+            return res.render('wikibrowse', {
+            zzwikiPage: "",
+            structure: '',
+            title: "",
+            related: "",
+            thisPage: urlPath,
+            rawMarkdown: "",
+            history: updateHistory(req, urlPath),
+            user: user,
+            notificationData: notification,
+            STACKEDITOR_URL: config.STACKEDIT_URL
+        });
         }
 
         if (req.query.raw) {
@@ -329,6 +345,73 @@ handleAPage = function(req, res) {
             return;
         }
 
+        var doc = data;
+
+        var htmlFile = filepath.slice(0,filepath.length-2) + "html";
+        // console.log("HTML file is: " + htmlFile);
+        var regenerate = false;
+        try {
+            var htmlFileStats = fs.statSync(htmlFile);
+            var mdFileStats = fs.statSync(filepath);
+            console.log("Times: html: " + htmlFileStats.mtime + "md: " + mdFileStats.mtime);
+            if (htmlFileStats.mtime <= mdFileStats.mtime) regenerate = true;
+        } catch(err) {
+            regenerate = true;
+        }
+
+        if (regenerate) {
+            // Convert markdown to html
+            console.log("regenerate " + htmlFile);
+            mdToHtml(doc).then(html => {
+            fs.writeFile(htmlFile, html, function(err) { console.log("write error: " + err); })
+                wikiPageReplyWithMdHtml(req, res, doc, html, urlPath); } );
+        } else {
+            fs.readFile(htmlFile, 'utf8', function(err, html) {
+                if (err) {
+                    mdToHtml(doc).then(html => {
+                        wikiPageReplyWithMdHtml(req, res, doc, html, urlPath); });
+                }
+                else
+                {
+                    wikiPageReplyWithMdHtml(req, res, doc, html, urlPath);
+                }
+            });
+        }
+    });
+}
+
+function mdToHtml(md) {
+    return new Promise(function (resolve, reject) {
+        var cvt = new pagedown.Converter();
+        var html = cvt.makeHtml(md);
+        resolve(html);
+    });
+}
+
+/*
+function mdToHtml(md) {
+    return new Promise(function (resolve, reject) {
+        //var cvt = new pagedown.Converter();
+        //var html = cvt.makeHtml(md);
+        console.log(typeof stackedit);
+        var se = new stackedit({ url: config.STACKEDIT_URL});
+        se.openFile({
+        name: "",
+        content: {
+            text: md
+        }
+    }, true); // true == silent mode
+    se.on('fileChange', (file) => {
+        console.log("md converted");
+        resolve(html);
+    });
+    });
+
+}
+*/
+
+
+function updateHistory(req, urlPath) {
         var historyHtml = "";
         if (req.session.history == undefined) req.session.history = [];
         else {
@@ -348,28 +431,13 @@ handleAPage = function(req, res) {
             req.session.history.splice(0, req.session.history.length - 10);
         }
 
+    return historyHtml;
+}
+
+function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
+{
+    var historyHtml = updateHistory(req, urlPath);
         var meta = null;
-        var doc = data;
-
-        /*
-                // Discover, parse, and remove any metadata
-                console.log(doc.slice(0,12));
-                if (doc.slice(0,12) == "metadata = {")
-                {
-                    var end = doc.indexOf(";");
-                    if (end != -1)
-                    {
-                        metaText = doc.slice(11,end);
-                        doc = doc.slice(end+1);
-                        meta = JSON.parse(metaText);
-                        console.log("doc is " + doc);
-                    }
-                }
-        */
-
-        // Convert markdown to html
-        var cvt = new pagedown.Converter();
-        var html = cvt.makeHtml(doc);
 
         var headings = "";
         var error = "";
@@ -379,11 +447,12 @@ handleAPage = function(req, res) {
         };
         // console.log("HEADINGS: " + headings)
         html = sanitizer(html, {
-            allowedTags: sanitizer.defaults.allowedTags.concat(['img', 'h1', 'h2']),
+            allowedTags: sanitizer.defaults.allowedTags.concat(['iframe','img', 'h1', 'h2']),
             exclusiveFilter: function(frame) {
                 if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
                 if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
                     try {
+                        console.log("parsing: " + frame.text);
                         meta = JSON.parse(frame.text);
                     } catch (err) {
                         error += err.message;
@@ -397,25 +466,43 @@ handleAPage = function(req, res) {
         //console.log(html);
         title = ""
         related = ""
-        if (meta) {
-            if (meta.title) title = meta.title
-            if (meta.related) related = meta.related.map(WikiLinkify).join("<br/>\n")
+    if (meta) {
+        console.log("meta " + JSON.stringify(meta));
+            if (meta.title) title = meta.title;
+            if (meta.related) {
+                console.log("related ");
+                related = meta.related.map(WikiLinkify).join("<br/>\n");
+            }
         }
 
         user = {
             loggedIn: (req.session.uid != undefined) ? true : false
         };
+
+    if (req.query.json)
+        res.json({
+            zzwikiPage: "loading...",
+            structure: headings,
+            title: title,
+            related: related,
+            thisPage: urlPath,
+            rawMarkdown: md,
+            history: historyHtml,
+            user: user,
+            notificationData: "",
+            STACKEDITOR_URL: config.STACKEDIT_URL
+        })
+     else
         res.render('wikibrowse', {
             zzwikiPage: "loading...",
             structure: headings,
             title: title,
             related: related,
             thisPage: urlPath,
-            rawMarkdown: data,
+            rawMarkdown: md,
             history: historyHtml,
             user: user,
-            notificationData: notification,
+            notificationData: "",
             STACKEDITOR_URL: config.STACKEDIT_URL
         });
-    })
-}
+    }

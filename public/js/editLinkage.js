@@ -1,18 +1,17 @@
-const stackedit = new Stackedit({
-    url: STACKEDITOR_URL
-});
 
 /* Take a markdown file place it in the hidden textarea, and render it into html into the appropriate locations */
 function processFetchedMd(text) {
     console.log("processing data");
     document.querySelector('textarea.cwikeditor').value = text;
-    stackedit.openFile({
+    var se = new Stackedit({url: STACKEDITOR_URL});
+    
+    se.openFile({
         name: "",
         content: {
             text: text
         }
     }, true); // true == silent mode
-    stackedit.on('fileChange', (file) => {
+    se.on('fileChange', (file) => {
         console.log("FILE CHANGE");
         document.querySelector('.wikicontent').innerHTML = file.content.html;
         // Give time for innerHTML to be rendered into DOM
@@ -20,6 +19,7 @@ function processFetchedMd(text) {
         setTimeout(xformKatex, 50);
         setTimeout(xformMermaids, 200);
         setTimeout(xformKatex, 200);
+        delete se;
     });
 }
 
@@ -93,6 +93,7 @@ function notification(json) {
 }
 
 function uploadEdit(url, text) {
+    console.log("upload Edit to: " + url);
     fetch(url, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, cors, *same-origin
@@ -109,7 +110,10 @@ function uploadEdit(url, text) {
 }
 
 function runeditor(url, domElem) {
+    console.log(url);
     // Open the iframe
+    var stackedit = new Stackedit({url: STACKEDITOR_URL});
+
     stackedit.openFile({
         name: 'Filename', // with an optional filename
         content: {
@@ -129,7 +133,7 @@ function runeditor(url, domElem) {
         document.querySelector(".wikicontent").innerHTML = html;
         setTimeout(xformMermaids, 100);
         setTimeout(xformKatex, 100);
-        console.log(domElem.value);
+        // console.log(domElem.value);
         uploadEdit(url, domElem.value);
     });
 

@@ -51,11 +51,13 @@ html, body
 }
 
 .rawMarkdown {
+    display: none;
     visibility: hidden;
 }
 
 .cwikmeta {
     visibility: hidden;
+    display: none;
 }
 
 .cwikheader.muuri-item-dragging {
@@ -198,6 +200,10 @@ html, body
 
 .notification {
     background-color: orange;
+}
+
+#mdData {
+    display: none;
 }
 
 input#challenge
