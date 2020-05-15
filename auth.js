@@ -13,10 +13,10 @@ strings = {
  */
 getChallengeString = _ => {
     let wordArr = strings.wordpool.split(' ');
-    let challenge = wordArr[Math.floor(Math.random()*wordArr.length)];
+    let challenge = wordArr[Math.floor(Math.random() * wordArr.length)];
     wordCount = 12;
-    for (var i=1; i < wordCount; i++) {
-        challenge += "_" + wordArr[Math.floor(Math.random()*wordArr.length)];
+    for (var i = 1; i < wordCount; i++) {
+        challenge += "_" + wordArr[Math.floor(Math.random() * wordArr.length)];
     }
     return challenge.trim()
 }
@@ -26,7 +26,11 @@ getChallengeString = _ => {
 
 verifySig = function(challenge, addr, signature) {
     console.log("verifysig: " + addr);
-    var result = verifySignature.messageVerify({challenge: challenge, pubkey: addr, signature: signature});
+    var result = verifySignature.messageVerify({
+        challenge: challenge,
+        pubkey: addr,
+        signature: signature
+    });
     console.log(result);
     return result;
 }
@@ -37,7 +41,12 @@ verifySig = function(challenge, addr, signature) {
  * @return {Object}      [The token to be passed to the user for future write transaction validation.]
  */
 const signatureVerify = data => new Promise((resolve, reject) => {
-    const { pubkey, challenge, signature, uid } = data;
+    const {
+        pubkey,
+        challenge,
+        signature,
+        uid
+    } = data;
     if (!isStr(pubkey) || !isStr(challenge) || !isStr(signature) || !isStr(uid)) {
         reject(rejectWithLog('signatureVerify(): Missing data for messageVerify.'));
     }
@@ -51,7 +60,12 @@ const signatureVerify = data => new Promise((resolve, reject) => {
             isAdmin(pubkey).then(res => {
                 if (messageVerify(data)) {
                     const expires = Math.floor(Date.now() / 1000) + Number(authExpirationSeconds);
-                    insertAuth({ pubkey, challenge, signature, expires }).then(res => {
+                    insertAuth({
+                        pubkey,
+                        challenge,
+                        signature,
+                        expires
+                    }).then(res => {
                         if (!res.pubkey || !res.challenge || !res.signature || !res.expires) throw 'Missing required jwt data.';
                         /*
                          * If auth makes it to this point, build the auth token.

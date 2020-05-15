@@ -13,7 +13,9 @@ var bchaddr = require("bchaddrjs");
  * @param  {String} address [The original address.]
  * @return {String}         [The corresponding legacy address.]
  */
-const fixAddressFormat = address => { return !bchaddr.isLegacyAddress(address) ? bchaddr.toLegacyAddress(address) : address; }
+const fixAddressFormat = address => {
+    return !bchaddr.isLegacyAddress(address) ? bchaddr.toLegacyAddress(address) : address;
+}
 
 /*
  * Verify the message
@@ -26,7 +28,11 @@ const fixAddressFormat = address => { return !bchaddr.isLegacyAddress(address) ?
  * @return {Boolean}         [true/false result.]
  */
 const messageVerify = message => {
-    let { challenge, pubkey, signature } = message;
+    let {
+        challenge,
+        pubkey,
+        signature
+    } = message;
     console.log("challenge: '" + challenge + "'");
     console.log("signature: '" + signature + "'");
     console.log("pubkey: '" + pubkey + "'");
@@ -34,7 +40,7 @@ const messageVerify = message => {
     console.log("fixed pubkey: " + fixedPubKey);
     try {
         return new bitcore.Message(challenge).verify(fixedPubKey, signature);
-    } catch(e) {
+    } catch (e) {
         console.log(e.message);
         return false;
     }

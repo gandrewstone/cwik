@@ -65,3 +65,9 @@ The site is started like any nodejs project.  A simple way to start on port 8000
 export PORT=8000
 npm start
 ```
+
+### JS file format
+
+```
+js-beautify -w 260
+```
