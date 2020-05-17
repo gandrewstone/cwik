@@ -1,11 +1,17 @@
+var LAYOUT_HEADER_PX=30;
+
 
 function jumpTo(spot) {
-    var s = spot.toLowerCase().replace(" ","-");
+    var s = spot.toLowerCase().split(/\s+/).join("-");
     console.log("jumpTo " + s);
     var e = document.getElementById(s);
     if (e)
     {
-        e.scrollIntoView({ behavior: 'smooth' });
+        //e.scrollIntoView(true);
+        //window.scrollBy(0,-30);
+
+        const y = e.getBoundingClientRect().top + window.pageYOffset - LAYOUT_HEADER_PX;
+        window.scrollTo({top: y, behavior: 'smooth'});
     }
     else
     {
@@ -24,7 +30,7 @@ function internalLinkOptimizer(doc, wnd, e) {
             e.preventDefault();
             e.stopPropagation();
             fetch(tgt.href+"?json=1").then(response => response.json().then(json => {
-                processFetchedMd(json.rawMarkdown);
+                processFetchedMd(json.rawMarkdown).then(html => {
                 document.getElementById("historyI").innerHTML = json.history;
                 document.getElementById("structureI").innerHTML = json.structure;
                 document.getElementById("relatedI").innerHTML = json.related;
@@ -35,6 +41,9 @@ function internalLinkOptimizer(doc, wnd, e) {
                 sidebarGrid.refreshItems().layout();
                 vertGrid.refreshItems().layout();
                 outerGrid.refreshItems().layout();
+                    window.scrollTo({top: 0 });
+                    notification(json);
+                });
             }));
         }
     }
@@ -51,7 +60,7 @@ function backOptimizer(doc, wnd, e) {
         {
             e.preventDefault();
             e.stopPropagation();
-            processFetchedMd(md);
+            processFetchedMd(md).then(html => {});
         }
         else
         {
@@ -71,4 +80,15 @@ function setupLayout(document, window) {
     window.addEventListener("popstate", e => backOptimizer(document, window,e));
     // This one happens whenever the page is being shown, not when history changes
     // window.addEventListener("pageshow", e => backOptimizer(document, window,e));
+}
+
+function notification(json) {
+    console.log("Notification: " + json.notification);
+    if (json.notification) {
+        document.querySelector('center.notifyText').innerText = json.notification;
+        document.querySelector('div.notification').visibility = "visible";
+    }
+    else
+        document.querySelector('center.notifyText').innerText = "";
+        document.querySelector('div.notification').visibility = "hidden";
 }

@@ -15,8 +15,7 @@ html
     script(src="/_static_/js/layout.js")
     script.
       setupLayout(document, window);
-    div.vert
-      div.VertA
+    div.VertA
         div.item-content
          div.cwikheader
           div.headergrid
@@ -39,10 +38,7 @@ html
                       span(onclick="login()") login |
                     span(onclick="commitEdits()") commit |
                     span(onclick="settings()") settings
-      div.VertB
-        div.item-content
-          div.outergrid
-            div.leftsidebar
+    div.leftsidebar
               div.item-content
                 div.sidebargrid
                   div.structure
@@ -54,10 +50,15 @@ html
                   div.history
                     div.item-content
                       block history
+    div.vert
+      div.VertB
+        div.notification
+          center.notifyText
+            block notification
+        div.item-content
+          div.outergrid
+
             div.cwikcontent
-              div.notification
-                center.notifyText
-                  block notification
               div.item-content
                 block wikipage
     textarea.cwikeditor

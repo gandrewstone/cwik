@@ -325,6 +325,20 @@ handleAPage = function(req, res) {
             loggedIn: (req.session.uid != undefined) ? true : false
         };
 
+                if (req.query.json)
+        return res.json({
+            zzwikiPage: "",
+            structure: "",
+            title: "",
+            related: "",
+            thisPage: urlPath,
+            rawMarkdown: "",
+            history: updateHistory(req, urlPath),
+            user: user,
+            notification: notification,
+            STACKEDITOR_URL: config.STACKEDIT_URL
+        })
+            else
             return res.render('wikibrowse', {
             zzwikiPage: "",
             structure: '',
@@ -334,7 +348,7 @@ handleAPage = function(req, res) {
             rawMarkdown: "",
             history: updateHistory(req, urlPath),
             user: user,
-            notificationData: notification,
+            notification: notification,
             STACKEDITOR_URL: config.STACKEDIT_URL
         });
         }
@@ -418,23 +432,27 @@ function updateHistory(req, urlPath) {
             historyHtml = req.session.history.map(WikiLinkify).join("<br/>\n")
         }
 
-        // Remove this url if we've already been there
         var historyPath = urlPath;
         if (urlPath == "/") historyPath = "/home.md";
 
-    if (historyPath.slice(historyPath.length-3) == ".md")
+    if (historyPath.length < 3 || historyPath.slice(historyPath.length-3) == ".md")
     {
         historyPath = historyPath.slice(0, historyPath.length-3);
     }
 
+        // Remove this url if we've already been there
         var index = req.session.history.indexOf(historyPath);
         if (index !== -1) req.session.history.splice(index, 1);
 
-    req.session.history.push(historyPath);
+    // eliminate some random files that get requested
+    if (historyPath.length < 4 || historyPath.slice(historyPath.length-4) != ".map")
+    {
+        req.session.history.push(historyPath);
         // Trim to no more than the last 10 places
         if (req.session.history.length > 10) {
             req.session.history.splice(0, 10);
         }
+    }
 
     return historyHtml;
 }
@@ -494,7 +512,7 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
             rawMarkdown: md,
             history: historyHtml,
             user: user,
-            notificationData: "",
+            notification: "",
             STACKEDITOR_URL: config.STACKEDIT_URL
         })
      else
@@ -507,7 +525,7 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
             rawMarkdown: md,
             history: historyHtml,
             user: user,
-            notificationData: "",
+            notification: "",
             STACKEDITOR_URL: config.STACKEDIT_URL
         });
     }

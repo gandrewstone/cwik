@@ -1,6 +1,6 @@
 
 /* Take a markdown file place it in the hidden textarea, and render it into html into the appropriate locations */
-function processFetchedMd(text) {
+function processFetchedMd2(text) {
     console.log("processing data");
     document.querySelector('textarea.cwikeditor').value = text;
     var se = new Stackedit({url: STACKEDITOR_URL});
@@ -20,6 +20,32 @@ function processFetchedMd(text) {
         setTimeout(xformMermaids, 200);
         setTimeout(xformKatex, 200);
         delete se;
+    });
+}
+
+function processFetchedMd(text) {
+    return new Promise(function (resolve, reject) {
+    console.log("processing data");
+    document.querySelector('textarea.cwikeditor').value = text;
+    var se = new Stackedit({url: STACKEDITOR_URL});
+
+    se.openFile({
+        name: "",
+        content: {
+            text: text
+        }
+    }, true); // true == silent mode
+    se.on('fileChange', (file) => {
+        console.log("FILE CHANGE");
+        document.querySelector('.wikicontent').innerHTML = file.content.html;
+        // Give time for innerHTML to be rendered into DOM
+        setTimeout(xformMermaids, 50);
+        setTimeout(xformKatex, 50);
+        setTimeout(xformMermaids, 200);
+        setTimeout(xformKatex, 200);
+        resolve(file.content.html);
+        delete se;
+    });
     });
 }
 
@@ -84,13 +110,6 @@ function commitEdits() {
     fetch("/_commit_").then(response => response.json().then(notification));
 }
 
-function notification(json) {
-    console.log(JSON.stringify(json));
-    console.log(json.notification);
-    if (json.notification) {
-        document.querySelector('center.notifyText').innerText = json.notification;
-    }
-}
 
 function uploadEdit(url, text) {
     console.log("upload Edit to: " + url);
