@@ -420,15 +420,20 @@ function updateHistory(req, urlPath) {
 
         // Remove this url if we've already been there
         var historyPath = urlPath;
-        if (urlPath == "/") historyPath = "/home";
+        if (urlPath == "/") historyPath = "/home.md";
+
+    if (historyPath.slice(historyPath.length-3) == ".md")
+    {
+        historyPath = historyPath.slice(0, historyPath.length-3);
+    }
 
         var index = req.session.history.indexOf(historyPath);
         if (index !== -1) req.session.history.splice(index, 1);
-        // And add it to the end
-        req.session.history.push(historyPath);
+
+    req.session.history.push(historyPath);
         // Trim to no more than the last 10 places
         if (req.session.history.length > 10) {
-            req.session.history.splice(0, req.session.history.length - 10);
+            req.session.history.splice(0, 10);
         }
 
     return historyHtml;
@@ -442,8 +447,8 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
         var headings = "";
         var error = "";
         appendHeading = function(tagName, text, attribs) {
-            // console.log("TAG: " + tagName + " " + text)
-            headings += '<div class="toc_' + tagName + '"><a href="#' + text + '">' + text + "</a></div>\n"
+            console.log("TAG: " + tagName + " " + text)
+            headings += '<div class="toc_' + tagName + '"><span onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n"
         };
         // console.log("HEADINGS: " + headings)
         html = sanitizer(html, {

@@ -8,12 +8,14 @@ html, body
     height: 100%;
 }
 
+
+
 .cwikheader {
   display: block;
-  position: absolute;
+  position: fixed;
   width: 100%;
   height: 30px;
-  margin: 5px;
+  margin: 0px;
   z-index: 1;
   background: #197717;
   color: #fff;
@@ -22,11 +24,13 @@ html, body
   display: block;
   position: absolute;
   width: 200px;
-  margin: 5px;
+  height: 100%;
+  margin: 0px;
   z-index: 1;
   background: #eeeeee;
-  background-image: linear-gradient(#106010, #ffffff);
+  background-image: linear-gradient(#197017, #ffffff);
   color: #fff;
+  overflow: hidden;
 }
 .cwikcontent {
   display: block;
@@ -39,15 +43,8 @@ html, body
 }
 
 .cwikeditor {
-  display: block;
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  margin: 5px;
-  z-index: 1;
-  background: #e0ffb0;
-  color: #000000;
   visibility: hidden;
+  display:none;
 }
 
 .rawMarkdown {
@@ -93,6 +90,7 @@ html, body
   display: block;
   position: absolute;
   width: 100%;
+  height: 100%;
   z-index: 2;
 }
 
@@ -110,8 +108,9 @@ html, body
 .history {
   display: block;
   position: absolute;
-  width: 98%;
-  margin: 1%;
+  width: 95%;
+  margin-left: 3px;
+  margin-top:5px;
   z-index: 2;
   color: #000000;
   border-radius: 20px;
@@ -124,8 +123,9 @@ html, body
 .related {
   display: block;
   position: absolute;
-  width: 98%;
-  margin: 1%;
+  width: 95%;
+  margin-left: 3px;
+  margin-top:5px;
   z-index: 2;
   color: #000000;
   border-radius: 20px;
@@ -138,13 +138,19 @@ html, body
 .structure {
   display: block;
   position: absolute;
-  width: 98%;
-  margin: 1%;
+  width: 95%;
+  margin-left: 3px;
+  margin-top:5px;
   z-index: 2;
   border-radius: 20px;
   border: 2px solid #197717;
   background: #d0d0d0;
   color: #000000;
+}
+
+#structureI {
+    margin: 5px;
+    font-size: 90%;
 }
 
 .toolBar {
@@ -194,12 +200,20 @@ html, body
   text-align:center;
 }
 
+.wikicontent {
+    height:100%;
+}
+
 .toc_h2 {
     margin-left: 20px;
 }
 
 .notification {
     background-color: orange;
+}
+
+.headerText {
+    font-size: 125%;
 }
 
 #mdData {

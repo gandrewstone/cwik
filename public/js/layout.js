@@ -1,4 +1,17 @@
 
+function jumpTo(spot) {
+    var s = spot.toLowerCase().replace(" ","-");
+    console.log("jumpTo " + s);
+    var e = document.getElementById(s);
+    if (e)
+    {
+        e.scrollIntoView({ behavior: 'smooth' });
+    }
+    else
+    {
+        console.log("unknown spot " + s);
+    }
+}
 
 function internalLinkOptimizer(doc, wnd, e) {
     //console.log("clicked on ", e);
