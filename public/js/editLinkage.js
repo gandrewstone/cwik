@@ -1,6 +1,6 @@
 /* Take a markdown file place it in the hidden textarea, and render it into html into the appropriate locations */
-function processFetchedMd2(text) {
-    console.log("processing data");
+function processFetchedMd_old(text) {
+    console.log("processing data 2");
     document.querySelector('textarea.cwikeditor').value = text;
     var se = new Stackedit({
         url: STACKEDITOR_URL
@@ -24,22 +24,39 @@ function processFetchedMd2(text) {
     });
 }
 
+
+var sedit = new Stackedit({
+    url: STACKEDITOR_URL
+});
+
+
 function processFetchedMd(text) {
     return new Promise(function(resolve, reject) {
         console.log("processing data");
         document.querySelector('textarea.cwikeditor').value = text;
-        var se = new Stackedit({
-            url: STACKEDITOR_URL
-        });
 
-        se.openFile({
-            name: "",
-            content: {
-                text: text
-            }
-        }, true); // true == silent mode
-        se.on('fileChange', (file) => {
-            console.log("FILE CHANGE");
+        // var seEditor = document.getElementsByClassName('stackedit-hidden-container')[0];
+        if (true) // typeof seEditor === "undefined")
+        {
+            console.log("open file");
+
+            sedit.openFile({
+                name: "",
+                content: {
+                    text: text
+                }
+            }, true); // true == silent mode
+        } else {
+            var iframe = seEditor.getElementsByClassName('stackedit-iframe')[0];
+            var element = iframe.contentWindow.document.getElementsByClassName("hidden-rendering-container")[0];
+            console.log("reuse");
+            console.log(seEditor);
+            element.innerHTML = text;
+        }
+        console.log("render");
+
+        var hdlr = function(file) {
+            console.log("render complete");
             document.querySelector('.wikicontent').innerHTML = file.content.html;
             // Give time for innerHTML to be rendered into DOM
             setTimeout(xformMermaids, 50);
@@ -47,10 +64,14 @@ function processFetchedMd(text) {
             setTimeout(xformMermaids, 200);
             setTimeout(xformKatex, 200);
             resolve(file.content.html);
-            delete se;
-        });
+            console.log(JSON.stringify(sedit));
+            sedit.off('fileChange', hdlr);
+        }
+
+        sedit.on('fileChange', hdlr);
     });
 }
+
 
 /* transform katex-style markup into html math */
 function xformKatex() {

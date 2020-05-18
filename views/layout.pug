@@ -17,8 +17,7 @@ html
     script.
       setupLayout(document, window);
     div#bchlogo
-      a(href="/home")
-        img#bchHeaderCoin(src="/_static_/images/bchCoin.svg")
+      img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('home')")
 
     div#userBar
       if user && user.loggedIn
