@@ -3,7 +3,7 @@ html
   head
     title=title
     link(rel='icon', type='image/svg+xml', href='/_static_/images/icon.svg')
-    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&family=Roboto:wght@500&display=swap")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&Oswald:wght@500&display=swap")
     link(rel='stylesheet', href='/_static_/css/styles.css')
     link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j",crossorigin="anonymous")
 
@@ -16,51 +16,48 @@ html
     script(src="/_static_/js/layout.js")
     script.
       setupLayout(document, window);
-    div.VertA
-        div.item-content
-         div.cwikheader
-          div.headergrid
-            div.toolBar
-                div.item-content
-                  block toolBar
-            div.bchlogo
-                div.item-content
-                  a(href="/home")
-                    img#bchHeaderFlag(src="/_static_/images/BitcoinCashFlag.svg")
-            div.headerContent
-                div.item-content
-                  block header
-            div.userBar
-                div.item-content
-                  div.userBar
-                    if user && user.loggedIn
-                      span(onclick="logout()") logout | 
-                    else
-                      span(onclick="login()") login |
-                    span(onclick="commitEdits()") commit |
-                    span(onclick="settings()") settings
-    div.leftsidebar
-              div.item-content
-                div.sidebargrid
-                  div.structure
-                    div.item-content
-                      block structure
-                  div.related
-                    div.item-content
-                      block related 
-                  div.history
-                    div.item-content
-                      block history
-    div.VertB
-        div.notification
-          center.notifyText
-            block notification
-        div.item-content
-          div.outergrid
+    div#bchlogo
+      a(href="/home")
+        img#bchHeaderCoin(src="/_static_/images/bchCoin.svg")
 
-            div.cwikcontent
-              div.item-content
-                block wikipage
+    div#userBar
+      if user && user.loggedIn
+        span(onclick="logout()") logout | 
+      else
+        span(onclick="login()") login | 
+      span(onclick="commitEdits()") commit | 
+      span(onclick="settings()") settings
+    
+    div#headerPageTitle
+      block header
+
+    div.cwikheader
+      div.toolBar
+        block toolBar
+
+    div.leftsidebar
+      div.item-content
+        div.sidebargrid
+          div.structure
+             div.item-content
+                block structure
+          div.related
+             div.item-content
+                block related 
+          div.history
+             div.item-content
+                block history
+
+    div.VertB
+      div.notification
+        center.notifyText
+          block notification
+      div.item-content
+        div.outergrid
+          div.cwikcontent
+            div.item-content
+              block wikipage
+
     textarea.cwikeditor
       
     script.
@@ -73,11 +70,6 @@ html
       var sidebarGrid = new Muuri('.sidebargrid', {
         dragEnabled: true
       });
-      var headerGrid = new Muuri('.headergrid', {
-      layout: {
-        horizontal: true
-        },
-        dragEnabled: true
-      });        
+ 
     block endScript
           

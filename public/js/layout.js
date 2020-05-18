@@ -25,7 +25,6 @@ function processJsonPage(json) {
                 document.getElementById("structureI").innerHTML = json.structure;
                 document.getElementById("relatedI").innerHTML = json.related;
                 document.getElementById("pageTitle").innerHTML = json.title;
-                headerGrid.refreshItems().layout();
                 sidebarGrid.refreshItems().layout();
                 vertGrid.refreshItems().layout();
                 outerGrid.refreshItems().layout();
