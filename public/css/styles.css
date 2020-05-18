@@ -2,6 +2,13 @@ html, body
 {
     height: 100%;
     margin: 0px;
+    font-family: 'Lato', sans-serif;
+}
+
+
+h1, h2, h3, h4, h5
+{
+    font-family: 'Roboto', sans-serif;
 }
 
 .outergrid {
@@ -24,7 +31,7 @@ html, body
 .leftsidebar {
   display: block;
   position: fixed;
-  width: 200px;
+  width: 25ch;
   height: 100%;
   margin-top: 30px;
   z-index: 3;
@@ -74,11 +81,6 @@ html, body
   height: 100%;
 }
 
-.vert {
-    position: relative;
-    height: 100%;
-    margin-left:200px;
-}
 
 .VertA {
     margin-top: 0px;
@@ -91,10 +93,12 @@ html, body
 }
 
 .VertB {
+    margin-left:25ch;
     margin-top:30px;
   display: block;
   position: absolute;
   width: 100%;
+  max-width: 100ch;
   height: 100%;
   z-index: 2;
 }

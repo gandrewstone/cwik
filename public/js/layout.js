@@ -19,6 +19,21 @@ function jumpTo(spot) {
     }
 }
 
+function processJsonPage(json) {
+  processFetchedMd(json.rawMarkdown).then(html => {
+                document.getElementById("historyI").innerHTML = json.history;
+                document.getElementById("structureI").innerHTML = json.structure;
+                document.getElementById("relatedI").innerHTML = json.related;
+                document.getElementById("pageTitle").innerHTML = json.title;
+                headerGrid.refreshItems().layout();
+                sidebarGrid.refreshItems().layout();
+                vertGrid.refreshItems().layout();
+                outerGrid.refreshItems().layout();
+                    window.scrollTo({top: 0 });
+                    notification(json);
+                });
+}
+
 function internalLinkOptimizer(doc, wnd, e) {
     //console.log("clicked on ", e);
     var loc = wnd.location;
@@ -30,37 +45,28 @@ function internalLinkOptimizer(doc, wnd, e) {
             e.preventDefault();
             e.stopPropagation();
             fetch(tgt.href+"?json=1").then(response => response.json().then(json => {
-                processFetchedMd(json.rawMarkdown).then(html => {
-                document.getElementById("historyI").innerHTML = json.history;
-                document.getElementById("structureI").innerHTML = json.structure;
-                document.getElementById("relatedI").innerHTML = json.related;
-                document.getElementById("pageTitle").innerHTML = json.title;
+                processJsonPage(json);
+                window.history.pushState({"json": json , "pageTitle":tgt.href},"", tgt.href);
                 document.title = tgt.href;
-                window.history.pushState({"md": json , "pageTitle":tgt.href},"", tgt.href);
-                headerGrid.refreshItems().layout();
-                sidebarGrid.refreshItems().layout();
-                vertGrid.refreshItems().layout();
-                outerGrid.refreshItems().layout();
-                    window.scrollTo({top: 0 });
-                    notification(json);
-                });
+
             }));
         }
     }
 }
 
 function backOptimizer(doc, wnd, e) {
-    //console.log(wnd.history.state);
-    //console.log("BackOptimizer");
-    //console.log(e);
+    console.log(wnd.history.state);
+    console.log("BackOptimizer");
+    console.log(e);
     if (e.state)
     {
-        var md = e.state["md"];
-        if (md)
+        var json = e.state.json;
+        console.log(json);
+        if (json)
         {
             e.preventDefault();
             e.stopPropagation();
-            processFetchedMd(md).then(html => {});
+            processJsonPage(json);
         }
         else
         {
