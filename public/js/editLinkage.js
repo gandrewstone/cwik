@@ -1,10 +1,11 @@
-
 /* Take a markdown file place it in the hidden textarea, and render it into html into the appropriate locations */
 function processFetchedMd2(text) {
     console.log("processing data");
     document.querySelector('textarea.cwikeditor').value = text;
-    var se = new Stackedit({url: STACKEDITOR_URL});
-    
+    var se = new Stackedit({
+        url: STACKEDITOR_URL
+    });
+
     se.openFile({
         name: "",
         content: {
@@ -24,28 +25,30 @@ function processFetchedMd2(text) {
 }
 
 function processFetchedMd(text) {
-    return new Promise(function (resolve, reject) {
-    console.log("processing data");
-    document.querySelector('textarea.cwikeditor').value = text;
-    var se = new Stackedit({url: STACKEDITOR_URL});
+    return new Promise(function(resolve, reject) {
+        console.log("processing data");
+        document.querySelector('textarea.cwikeditor').value = text;
+        var se = new Stackedit({
+            url: STACKEDITOR_URL
+        });
 
-    se.openFile({
-        name: "",
-        content: {
-            text: text
-        }
-    }, true); // true == silent mode
-    se.on('fileChange', (file) => {
-        console.log("FILE CHANGE");
-        document.querySelector('.wikicontent').innerHTML = file.content.html;
-        // Give time for innerHTML to be rendered into DOM
-        setTimeout(xformMermaids, 50);
-        setTimeout(xformKatex, 50);
-        setTimeout(xformMermaids, 200);
-        setTimeout(xformKatex, 200);
-        resolve(file.content.html);
-        delete se;
-    });
+        se.openFile({
+            name: "",
+            content: {
+                text: text
+            }
+        }, true); // true == silent mode
+        se.on('fileChange', (file) => {
+            console.log("FILE CHANGE");
+            document.querySelector('.wikicontent').innerHTML = file.content.html;
+            // Give time for innerHTML to be rendered into DOM
+            setTimeout(xformMermaids, 50);
+            setTimeout(xformKatex, 50);
+            setTimeout(xformMermaids, 200);
+            setTimeout(xformKatex, 200);
+            resolve(file.content.html);
+            delete se;
+        });
     });
 }
 
@@ -131,7 +134,9 @@ function uploadEdit(url, text) {
 function runeditor(url, domElem) {
     console.log(url);
     // Open the iframe
-    var stackedit = new Stackedit({url: STACKEDITOR_URL});
+    var stackedit = new Stackedit({
+        url: STACKEDITOR_URL
+    });
 
     stackedit.openFile({
         name: 'Filename', // with an optional filename

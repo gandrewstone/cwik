@@ -18,15 +18,15 @@ var titles = ["h1", "h2", "h3", "h4", "h5", "h6"]
 /* Turns a wiki path into a link */
 function WikiLinkify(s) {
     var text = s.split("/").slice(-1)[0].replace("__", " ")
-    if (text.length >= 3 && text.slice(text.length-3, text.length) == ".md")
-        text = text.slice(0,text.length-3)
+    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
+        text = text.slice(0, text.length - 3)
     return '<a class="histL" href=\"' + s + '">' + text + '</a>'
 }
 
 function JumpToLinkify(s, cls) {
     var text = s.split("/").slice(-1)[0].replace("__", " ");
-    if (text.length >= 3 && text.slice(text.length-3, text.length) == ".md")
-        text = text.slice(0,text.length-3);
+    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
+        text = text.slice(0, text.length - 3);
     //return '<a class="histL" href=\"' + s + '">' + text + '</a>'
     var ret = '<div class="l' + cls + '"></span><span class="i' + cls + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n";
     console.log(ret)
@@ -35,8 +35,8 @@ function JumpToLinkify(s, cls) {
 
 function LinkToLinkify(s, cls) {
     var text = s.split("/").slice(-1)[0].replace("__", " ");
-    if (text.length >= 3 && text.slice(text.length-3, text.length) == ".md")
-        text = text.slice(0,text.length-3);
+    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
+        text = text.slice(0, text.length - 3);
     //return '<a class="histL" href=\"' + s + '">' + text + '</a>'
     var ret = '<div class="l' + cls + '"></span><span class="i' + cls + '" onclick="linkTo(\'' + text + '\')">' + text + "</span></div>\n";
     console.log(ret)
@@ -338,41 +338,41 @@ handleAPage = function(req, res) {
         return;
     }
 
-    
+
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
             data = "";
             notification = "nonexistent page, click 'edit' to create";
             var user = {
-            loggedIn: (req.session.uid != undefined) ? true : false
-        };
+                loggedIn: (req.session.uid != undefined) ? true : false
+            };
 
-                if (req.query.json)
-        return res.json({
-            zzwikiPage: "",
-            structure: "",
-            title: "",
-            related: "",
-            thisPage: urlPath,
-            rawMarkdown: "",
-            history: updateHistory(req, urlPath),
-            user: user,
-            notification: notification,
-            STACKEDITOR_URL: config.STACKEDIT_URL
-        })
+            if (req.query.json)
+                return res.json({
+                    zzwikiPage: "",
+                    structure: "",
+                    title: "",
+                    related: "",
+                    thisPage: urlPath,
+                    rawMarkdown: "",
+                    history: updateHistory(req, urlPath),
+                    user: user,
+                    notification: notification,
+                    STACKEDITOR_URL: config.STACKEDIT_URL
+                })
             else
-            return res.render('wikibrowse', {
-            zzwikiPage: "",
-            structure: '',
-            title: "",
-            related: "",
-            thisPage: urlPath,
-            rawMarkdown: "",
-            history: updateHistory(req, urlPath),
-            user: user,
-            notification: notification,
-            STACKEDITOR_URL: config.STACKEDIT_URL
-        });
+                return res.render('wikibrowse', {
+                    zzwikiPage: "",
+                    structure: '',
+                    title: "",
+                    related: "",
+                    thisPage: urlPath,
+                    rawMarkdown: "",
+                    history: updateHistory(req, urlPath),
+                    user: user,
+                    notification: notification,
+                    STACKEDITOR_URL: config.STACKEDIT_URL
+                });
         }
 
         if (req.query.raw) {
@@ -383,7 +383,7 @@ handleAPage = function(req, res) {
 
         var doc = data;
 
-        var htmlFile = filepath.slice(0,filepath.length-2) + "html";
+        var htmlFile = filepath.slice(0, filepath.length - 2) + "html";
         // console.log("HTML file is: " + htmlFile);
         var regenerate = false;
         try {
@@ -391,7 +391,7 @@ handleAPage = function(req, res) {
             var mdFileStats = fs.statSync(filepath);
             console.log("Times: html: " + htmlFileStats.mtime + "md: " + mdFileStats.mtime);
             if (htmlFileStats.mtime <= mdFileStats.mtime) regenerate = true;
-        } catch(err) {
+        } catch (err) {
             regenerate = true;
         }
 
@@ -399,16 +399,18 @@ handleAPage = function(req, res) {
             // Convert markdown to html
             console.log("regenerate " + htmlFile);
             mdToHtml(doc).then(html => {
-            fs.writeFile(htmlFile, html, function(err) { console.log("write error: " + err); })
-                wikiPageReplyWithMdHtml(req, res, doc, html, urlPath); } );
+                fs.writeFile(htmlFile, html, function(err) {
+                    console.log("write error: " + err);
+                })
+                wikiPageReplyWithMdHtml(req, res, doc, html, urlPath);
+            });
         } else {
             fs.readFile(htmlFile, 'utf8', function(err, html) {
                 if (err) {
                     mdToHtml(doc).then(html => {
-                        wikiPageReplyWithMdHtml(req, res, doc, html, urlPath); });
-                }
-                else
-                {
+                        wikiPageReplyWithMdHtml(req, res, doc, html, urlPath);
+                    });
+                } else {
                     wikiPageReplyWithMdHtml(req, res, doc, html, urlPath);
                 }
             });
@@ -417,7 +419,7 @@ handleAPage = function(req, res) {
 }
 
 function mdToHtml(md) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         var cvt = new pagedown.Converter();
         var html = cvt.makeHtml(md);
         resolve(html);
@@ -448,25 +450,23 @@ function mdToHtml(md) {
 
 
 function updateHistory(req, urlPath) {
-        var historyHtml = "";
+    var historyHtml = "";
 
-        var historyPath = urlPath;
-        if (urlPath == "/") historyPath = "/home.md";
+    var historyPath = urlPath;
+    if (urlPath == "/") historyPath = "/home.md";
 
     if (req.session.history == undefined) req.session.history = [];
 
-    if (historyPath.length < 3 || historyPath.slice(historyPath.length-3) == ".md")
-    {
-        historyPath = historyPath.slice(0, historyPath.length-3);
+    if (historyPath.length < 3 || historyPath.slice(historyPath.length - 3) == ".md") {
+        historyPath = historyPath.slice(0, historyPath.length - 3);
     }
 
-        // Remove this url if we've already been there
-        var index = req.session.history.indexOf(historyPath);
-        if (index !== -1) req.session.history.splice(index, 1);
+    // Remove this url if we've already been there
+    var index = req.session.history.indexOf(historyPath);
+    if (index !== -1) req.session.history.splice(index, 1);
 
     // eliminate some random files that get requested
-    if (historyPath.length < 4 || historyPath.slice(historyPath.length-4) != ".map")
-    {
+    if (historyPath.length < 4 || historyPath.slice(historyPath.length - 4) != ".map") {
         req.session.history.push(historyPath);
         // Trim to no more than the last 10 places
         if (req.session.history.length > 10) {
@@ -475,54 +475,53 @@ function updateHistory(req, urlPath) {
     }
 
 
-    historyHtml = req.session.history.reverse().map(s => LinkToLinkify(s,"his")).join("\n");
+    historyHtml = req.session.history.reverse().map(s => LinkToLinkify(s, "his")).join("\n");
     return historyHtml;
 }
 
-function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
-{
+function wikiPageReplyWithMdHtml(req, res, md, html, urlPath) {
     var historyHtml = updateHistory(req, urlPath);
-        var meta = null;
+    var meta = null;
 
-        var headings = "";
-        var error = "";
-        appendHeading = function(tagName, text, attribs) {
-            console.log("TAG: " + tagName + " " + text)
-            headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n"
-        };
-        // console.log("HEADINGS: " + headings)
-        html = sanitizer(html, {
-            allowedTags: sanitizer.defaults.allowedTags.concat(['iframe','img', 'h1', 'h2']),
-            exclusiveFilter: function(frame) {
-                if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
-                if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
-                    try {
-                        console.log("parsing: " + frame.text);
-                        meta = JSON.parse(frame.text);
-                    } catch (err) {
-                        error += err.message;
-                    }
-                    return true;
+    var headings = "";
+    var error = "";
+    appendHeading = function(tagName, text, attribs) {
+        console.log("TAG: " + tagName + " " + text)
+        headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n"
+    };
+    // console.log("HEADINGS: " + headings)
+    html = sanitizer(html, {
+        allowedTags: sanitizer.defaults.allowedTags.concat(['iframe', 'img', 'h1', 'h2']),
+        exclusiveFilter: function(frame) {
+            if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
+            if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
+                try {
+                    console.log("parsing: " + frame.text);
+                    meta = JSON.parse(frame.text);
+                } catch (err) {
+                    error += err.message;
                 }
-                return false; // Don't remove anything based on this filter -- I am just trying to extract headings
+                return true;
             }
-        });
-        //console.log("META: " + JSON.stringify(meta))
-        //console.log(html);
-        title = ""
-        related = ""
+            return false; // Don't remove anything based on this filter -- I am just trying to extract headings
+        }
+    });
+    //console.log("META: " + JSON.stringify(meta))
+    //console.log(html);
+    title = ""
+    related = ""
     if (meta) {
         console.log("meta " + JSON.stringify(meta));
-            if (meta.title) title = meta.title;
-            if (meta.related) {
-                console.log("related ");
-                related = meta.related.map(t => LinkToLinkify(t, "rel")).join("\n");
-            }
+        if (meta.title) title = meta.title;
+        if (meta.related) {
+            console.log("related ");
+            related = meta.related.map(t => LinkToLinkify(t, "rel")).join("\n");
         }
+    }
 
-        user = {
-            loggedIn: (req.session.uid != undefined) ? true : false
-        };
+    user = {
+        loggedIn: (req.session.uid != undefined) ? true : false
+    };
 
     if (req.query.json)
         res.json({
@@ -537,7 +536,7 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
             notification: "",
             STACKEDITOR_URL: config.STACKEDIT_URL
         })
-     else
+    else
         res.render('wikibrowse', {
             zzwikiPage: "loading...",
             structure: headings,
@@ -550,4 +549,4 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
             notification: "",
             STACKEDITOR_URL: config.STACKEDIT_URL
         });
-    }
+}
