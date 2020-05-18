@@ -53,21 +53,14 @@ html
       div.notification
         center.notifyText
           block notification
-      div.item-content
-        div.outergrid
+      div.Content
+        div.item-content
           div.cwikcontent
-            div.item-content
               block wikipage
 
     textarea.cwikeditor
       
     script.
-      var vertGrid = new Muuri('.VertB');
-      var outerGrid = new Muuri('.outergrid', {
-      layout: {
-        horizontal: true
-        },      
-      });
       var sidebarGrid = new Muuri('.sidebargrid', {
         dragEnabled: true
       });

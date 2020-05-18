@@ -1,26 +1,29 @@
 /* Take a markdown file place it in the hidden textarea, and render it into html into the appropriate locations */
 function processFetchedMd_old(text) {
-    console.log("processing data 2");
-    document.querySelector('textarea.cwikeditor').value = text;
-    var se = new Stackedit({
-        url: STACKEDITOR_URL
-    });
+    return new Promise(function(resolve, reject) {
+        console.log("processing data 2");
+        document.querySelector('textarea.cwikeditor').value = text;
+        var se = new Stackedit({
+            url: STACKEDITOR_URL
+        });
 
-    se.openFile({
-        name: "",
-        content: {
-            text: text
-        }
-    }, true); // true == silent mode
-    se.on('fileChange', (file) => {
-        console.log("FILE CHANGE");
-        document.querySelector('.wikicontent').innerHTML = file.content.html;
-        // Give time for innerHTML to be rendered into DOM
-        setTimeout(xformMermaids, 50);
-        setTimeout(xformKatex, 50);
-        setTimeout(xformMermaids, 200);
-        setTimeout(xformKatex, 200);
-        delete se;
+        se.openFile({
+            name: "",
+            content: {
+                text: text
+            }
+        }, true); // true == silent mode
+        se.on('fileChange', (file) => {
+            console.log("FILE CHANGE");
+            document.querySelector('.wikicontent').innerHTML = file.content.html;
+            // Give time for innerHTML to be rendered into DOM
+            setTimeout(xformMermaids, 50);
+            setTimeout(xformKatex, 50);
+            setTimeout(xformMermaids, 200);
+            setTimeout(xformKatex, 200);
+            delete se;
+            resolve(file.content.html);
+        });
     });
 }
 
@@ -28,7 +31,6 @@ function processFetchedMd_old(text) {
 var sedit = new Stackedit({
     url: STACKEDITOR_URL
 });
-
 
 function processFetchedMd(text) {
     return new Promise(function(resolve, reject) {
@@ -57,14 +59,14 @@ function processFetchedMd(text) {
 
         var hdlr = function(file) {
             console.log("render complete");
+            resolve(file.content.html);
             document.querySelector('.wikicontent').innerHTML = file.content.html;
             // Give time for innerHTML to be rendered into DOM
             setTimeout(xformMermaids, 50);
             setTimeout(xformKatex, 50);
             setTimeout(xformMermaids, 200);
             setTimeout(xformKatex, 200);
-            resolve(file.content.html);
-            console.log(JSON.stringify(sedit));
+            //console.log(JSON.stringify(sedit));
             sedit.off('fileChange', hdlr);
         }
 
