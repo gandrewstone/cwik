@@ -18,7 +18,29 @@ var titles = ["h1", "h2", "h3", "h4", "h5", "h6"]
 /* Turns a wiki path into a link */
 function WikiLinkify(s) {
     var text = s.split("/").slice(-1)[0].replace("__", " ")
-    return '<a href=\"' + s + '">' + text + '</a>'
+    if (text.length >= 3 && text.slice(text.length-3, text.length) == ".md")
+        text = text.slice(0,text.length-3)
+    return '<a class="histL" href=\"' + s + '">' + text + '</a>'
+}
+
+function JumpToLinkify(s, cls) {
+    var text = s.split("/").slice(-1)[0].replace("__", " ");
+    if (text.length >= 3 && text.slice(text.length-3, text.length) == ".md")
+        text = text.slice(0,text.length-3);
+    //return '<a class="histL" href=\"' + s + '">' + text + '</a>'
+    var ret = '<div class="l' + cls + '"></span><span class="i' + cls + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n";
+    console.log(ret)
+    return ret;
+}
+
+function LinkToLinkify(s, cls) {
+    var text = s.split("/").slice(-1)[0].replace("__", " ");
+    if (text.length >= 3 && text.slice(text.length-3, text.length) == ".md")
+        text = text.slice(0,text.length-3);
+    //return '<a class="histL" href=\"' + s + '">' + text + '</a>'
+    var ret = '<div class="l' + cls + '"></span><span class="i' + cls + '" onclick="linkTo(\'' + text + '\')">' + text + "</span></div>\n";
+    console.log(ret)
+    return ret;
 }
 
 
@@ -427,13 +449,11 @@ function mdToHtml(md) {
 
 function updateHistory(req, urlPath) {
         var historyHtml = "";
-        if (req.session.history == undefined) req.session.history = [];
-        else {
-            historyHtml = req.session.history.map(WikiLinkify).join("<br/>\n")
-        }
 
         var historyPath = urlPath;
         if (urlPath == "/") historyPath = "/home.md";
+
+    if (req.session.history == undefined) req.session.history = [];
 
     if (historyPath.length < 3 || historyPath.slice(historyPath.length-3) == ".md")
     {
@@ -454,6 +474,8 @@ function updateHistory(req, urlPath) {
         }
     }
 
+
+    historyHtml = req.session.history.reverse().map(s => LinkToLinkify(s,"his")).join("\n");
     return historyHtml;
 }
 
@@ -466,7 +488,7 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
         var error = "";
         appendHeading = function(tagName, text, attribs) {
             console.log("TAG: " + tagName + " " + text)
-            headings += '<div class="toc_' + tagName + '"><span onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n"
+            headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n"
         };
         // console.log("HEADINGS: " + headings)
         html = sanitizer(html, {
@@ -494,7 +516,7 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath)
             if (meta.title) title = meta.title;
             if (meta.related) {
                 console.log("related ");
-                related = meta.related.map(WikiLinkify).join("<br/>\n");
+                related = meta.related.map(t => LinkToLinkify(t, "rel")).join("\n");
             }
         }
 

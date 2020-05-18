@@ -19,6 +19,19 @@ function jumpTo(spot) {
     }
 }
 
+function linkTo(spot) {
+
+    var s = spot.toLowerCase().split(/\s+/).join("__");
+    console.log("linkTo " + s);
+
+    fetch(s+"?json=1").then(response => response.json().then(json => {
+                processJsonPage(json);
+        window.history.pushState({"json": json , "pageTitle":json.thisPage},"", json.thisPage);
+                document.title = json.thisPage;
+            }));
+}
+
+
 function processJsonPage(json) {
   processFetchedMd(json.rawMarkdown).then(html => {
                 document.getElementById("historyI").innerHTML = json.history;

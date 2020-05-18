@@ -22,11 +22,13 @@ html
 
     div#userBar
       if user && user.loggedIn
-        span(onclick="logout()") logout | 
+        span.horizMenu(onclick="logout()") logout
       else
-        span(onclick="login()") login | 
-      span(onclick="commitEdits()") commit | 
-      span(onclick="settings()") settings
+        span.horizMenu(onclick="login()") login
+      |  | 
+      span.horizMenu(onclick="commitEdits()") commit
+      |  | 
+      span.horizMenu(onclick="settings()") settings
     
     div#headerPageTitle
       block header

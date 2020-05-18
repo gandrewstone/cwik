@@ -1,0 +1,82 @@
+.ltoc_h1, .ltoc_h2, .ltoc_h3 {
+    display: inline-block;
+    width: 100%;
+    margin: 0px 0px 0px 0px;
+    padding: 0px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.itoc_h1 {
+    margin: 0px 0px 0px 1ch;
+    padding: 0px;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* inject a bigger thing so the hover doesn't change the element size */
+.ltoc_h1::after, .ltoc_h2::after, .ltoc_h3::after, .ltoc_h4::after, .ltoc_h5::after, .ltoc_h6::after{
+    margin: 0px;
+    content: " ";
+    font-weight: bold;
+    font-size: 120%;
+}
+
+.ltoc_h1:hover, .ltoc_h2:hover, .ltoc_h3:hover, .ltoc_h4:hover, .ltoc_h5:hover, .ltoc_h6:hover {
+    background-image: linear-gradient(#c0c0c0, #197717,#197717,#c0c0c0);
+    background-color: #3d1e0b;
+    color: #fca22b;
+    overflow: hidden;
+}
+
+.ltoc_h1:hover .itoc_h1, .ltoc_h2:hover .itoc_h2, .ltoc_h3:hover .itoc_h3, .ltoc_h4:hover .itoc_h4, .ltoc_h5:hover .itoc_h5, .ltoc_h6:hover .itoc_h6 {
+    color: #fca22b;
+    font-weight: bold;
+    font-size: 115%;
+    margin: 0px;
+    overflow: hidden;
+}
+
+
+.itoc_h2 {
+    margin: 0px;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 3ch;
+}
+
+.itoc_h3 {
+    margin: 0px;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 5ch;
+}
+
+.itoc_h4 {
+    margin: 0px;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 6ch;
+}
+
+.itoc_h5 {
+    margin: 0px;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 7ch;
+}
+
+.itoc_h6 {
+    margin: 0px;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 8ch;
+}
+

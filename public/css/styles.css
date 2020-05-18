@@ -1,3 +1,7 @@
+@import "tocmenu.css";
+@import "relatedmenu.css";
+@import "hismenu.css";
+
 html, body
 {
     height: 100%;
@@ -86,8 +90,8 @@ h1, h2, h3, h4, h5
 }
 
 
-.VertA {
-
+.horizMenu:hover {
+    color: #fca22b;
 }
 
 .VertB {
@@ -152,7 +156,17 @@ h1, h2, h3, h4, h5
 }
 
 #structureI {
-    margin: 5px;
+    margin: 0.5rem 0px 0.75rem 0px;
+    font-size: 90%;
+}
+
+#relatedI {
+    margin: 0.5rem 0px 0.75rem 0px;
+    font-size: 90%;
+}
+
+#historyI {
+    margin: 0.5rem 0px 0.75rem 0px;
     font-size: 90%;
 }
 
@@ -191,6 +205,11 @@ h1, h2, h3, h4, h5
     width: 45px;
     margin-left: 0%;
 }
+#bchHeaderCoin:hover
+{
+    width: 55px;
+    margin-left: 0%;
+}
 
 #headerPageTitle {
   display: inline-block;
@@ -208,9 +227,7 @@ h1, h2, h3, h4, h5
     height:100%;
 }
 
-.toc_h2 {
-    margin-left: 20px;
-}
+
 
 .notification {
     font-size: 140%;
