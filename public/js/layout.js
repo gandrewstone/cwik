@@ -37,18 +37,23 @@ function linkTo(spot) {
 
 function processJsonPage(json) {
     console.log("processJsonPage");
-    processFetchedMd(json.rawMarkdown).then(html => {
-        console.log("fetch complete");
-        document.getElementById("historyI").innerHTML = json.history;
-        document.getElementById("structureI").innerHTML = json.structure;
-        document.getElementById("relatedI").innerHTML = json.related;
-        document.getElementById("pageTitle").innerHTML = json.title;
-        sidebarGrid.refreshItems().layout();
-        window.scrollTo({
-            top: 0
-        });
+    if (typeof json.html !== "undefined") {
+        document.querySelector('.wikicontent').innerHTML = json.html;
         notification(json);
-    });
+    } else {
+        processFetchedMd(json.rawMarkdown).then(html => {
+            console.log("fetch complete");
+            document.getElementById("historyI").innerHTML = json.history;
+            document.getElementById("structureI").innerHTML = json.structure;
+            document.getElementById("relatedI").innerHTML = json.related;
+            document.getElementById("pageTitle").innerHTML = json.title;
+            sidebarGrid.refreshItems().layout();
+            window.scrollTo({
+                top: 0
+            });
+            notification(json);
+        });
+    }
 }
 
 function internalLinkOptimizer(doc, wnd, e) {

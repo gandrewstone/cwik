@@ -338,7 +338,7 @@ handleAPage = function(req, res) {
         return;
     }
 
-
+    console.log("read file: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
             data = "";
@@ -347,20 +347,41 @@ handleAPage = function(req, res) {
                 loggedIn: (req.session.uid != undefined) ? true : false
             };
 
-            if (req.query.json)
-                return res.json({
-                    zzwikiPage: "",
-                    structure: "",
-                    title: "",
-                    related: "",
-                    thisPage: urlPath,
-                    rawMarkdown: "",
-                    history: updateHistory(req, urlPath),
-                    user: user,
-                    notification: notification,
-                    STACKEDITOR_URL: config.STACKEDIT_URL
-                })
-            else
+            if (req.query.json) {
+                console.log("trying " + readFrom + "/cwikTemplate.html");
+                return fs.readFile(readFrom + "/cwikTemplate.html", 'utf8', function(err, htmlTemplateData) {
+                    if (err) {
+                        console.log("template missing");
+                        return res.json({
+                            zzwikiPage: "",
+                            structure: "",
+                            title: "",
+                            related: "",
+                            thisPage: urlPath,
+                            rawMarkdown: "",
+                            history: updateHistory(req, urlPath),
+                            user: user,
+                            notification: notification,
+                            STACKEDITOR_URL: config.STACKEDIT_URL
+                        });
+                    }
+                    console.log("template exists");
+                    return res.json({
+                        html: htmlTemplateData,
+                        zzwikiPage: "",
+                        structure: "",
+                        title: "",
+                        related: "",
+                        thisPage: urlPath,
+                        rawMarkdown: "",
+                        history: updateHistory(req, urlPath),
+                        user: user,
+                        notification: notification,
+                        STACKEDITOR_URL: config.STACKEDIT_URL
+                    });
+
+                });
+            } else
                 return res.render('wikibrowse', {
                     zzwikiPage: "",
                     structure: '',

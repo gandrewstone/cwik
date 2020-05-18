@@ -186,3 +186,45 @@ function runeditor(url, domElem) {
 
     return false;
 }
+
+function editWithTemplate(tmplName) {
+    url = window.location.href;
+    domElem = document.querySelector('.cwikeditor')
+
+    fetch(tmplName + "?json=1").then(response => response.json().then(json => {
+
+        var stackedit = new Stackedit({
+            url: STACKEDITOR_URL
+        });
+
+        if (typeof json.rawMarkdown !== "undefined")
+            domElem.value = json.rawMarkdown;
+        else
+            domElem.value = "";
+
+        stackedit.openFile({
+            name: url, // with an optional filename
+            content: {
+                text: json.rawMarkdown // and the Markdown content.
+            }
+        });
+
+        var html = "";
+
+        // Listen to StackEdit events and apply the changes to the textarea.
+        stackedit.on('fileChange', (file) => {
+            domElem.value = file.content.text;
+            html = file.content.html;
+        });
+
+        stackedit.on('close', (file) => {
+            document.querySelector(".wikicontent").innerHTML = html;
+            setTimeout(xformMermaids, 10);
+            setTimeout(xformKatex, 10);
+            setTimeout(xformMermaids, 200);
+            setTimeout(xformKatex, 200);
+            uploadEdit(url, domElem.value);
+        });
+
+    }));
+}
