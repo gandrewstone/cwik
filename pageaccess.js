@@ -2,9 +2,8 @@ var fs = require('fs');
 var path = require('path');
 var pagedown = require("pagedown");
 var sanitizer = require("sanitize-html");
-var git = require("nodegit");
 var path = require("path");
-
+var git = require("./cwikgit");
 var config = require("./config");
 var PUSH_BRANCHES = config.PUSH_BRANCHES;
 var UPSTREAM_REPO_NAME = config.UPSTREAM_REPO_NAME;
@@ -23,6 +22,7 @@ function WikiLinkify(s) {
     return '<a class="histL" href=\"' + s + '">' + text + '</a>'
 }
 
+/* Creates a js-handled link to an anchor i.e. # -- an internal link to a different document section.  Click calls the client-side js function jumpTo. */
 function JumpToLinkify(s, cls) {
     var text = s.split("/").slice(-1)[0].replace("__", " ");
     if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
@@ -33,6 +33,7 @@ function JumpToLinkify(s, cls) {
     return ret;
 }
 
+/* Creates a js-handled link to another document.  Click calls the client-side js function "linkTo" */
 function LinkToLinkify(s, cls) {
     var text = s.split("/").slice(-1)[0].replace("__", " ");
     if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
@@ -49,185 +50,6 @@ function BadURL(req, res) {
 }
 
 
-function ccred() {
-    var nCalls = 0;
-
-    function f(url, userName) {
-        console.log("credentials requsted url: " + url + " username: " + userName + "Call Num: " + nCalls);
-        if (nCalls > 5) throw "Credential failure";
-        nCalls += 1;
-        return git.Cred.sshKeyFromAgent(userName);
-    }
-
-    return f;
-}
-
-/**
- * Fetch from remote (credit https://stackoverflow.com/questions/20955393/nodegit-libgit2-for-node-js-how-to-push-and-pull/35656463)
- *
- * @param {string} repositoryPath - Path to local git repository
- * @param {string} remoteName - Remote name
- * @param {string} branch - Branch to fetch
- */
-gitPull = function(repositoryPath, remoteName, branch, cb) {
-    var repository;
-    var remoteBranch = remoteName + '/' + branch;
-    git.Repository.open(repositoryPath)
-        .then(function(_repository) {
-            console.log("gitPull.open ok");
-            repository = _repository;
-            var result = repository.fetch(remoteName, {
-                callbacks: {
-                    credentials: ccred()
-                }
-            }).then(function() {
-                    console.log("fetch worked!");
-                },
-                function() {
-                    console.log(" fetch failed!");
-                });
-            console.log("fetch started");
-            return result;
-        }, cb)
-        .then(function() {
-            console.log("gitPull.fetch ok");
-            return repository.mergeBranches(branch, remoteBranch);
-        }, cb)
-        .then(function(oid) {
-            console.log("gitPull.merge ok");
-            cb(null, oid);
-        }, cb);
-};
-
-// All files that are modified are stored in a file so that we know what to commit.
-// Perhaps this can be better accomplished with a git command
-changedFiles = {}; // This is a dictionary of uid, Set() pairs
-
-commitEdits = function(req, res) {
-    var uid = req.session.uid;
-    var user = uid.split(":")[1];
-    var userSpace = userForkRoot + "/" + user;
-    console.log("commit edits run: " + user + " repo " + userSpace);
-    git.Repository.open(userSpace).then(function(repo) {
-            var author = git.Signature.now(user, user + "@reference.cash");
-            var committer = git.Signature.now("buwiki", "buwiki@protonmail.com");
-            console.log("author " + user + "@reference.cash");
-            console.log("committer " + "buwiki@protonmail.com");
-            files = Array.from(changedFiles[uid].keys());
-            console.log("files " + JSON.stringify(files));
-            repo.createCommitOnHead(files, author, committer, "wiki commit").then(
-                function(oid) {
-                    console.log("worked " + oid);
-                    changedFiles[uid].clear();
-                    saveChangedFiles(uid, changedFiles[uid]);
-                    git.Remote.lookup(repo, UPSTREAM_REPO_NAME).then(
-                        function(remote) {
-                            console.log("push");
-                            remote.push(PUSH_BRANCHES, {
-                                callbacks: {
-                                    credentials: ccred()
-                                }
-                            }).then(function(number) {
-                                    console.log("push completed. returned " + number);
-                                    res.json({
-                                        notification: "commit and push completed"
-                                    });
-                                    refreshRepoEveryone();
-                                },
-                                function(failure) {
-                                    console.log("push failed " + failure.message);
-                                    res.json({
-                                        notification: "push failed " + failure.message
-                                    });
-                                }).catch(err => {
-                                console.error("push catch error ", err);
-                            });
-                        },
-                        function(failure) {
-                            console.log("remote create failed" + failure);
-                        }
-                    );
-                },
-                function(failure) {
-                    console.log("failed" + failure);
-                });
-        },
-        function(failure) {
-            console.log("fail");
-            //console.log("failed! " + JSON.stringify(failure));
-        });
-}
-
-const getDirectories = source =>
-    fs.readdirSync(source, {
-        withFileTypes: true
-    })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name)
-
-/** Pull from the origin in every user's repo */
-refreshRepoEveryone = function() {
-    repoDirs = getDirectories(userForkRoot);
-    console.log("repo dirs: " + repoDirs);
-    for (i = 0; i < repoDirs.length; i++) {
-        refreshRepoByDir(userForkRoot + "/" + repoDirs[i]);
-    }
-}
-
-// do a git pull to sync the user's repo with the latest changes
-refreshRepo = function(uid) {
-    var user = uid.split(":")[1];
-    var userSpace = userForkRoot + "/" + user;
-    console.log("refresh repo: " + user + " dir: " + userSpace);
-
-    gitPull(userSpace, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME, function(err, oid) {
-        if (err != null) console.log("pull error " + err);
-    });
-}
-
-// do a git pull to sync a repo with the latest changes
-refreshRepoByDir = function(dir) {
-    console.log("refresh repo: " + dir);
-
-    gitPull(dir, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME, function(err, oid) {
-        if (err != null) console.log("pull error " + err);
-    });
-}
-
-// Load the list of changed files from disk.
-loadChangedFiles = function(uid, sess) {
-    var userSpace = userForkRoot + "/" + uid.split(":")[1];
-    var filepath = userSpace + "/.changedFiles.lst";
-    console.log("load edited files from: " + filepath);
-    fs.readFile(filepath, 'utf8', function(err, data) {
-        if (err) {
-            console.log("file doesn't exist: " + err);
-            changedFiles[uid] = new Set();
-            console.log("assigned changedFiles ");
-            return;
-        }
-        changedFiles[uid] = new Set(JSON.parse(data));
-        console.log("edited file list: " + JSON.stringify(Array.from(changedFiles[uid].keys())));
-    });
-}
-
-// Save the list of changed files to a file on disk.
-saveChangedFiles = function(uid, changedFiles) {
-    console.log("saveChangedFiles " + uid);
-    var userSpace = userForkRoot + "/" + uid.split(":")[1];
-    console.log("userSpace " + userSpace);
-    var filepath = userSpace + "/.changedFiles.lst";
-    console.log("writing file change list: " + filepath);
-    console.log(JSON.stringify(Array.from(changedFiles.keys())));
-    fs.writeFile(userSpace + "/.changedFiles.lst", JSON.stringify(Array.from(changedFiles.keys())), (err) => {
-        if (err)
-            console.log("changed list write error: " + JSON.stringify(err));
-        else
-            console.log("changed list written");
-    });
-}
-
-
 // Return a requested page
 handleAPage = function(req, res) {
     var notification = undefined;
@@ -237,14 +59,14 @@ handleAPage = function(req, res) {
         // For now, require login
         // return res.redirect(307,"/_login_")
     } else {
-        userSpace = userForkRoot + "/" + req.session.uid.split(":")[1];
+        userSpace = config.USER_FORK_ROOT + "/" + req.session.uid.split(":")[1];
         readFrom = userSpace;
         console.log("User space: " + userSpace);
 
         // Make a working space for this user if one does not yet exist
         if (!fs.existsSync(userSpace)) {
             // Refresh my local copy
-            gitPull(contentHome, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME,
+            git.pull(contentHome, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME,
                 function(err, oid) {
                     if (err != null) console.log("pull " + contentHome + " error " + err);
 
@@ -259,8 +81,8 @@ handleAPage = function(req, res) {
             readFrom = contentHome; // While I'm waiting for the copy, allow the user to read
         }
 
-        if (changedFiles[req.session.uid] == undefined) {
-            loadChangedFiles(req.session.uid, req.session);
+        if (git.changedFiles[req.session.uid] == undefined) {
+            git.loadChangedFiles(req.session.uid, req.session);
         }
 
     }
@@ -303,19 +125,17 @@ handleAPage = function(req, res) {
         // console.log(writeFilePath + ": POST of " + JSON.stringify(req.body));
         console.log("user: " + req.session.uid);
         if (req.session.uid == undefined) {
-            console.log("unauthorized edit attempt! Test2");
-            //res.status(401).send("login required");
             res.json({
                 notification: "unauthorized edit attempt, log in first!"
             });
             return;
         }
 
-        var chFiles = changedFiles[req.session.uid];
+        var chFiles = git.changedFiles[req.session.uid];
 
         if (!chFiles.has(repoRelativeFilePath)) {
             chFiles.add(repoRelativeFilePath);
-            saveChangedFiles(req.session.uid, chFiles);
+            git.saveChangedFiles(req.session.uid, chFiles);
         }
 
         var dirOfPost = path.dirname(filepath);

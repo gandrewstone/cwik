@@ -12,24 +12,25 @@ var config = require("./config");
 var pageaccess = require("./pageaccess");
 var index = require('./routes/index');
 var users = require('./routes/users');
+var git = require("./cwikgit");
 
 gitrepo = null;
 contentHome = path.resolve("./repo/mirror");
-userForkRoot = path.resolve("./repo");
-var git = require("nodegit");
+var nodegit = require("nodegit");
 
 var app = express();
-app.use(compression())
+app.use(compression());
 
 console.log("repo clone: " + config.REPO_URL);
-git.Clone(config.REPO_URL, contentHome).then(function(repo) {
+nodegit.Clone(config.REPO_URL, contentHome).then(function(repo) {
     gitrepo = repo;
     console.log("repo cloned");
 }, function(error) {
     console.log("repo clone error" + error);
 })
 
-refreshRepoByDir(contentHome)
+git.refreshRepoByDir(contentHome, config.UPSTREAM_REPO_NAME);
+git.repoBranchByDir(contentHome, config.UPSTREAM_REPO_NAME).then(r => console.log("branch " + r));
 
 sessionStore = new memoryStore({
     checkPeriod: 86400000 // prune expired entries every 24hrs

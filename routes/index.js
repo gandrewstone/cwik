@@ -1,4 +1,6 @@
 var auth = require("../auth.js");
+var git = require("../cwikgit.js");
+var config = require("../config.js");
 var express = require('express');
 var router = express.Router();
 var users = require('../knownusers.json')["KnownUsers"]
@@ -31,7 +33,7 @@ router.get('/_commit_', function(req, res, next) {
         return;
     }
     console.log("commit to repo");
-    commitEdits(req, res); // sets res to a json response detailing whether the commit was successful
+    git.commitEdits(req, res, config.UPSTREAM_REPO_NAME); // sets res to a json response detailing whether the commit was successful
 });
 
 router.get('/_login_/auto', function(req, res, next) {
@@ -72,7 +74,7 @@ router.get('/_login_/auto', function(req, res, next) {
                             console.log("error?:" + JSON.stringify(err));
                         });
                     }
-                    refreshRepo(req.query.addr);
+                    git.refreshRepo(req.query.addr, config.UPSTREAM_REPO_NAME);
                     console.log("login accepted");
                     res.status(200).send("login accepted");
                     return;

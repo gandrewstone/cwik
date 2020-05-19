@@ -124,3 +124,8 @@ function notification(json) {
         document.querySelector('center.notifyText').innerText = "";
     document.querySelector('div.notification').visibility = "hidden";
 }
+
+
+function logout() {
+    window.location.href = '/_logout_';
+}
