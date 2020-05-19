@@ -59,24 +59,24 @@ push = function(repo, upstreamRepoName) {
         var p1 = git.Remote.lookup(repo, upstreamRepoName);
         var p2 = repo.getCurrentBranch();
 
-        Promise.all([p1,p2]).then(results => {
-            var remote = results[0];
-            var branch = results[1];
-            console.log("push");
-            remote.push(branch + ":" + branch, {
-                callbacks: {
-                    credentials: ccred()
-                }
-            }).then(resolve,reject).catch(err => {
-                console.error("push catch error ", err);
-                reject(err);
-            });
-        },
-                                  failure => {
-                                      console.log("remote create failed" + failure);
-                            reject(failure);
-                        }
-                    );
+        Promise.all([p1, p2]).then(results => {
+                var remote = results[0];
+                var branch = results[1];
+                console.log("push");
+                remote.push(branch + ":" + branch, {
+                    callbacks: {
+                        credentials: ccred()
+                    }
+                }).then(resolve, reject).catch(err => {
+                    console.error("push catch error ", err);
+                    reject(err);
+                });
+            },
+            failure => {
+                console.log("remote create failed" + failure);
+                reject(failure);
+            }
+        );
     });
 }
 
@@ -104,27 +104,27 @@ commitEdits = function(req, res, upstreamRepoName, comment) {
                     changedFiles[uid].clear();
                     saveChangedFiles(uid, changedFiles[uid]);
                     push(repo, upstreamRepoName).then(function(number) {
-                                    console.log("push completed. returned " + number);
-                                    res.json({
-                                        notification: "commit and push completed"
-                                    });
-                                    refreshRepoEveryone();
-                                },
-                                function(failure) {
-                                    console.log("push failed " + failure.message);
-                                    res.json({
-                                        notification: "push failed " + failure.message
-                                    });
-                                });
+                            console.log("push completed. returned " + number);
+                            res.json({
+                                notification: "commit and push completed"
+                            });
+                            refreshRepoEveryone();
                         },
                         function(failure) {
-                            console.log("remote create failed" + failure);
-                        }
-                    );
+                            console.log("push failed " + failure.message);
+                            res.json({
+                                notification: "push failed " + failure.message
+                            });
+                        });
                 },
                 function(failure) {
-                    console.log("failed" + failure);
-                });
+                    console.log("remote create failed" + failure);
+                }
+            );
+        },
+        function(failure) {
+            console.log("failed" + failure);
+        });
 }
 
 

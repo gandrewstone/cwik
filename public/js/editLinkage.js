@@ -67,11 +67,11 @@ function processFetchedMd(text) {
 }
 
 function timedXformations() {
-            // Give time for innerHTML to be rendered into DOM
-            setTimeout(xformMermaids, 50);
-            setTimeout(xformKatex, 50);
-            setTimeout(xformMermaids, 200);
-            setTimeout(xformKatex, 200);
+    // Give time for innerHTML to be rendered into DOM
+    setTimeout(xformMermaids, 50);
+    setTimeout(xformKatex, 50);
+    setTimeout(xformMermaids, 200);
+    setTimeout(xformKatex, 200);
 }
 
 /* transform katex-style markup into html math */
