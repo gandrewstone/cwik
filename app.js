@@ -1,3 +1,4 @@
+var compression = require('compression')
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -18,6 +19,7 @@ userForkRoot = path.resolve("./repo");
 var git = require("nodegit");
 
 var app = express();
+app.use(compression())
 
 console.log("repo clone: " + config.REPO_URL);
 git.Clone(config.REPO_URL, contentHome).then(function(repo) {

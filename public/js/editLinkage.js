@@ -16,11 +16,7 @@ function processFetchedMd_old(text) {
         se.on('fileChange', (file) => {
             console.log("FILE CHANGE");
             document.querySelector('.wikicontent').innerHTML = file.content.html;
-            // Give time for innerHTML to be rendered into DOM
-            setTimeout(xformMermaids, 50);
-            setTimeout(xformKatex, 50);
-            setTimeout(xformMermaids, 200);
-            setTimeout(xformKatex, 200);
+            timedXformations();
             delete se;
             resolve(file.content.html);
         });
@@ -61,11 +57,7 @@ function processFetchedMd(text) {
             console.log("render complete");
             resolve(file.content.html);
             document.querySelector('.wikicontent').innerHTML = file.content.html;
-            // Give time for innerHTML to be rendered into DOM
-            setTimeout(xformMermaids, 50);
-            setTimeout(xformKatex, 50);
-            setTimeout(xformMermaids, 200);
-            setTimeout(xformKatex, 200);
+            timedXformations();
             //console.log(JSON.stringify(sedit));
             sedit.off('fileChange', hdlr);
         }
@@ -74,6 +66,13 @@ function processFetchedMd(text) {
     });
 }
 
+function timedXformations() {
+            // Give time for innerHTML to be rendered into DOM
+            setTimeout(xformMermaids, 50);
+            setTimeout(xformKatex, 50);
+            setTimeout(xformMermaids, 200);
+            setTimeout(xformKatex, 200);
+}
 
 /* transform katex-style markup into html math */
 function xformKatex() {
@@ -81,7 +80,8 @@ function xformKatex() {
     var i = 0;
     for (i = 0; i < katexes.length; i++) {
         var text = katexes[i].firstChild.data;
-        katex.render(text, katexes[i], {
+        console.log("inline: " + text);
+        if (typeof text !== "undefined") katex.render(text, katexes[i], {
             throwOnError: false
         });
     }
@@ -90,7 +90,8 @@ function xformKatex() {
     var i = 0;
     for (i = 0; i < katexes.length; i++) {
         var text = katexes[i].firstChild.data;
-        katex.render(text, katexes[i], {
+        if (typeof text === "undefined") console.log(katexes[i]);
+        if (typeof text !== "undefined") katex.render(text, katexes[i], {
             throwOnError: false
         });
     }
@@ -178,8 +179,7 @@ function runeditor(url, domElem) {
 
     stackedit.on('close', (file) => {
         document.querySelector(".wikicontent").innerHTML = html;
-        setTimeout(xformMermaids, 100);
-        setTimeout(xformKatex, 100);
+        timedXformations();
         // console.log(domElem.value);
         uploadEdit(url, domElem.value);
     });
@@ -219,10 +219,7 @@ function editWithTemplate(tmplName) {
 
         stackedit.on('close', (file) => {
             document.querySelector(".wikicontent").innerHTML = html;
-            setTimeout(xformMermaids, 10);
-            setTimeout(xformKatex, 10);
-            setTimeout(xformMermaids, 200);
-            setTimeout(xformKatex, 200);
+            timedXformations();
             uploadEdit(url, domElem.value);
         });
 
