@@ -22,7 +22,7 @@ router.get('/', function(req, res, next) {
 router.get('/_logout_', function(req, res, next) {
     req.session.challenge = undefined;
     req.session.uid = undefined;
-    req.redirect("/");
+    res.redirect("/");
 });
 
 router.get('/_commit_', function(req, res, next) {

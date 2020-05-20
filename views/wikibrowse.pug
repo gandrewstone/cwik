@@ -25,11 +25,14 @@ block notification
 
 block toolBar
   div.editBar
-    <span class="horizMenu" onclick="runeditor(window.location.href, document.querySelector('.cwikeditor'))">edit</span>
-    |  | 
-    <span class="horizMenu" onclick="voting(window.location.href)">voting</span>
-    |  | 
-    <span class="horizMenu" onclick="discussion(window.location.href)">talking</span>
+    if user && user.loggedIn
+      <span class="horizMenu" onclick="runeditor(window.location.href, document.querySelector('.cwikeditor'))">edit</span>
+
+    //- unimplemented features
+        |  | 
+        <span class="horizMenu" onclick="voting(window.location.href)">voting</span>
+        |  | 
+        <span class="horizMenu" onclick="discussion(window.location.href)">talking</span>
 
 block endScript
   script(src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js", integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ", crossorigin="anonymous")

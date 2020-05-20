@@ -42,16 +42,7 @@ block wikipage
     qr.addData("!{QRsignCode}");
     qr.make();
     document.getElementById('QRcode').innerHTML = qr.createImgTag();
-
-    var intervalID = setInterval(function() {
-      fetch("/_login_/check").then(response => {
-      console.log(response);
-      if (response.status == 200)
-      {
-        window.location.href = "/";
-      }
-      });
-      }, 5000);
+    loginPolling();
 
 block toolBar
   div.editBar

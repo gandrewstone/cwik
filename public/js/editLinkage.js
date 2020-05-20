@@ -51,10 +51,10 @@ function processFetchedMd(text) {
             console.log(seEditor);
             element.innerHTML = text;
         }
-        console.log("render");
+        // console.log("render");
 
         var hdlr = function(file) {
-            console.log("render complete");
+            // console.log("render complete");
             resolve(file.content.html);
             document.querySelector('.wikicontent').innerHTML = file.content.html;
             timedXformations();
@@ -89,7 +89,7 @@ function xformKatex() {
     var i = 0;
     for (i = 0; i < katexes.length; i++) {
         var text = katexes[i].firstChild.data;
-        if (typeof text === "undefined") console.log(katexes[i]);
+        // if (typeof text === "undefined") console.log(katexes[i]);
         if (typeof text !== "undefined") katex.render(text, katexes[i], {
             throwOnError: false
         });
@@ -122,23 +122,9 @@ function xformMermaids() {
 }
 
 
-function logout() {
-    fetch("/_logout_").then(function(data) {
-        window.location.reload(false);
-    });
-}
-
-function login() {
-    window.location.href = "/_login_";
-}
-
-function commitEdits() {
-    fetch("/_commit_").then(response => response.json().then(notification));
-}
-
 
 function uploadEdit(url, text) {
-    console.log("upload Edit to: " + url);
+    // console.log("upload Edit to: " + url);
     fetch(url, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, cors, *same-origin
@@ -164,19 +150,19 @@ function handleEditorResponse(se, url, domElem) {
     });
 
     se.on('close', (file) => {
-        console.log("close");
+        //console.log("close");
         document.querySelector(".wikicontent").innerHTML = html;
         timedXformations();
         uploadEdit(url, domElem.value);
     });
     se.on('ok', (file) => {
-        console.log("OK");
+        //console.log("OK");
         document.querySelector(".wikicontent").innerHTML = html;
         timedXformations();
         uploadEdit(url, domElem.value);
     });
     se.on('abort', (file) => {
-        console.log("abort");
+        //console.log("abort");
         notification({
             notification: ""
         });
@@ -185,7 +171,7 @@ function handleEditorResponse(se, url, domElem) {
 }
 
 function runeditor(url, domElem) {
-    console.log(url);
+    // console.log(url);
     // Open the iframe
     var stackedit = new Stackedit({
         url: STACKEDITOR_URL

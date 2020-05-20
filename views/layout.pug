@@ -20,14 +20,16 @@ html
       img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('home')")
 
     div#userBar
+      //- v also check if user has commit privledges
+      if user && user.loggedIn
+        span.horizMenu(onclick="commitEdits()") commit
+        |  | 
+      //-  |  | 
+           span.horizMenu(onclick="settings()") settings
       if user && user.loggedIn
         span.horizMenu(onclick="logout()") logout
       else
         span.horizMenu(onclick="login()") login
-      |  | 
-      span.horizMenu(onclick="commitEdits()") commit
-      |  | 
-      span.horizMenu(onclick="settings()") settings
     
     div#headerPageTitle
       block header

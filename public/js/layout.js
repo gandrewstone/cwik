@@ -34,6 +34,33 @@ function linkTo(spot) {
     }));
 }
 
+function logout() {
+    fetch("/_logout_").then(function(data) {
+        window.location.reload(false);
+    });
+}
+
+function login() {
+    window.location.href = "/_login_";
+}
+
+function loginPolling() {
+    var intervalID = setInterval(function() {
+        fetch("/_login_/check").then(response => {
+            if (response.status == 200) {
+                window.location.href = "/";
+            }
+            if (response.status != 401) clearInterval(intervalID);
+        });
+    }, 500);
+}
+
+function commitEdits() {
+    notification({
+        notification: "executing commit operation"
+    });
+    fetch("/_commit_").then(response => response.json().then(notification));
+}
 
 function processJsonPage(json) {
     console.log("processJsonPage");
@@ -120,9 +147,13 @@ function notification(json) {
     if (json.notification) {
         document.querySelector('center.notifyText').innerText = json.notification;
         document.querySelector('div.notification').visibility = "visible";
-    } else
+        setTimeout(function() {
+            if (document.querySelector('center.notifyText').innerText == json.notification) notification({});
+        }, 5000);
+    } else {
         document.querySelector('center.notifyText').innerText = "";
-    document.querySelector('div.notification').visibility = "hidden";
+        document.querySelector('div.notification').visibility = "hidden";
+    }
 }
 
 
