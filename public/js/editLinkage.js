@@ -80,7 +80,6 @@ function xformKatex() {
     var i = 0;
     for (i = 0; i < katexes.length; i++) {
         var text = katexes[i].firstChild.data;
-        console.log("inline: " + text);
         if (typeof text !== "undefined") katex.render(text, katexes[i], {
             throwOnError: false
         });
@@ -155,6 +154,36 @@ function uploadEdit(url, text) {
         .then(response => response.json().then(notification)); // parses JSON response into native JavaScript objects 
 }
 
+function handleEditorResponse(se, url, domElem) {
+    var html = "";
+
+    // Listen to StackEdit events and apply the changes to the textarea.
+    se.on('fileChange', (file) => {
+        domElem.value = file.content.text;
+        html = file.content.html;
+    });
+
+    se.on('close', (file) => {
+        console.log("close");
+        document.querySelector(".wikicontent").innerHTML = html;
+        timedXformations();
+        uploadEdit(url, domElem.value);
+    });
+    se.on('ok', (file) => {
+        console.log("OK");
+        document.querySelector(".wikicontent").innerHTML = html;
+        timedXformations();
+        uploadEdit(url, domElem.value);
+    });
+    se.on('abort', (file) => {
+        console.log("abort");
+        notification({
+            notification: ""
+        });
+    });
+
+}
+
 function runeditor(url, domElem) {
     console.log(url);
     // Open the iframe
@@ -169,20 +198,7 @@ function runeditor(url, domElem) {
         }
     });
 
-    var html = "";
-
-    // Listen to StackEdit events and apply the changes to the textarea.
-    stackedit.on('fileChange', (file) => {
-        domElem.value = file.content.text;
-        html = file.content.html;
-    });
-
-    stackedit.on('close', (file) => {
-        document.querySelector(".wikicontent").innerHTML = html;
-        timedXformations();
-        // console.log(domElem.value);
-        uploadEdit(url, domElem.value);
-    });
+    handleEditorResponse(stackedit, url, domElem);
 
     return false;
 }
@@ -208,20 +224,8 @@ function editWithTemplate(tmplName) {
                 text: json.rawMarkdown // and the Markdown content.
             }
         });
+        handleEditorResponse(stackedit, url, domElem);
 
-        var html = "";
-
-        // Listen to StackEdit events and apply the changes to the textarea.
-        stackedit.on('fileChange', (file) => {
-            domElem.value = file.content.text;
-            html = file.content.html;
-        });
-
-        stackedit.on('close', (file) => {
-            document.querySelector(".wikicontent").innerHTML = html;
-            timedXformations();
-            uploadEdit(url, domElem.value);
-        });
 
     }));
 }
