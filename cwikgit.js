@@ -2,6 +2,9 @@ var config = require("./config");
 var git = require("nodegit");
 var fs = require('fs');
 
+var EP_SUBMISSIONS = "SUBMIT";
+
+
 /* Provide git ssh credentials -- but only try 5 times then give up (otherwise nodeget goes into an infinite loop */
 function ccred() {
     var nCalls = 0;
@@ -54,6 +57,23 @@ pull = function(repositoryPath, remoteName, branch, cb) {
         }, cb);
 };
 
+
+pullRepo = function(repo, remoteName, branch, cb) {
+    return new Promise(function(resolve, reject) {
+
+        var remoteBranch = remoteName + '/' + branch;
+        repo.fetch(remoteName, {
+                callbacks: {
+                    credentials: ccred()
+                }
+            }).then(function() {
+            console.log("gitPull.fetch ok");
+                repo.mergeBranches(branch, remoteBranch).then(resolve,reject);
+            }, reject);
+    });
+}
+
+
 push = function(repo, upstreamRepoName) {
     return new Promise(function(resolve, reject) {
         var p1 = git.Remote.lookup(repo, upstreamRepoName);
@@ -77,6 +97,38 @@ push = function(repo, upstreamRepoName) {
                 reject(failure);
             }
         );
+    });
+}
+
+branch = function(repo, branchName, upstreamRepoName, create) {
+    return new Promise(function(resolve, reject) {
+        console.log(repo);
+        pullRepo(repo, branchName, upstreamRepoName).then(oid => {
+            console.log("pulled branch " + branchName + "to " + oid);
+            repo.checkoutBranch(branchName).then(resolve, reject);
+        }, err => {
+            console.log("pull Repo error: " + JSON.stringify(err));
+            console.log(typeof err);
+            if (err.errno == git.Error.CODE.ENOTFOUND)  // its ok that the branch does not exist in the remote yet
+            {
+                repo.checkoutBranch(branchName).then(resolve, reject);
+            }
+            else if (create) {
+                repo.getHeadCommit().then(commit => {
+                    repo.createBranch(branchName, commit.id(), false).then(smth => {
+                        pullRepo(repo, branchName, upstreamRepoName).then(oid => {
+                            console.log("pulled branch " + branchName + "to " + oid);
+                            repo.checkoutBranch(branchName).then(resolve, reject);
+                        }, reject);
+                    }
+                        , reject);
+                }, reject);
+            }
+            else {
+                console.log("pullRepo error: " + err);
+                reject(err);
+            }
+        });
     });
 }
 
@@ -173,6 +225,17 @@ repoBranchByDir = function(userSpace) {
     });
 }
 
+repoByUid = function(uid) {
+    let user = uid.split(":")[1];
+    let userSpace = config.USER_FORK_ROOT + "/" + user;
+
+    return new Promise(function(resolve, reject) {
+        git.Repository.open(userSpace).then(resolve, reject);
+        });
+}
+
+
+
 // do a git pull to sync the user's repo with the latest changes
 refreshRepo = function(uid, upstreamRepoName) {
     var user = uid.split(":")[1];
@@ -198,8 +261,8 @@ refreshRepoByDir = function(dir, upstreamRepoName) {
 
 // Load the list of changed files from disk.
 loadChangedFiles = function(uid, sess) {
-    var userSpace = config.USER_FORK_ROOT + "/" + uid.split(":")[1];
-    var filepath = userSpace + "/.changedFiles.lst";
+    let userSpace = config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+    let filepath = userSpace + "/.changedFiles.lst";
     console.log("load edited files from: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
@@ -216,9 +279,9 @@ loadChangedFiles = function(uid, sess) {
 // Save the list of changed files to a file on disk.
 saveChangedFiles = function(uid, changedFiles) {
     console.log("saveChangedFiles " + uid);
-    var userSpace = config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+    let userSpace = config.USER_FORK_ROOT + "/" + uid.split(":")[1];
     console.log("userSpace " + userSpace);
-    var filepath = userSpace + "/.changedFiles.lst";
+    let filepath = userSpace + "/.changedFiles.lst";
     console.log("writing file change list: " + filepath);
     console.log(JSON.stringify(Array.from(changedFiles.keys())));
     fs.writeFile(userSpace + "/.changedFiles.lst", JSON.stringify(Array.from(changedFiles.keys())), (err) => {
@@ -229,6 +292,61 @@ saveChangedFiles = function(uid, changedFiles) {
     });
 }
 
+// Load the list of edit proposals from disk.
+loadEditProposals = function(uid) {
+    let userSpace = (uid == EP_SUBMISSIONS) ? config.MAIN_REPO_DIR : config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+    let filepath = userSpace + "/.editProposals.lst";
+    console.log("load edited files from: " + filepath);
+    fs.readFile(filepath, 'utf8', function(err, data) {
+        if (err) {
+            console.log("file doesn't exist: " + err);
+            editProposals[uid] = new Set();
+            return;
+        }
+        editProposals[uid] = new Set(JSON.parse(data));
+        console.log("edit proposals: " + JSON.stringify(Array.from(editProposals[uid].keys())));
+    });
+}
+
+// Save the list of changed files to a file on disk.
+saveEditProposals = function(uid, editProposals) {
+    console.log("saveEditProposals " + uid);
+    let userSpace = (uid == EP_SUBMISSIONS) ? config.MAIN_REPO_DIR : config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+    console.log("userSpace " + userSpace);
+    let filepath = userSpace + "/.editProposals.lst";
+    console.log("writing file change list: " + filepath);
+    console.log(JSON.stringify(Array.from(changedFiles.keys())));
+    fs.writeFile(userSpace + "/.editProposals.lst", JSON.stringify(Array.from(changedFiles.keys())), (err) => {
+        if (err)
+            console.log("edit proposal write error: " + JSON.stringify(err));
+        else
+            console.log("edit proposals written");
+    });
+}
+
+var diffBranch = function(repo, branchName) {
+    console.log("diffBranch");
+    return new Promise(function(resolve, reject) {
+        console.log("diffBranch promise" + branchName);
+        repo.getBranchCommit(branchName).then(commit => {
+            console.log("gbc ok");
+            console.log("head of " + branchName);
+            console.log(" is " + commit.id().tostrS());
+            console.log(" msg: " + commit.message());
+            diffCommit(repo, commit).then(resolve,reject);
+        }, reject);
+    });
+};
+
+var diffCommit = function(repo, commit) {
+    return new Promise(function(resolve, reject) {
+        commit.getTree().then(tree => {
+            git.Diff.treeToWorkdir(repo, tree).then(diff => {
+                return resolve(diff);
+            }, reject);
+        }, reject);
+    })
+};
 
 exports.pull = pull;
 exports.commitEdits = commitEdits;
@@ -242,3 +360,8 @@ exports.saveChangedFiles = saveChangedFiles;
 exports.repoBranchNameByUid = repoBranchNameByUid;
 exports.repoBranchByUid = repoBranchByUid;
 exports.repoBranchByDir = repoBranchByDir;
+exports.repoByUid = repoByUid;
+exports.branch = branch;
+exports.EP_SUBMISSIONS = EP_SUBMISSIONS;
+exports.diffBranch = diffBranch;
+exports.diffCommit = diffCommit;

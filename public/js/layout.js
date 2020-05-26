@@ -62,15 +62,29 @@ function commitEdits() {
     fetch("/_commit_").then(response => response.json().then(notification));
 }
 
+function updatePage(json) {
+    document.getElementById("historyI").innerHTML = json.history;
+    document.getElementById("structureI").innerHTML = json.structure;
+    document.getElementById("relatedI").innerHTML = json.related;
+    document.getElementById("pageTitle").innerHTML = json.title;
+
+    // undefined means leave as is, "" means no edit proposal
+    if (json.user.editProposal !== undefined)
+    {
+    let epInput = document.getElementById("editProposal");
+    if (epInput)
+    {
+        console.log("EP: " + json.user.editProposal);
+        epInput.value = json.user.editProposal;
+    }
+    }
+}
+
 function processJsonPage(json) {
     console.log("processJsonPage");
     if (typeof json.html !== "undefined") {
         document.querySelector('.wikicontent').innerHTML = json.html;
-
-        document.getElementById("historyI").innerHTML = json.history;
-        document.getElementById("structureI").innerHTML = json.structure;
-        document.getElementById("relatedI").innerHTML = json.related;
-        document.getElementById("pageTitle").innerHTML = json.title;
+        updatePage(json);
         sidebarGrid.refreshItems().layout();
         window.scrollTo({
             top: 0
@@ -78,10 +92,7 @@ function processJsonPage(json) {
         notification(json);
     } else {
         processFetchedMd(json.rawMarkdown).then(html => {
-            document.getElementById("historyI").innerHTML = json.history;
-            document.getElementById("structureI").innerHTML = json.structure;
-            document.getElementById("relatedI").innerHTML = json.related;
-            document.getElementById("pageTitle").innerHTML = json.title;
+            updatePage(json);
             sidebarGrid.refreshItems().layout();
             window.scrollTo({
                 top: 0
@@ -156,6 +167,78 @@ function notification(json) {
     }
 }
 
+function openEditProposal() {
+    let epEntry = document.getElementById("editProposal");
+    fetch("/_editProposal_/open/" + epEntry.value).then(response => response.json().then(json => {
+        if (json.error == 0) setEditProposalMenuVisibility(epEntry.value);
+        let locNoArgs = window.location.pathname;
+        fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
+            processJsonPage(json);
+        }));
+        notification(json);
+    }));
+}
+
+function closeEditProposal() {
+    let epEntry = document.getElementById("editProposal");
+    // Commit any pending edits first
+    fetch("/_commit_").then(r => r.json().then(j => {
+    // Now close
+    fetch("/_editProposal_/close").then(response => response.json().then(json => {
+        if (json.error == 0) setEditProposalMenuVisibility("");
+        let locNoArgs = window.location.pathname;
+        fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
+            processJsonPage(json);
+        }));
+        console.log("got here");
+        notification(json);
+        epEntry.value = "";
+    }));
+    }));
+}
+
+function submitEditProposal() {
+    let epEntry = document.getElementById("editProposal");
+    // Commit any pending edits first
+    fetch("/_commit_").then(r => r.json().then(j => {
+    // Now close
+    fetch("/_editProposal_/submit").then(response => response.json().then(json => {
+        if (json.error == 0) setEditProposalMenuVisibility("");
+        let locNoArgs = window.location.pathname;
+        fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
+            processJsonPage(json);
+        }));
+        notification(json);
+        epEntry.value = "";
+    }));
+    }));
+}
+
+function diffEditProposal() {
+    let epEntry = document.getElementById("editProposal");
+
+    fetch("/_editProposal_/diff").then(response => response.json().then(json => {
+        processJsonPage(json);
+        notification(json);
+        epEntry.value = "";
+    }));
+}
+
+function setEditProposalMenuVisibility(ep) {
+    if (ep) {
+        document.getElementById("closeEP").hidden=false;
+        document.getElementById("submitEP").hidden=false;
+        //document.getElementById("diffEP").hidden=false;
+        document.getElementById("diffEP").hidden=true;  // for now disable
+        document.getElementById("openEP").hidden=true;
+    }
+    else {
+        document.getElementById("closeEP").hidden=true;
+        document.getElementById("submitEP").hidden=true;
+        document.getElementById("diffEP").hidden=true;
+        document.getElementById("openEP").hidden=false;
+    }
+}
 
 function logout() {
     window.location.href = '/_logout_';

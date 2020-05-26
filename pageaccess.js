@@ -50,20 +50,8 @@ function BadURL(req, res) {
 }
 
 
-// Return a requested page
-handleAPage = function(req, res) {
-    var notification = undefined;
-    var userSpace = "";
-    var readFrom = contentHome;
-    if (req.session.uid == undefined) {
-        // For now, require login
-        // return res.redirect(307,"/_login_")
-    } else {
-        userSpace = config.USER_FORK_ROOT + "/" + req.session.uid.split(":")[1];
-        readFrom = userSpace;
-        console.log("User space: " + userSpace);
-
-        // Make a working space for this user if one does not yet exist
+function ensureUserRepoCreated(userSpace, contentHome) {
+    // Make a working space for this user if one does not yet exist
         if (!fs.existsSync(userSpace)) {
             // Refresh my local copy
             git.pull(contentHome, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME,
@@ -73,22 +61,64 @@ handleAPage = function(req, res) {
                     // then copy it to the user's space
                     ncp(contentHome, userSpace, function(err) {
                         if (err) {
-                            return console.error("ncp copy error: " + err);
+                            console.error("ncp copy error: " + err);
+                            return contentHome;
                         }
                         console.log("user scratch space created!");
                     });
                 });
-            readFrom = contentHome; // While I'm waiting for the copy, allow the user to read
+            return contentHome; // While I'm waiting for the copy, allow the user to read
         }
+    return userSpace;
+}
+
+
+// Return a requested page
+handleAPage = function(req, res) {
+    let notification = undefined;
+    let userSpace = "";
+    let readFrom = contentHome;
+    let user = {};
+    let jReply = {user:user, notification:notification};
+
+    if (req.session.uid == undefined) {
+        req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
+    }
+    
+    if (req.session.uid == undefined) {
+        // require login to view:
+        // return res.redirect(307,"/_login_")
+        user['loggedIn'] = false;
+        user['editProposal'] = undefined;
+        
+    } else {
+        userSpace = config.USER_FORK_ROOT + "/" + req.session.uid.split(":")[1];
+        console.log("User space: " + userSpace);
+
+        readFrom = ensureUserRepoCreated(userSpace, contentHome);
 
         if (git.changedFiles[req.session.uid] == undefined) {
             git.loadChangedFiles(req.session.uid, req.session);
         }
 
+        if (req.session.editProposal == undefined)
+        {
+            git.repoBranchNameByUid(req.session.uid).then(br => {
+                if (br != config. REPO_BRANCH_NAME) req.session.editProposal = br;
+                else req.session.editProposal = "";
+                user['editProposal'] = req.session.editProposal;  // Probably won't be updated in time for this req...
+                        });
+        }
+        else
+        {
+            console.log("session EP is: " + req.session.editProposal);
+        }
+
+        user['loggedIn'] = true;
+        user['editProposal'] = req.session.editProposal;
     }
 
     console.log("handle a page: " + req.path);
-    console.log("url: " + req.baseUrl);
     console.log("hostname: " + req.hostname);
     console.log("originalUrl: " + req.originalUrl);
 
@@ -98,8 +128,6 @@ handleAPage = function(req, res) {
     }
 
     urlPath = req.path;
-    console.log(urlPath);
-    console.log(decodeURI(urlPath));
     decodedPath = decodeURI(urlPath);
     decodedPath = decodedPath.replace(" ", "__"); // replace spaces with double underscore
     decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
@@ -121,9 +149,7 @@ handleAPage = function(req, res) {
         }
 
         var writeFilePath = userSpace + repoRelativeFilePath;
-        // requires app.use(bodyParser.text({type: 'text/plain'}));
-        // console.log(writeFilePath + ": POST of " + JSON.stringify(req.body));
-        console.log("user: " + req.session.uid);
+
         if (req.session.uid == undefined) {
             res.json({
                 notification: "unauthorized edit attempt, log in first!"
@@ -158,75 +184,48 @@ handleAPage = function(req, res) {
         return;
     }
 
+    if (!req.query.raw) {
+    jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
+    jReply['history'] = updateHistory(req, urlPath);
+    jReply['related'] = "";
+    jReply['title'] = "";
+    jReply['structure'] = "";
+    jReply['zzwikiPage'] = "";
+    jReply['thisPage'] = urlPath;
+    jReply['rawMarkdown'] = "";
+    }
+    
     console.log("read file: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
             data = "";
             notification = "nonexistent page, click 'edit' to create";
-            var user = {
-                loggedIn: (req.session.uid != undefined) ? true : false
-            };
 
             if (req.query.json) {
                 console.log("trying " + readFrom + "/cwikTemplate.html");
                 return fs.readFile(readFrom + "/cwikTemplate.html", 'utf8', function(err, htmlTemplateData) {
                     if (err) {
                         console.log("template missing");
-                        return res.json({
-                            zzwikiPage: "",
-                            structure: "",
-                            title: "",
-                            related: "",
-                            thisPage: urlPath,
-                            rawMarkdown: "",
-                            history: updateHistory(req, urlPath),
-                            user: user,
-                            notification: notification,
-                            STACKEDITOR_URL: config.STACKEDIT_URL
-                        });
+                        return res.json(jReply);
                     }
-                    console.log("template exists");
-                    return res.json({
-                        html: htmlTemplateData,
-                        zzwikiPage: "",
-                        structure: "",
-                        title: "",
-                        related: "",
-                        thisPage: urlPath,
-                        rawMarkdown: "",
-                        history: updateHistory(req, urlPath),
-                        user: user,
-                        notification: notification,
-                        STACKEDITOR_URL: config.STACKEDIT_URL
-                    });
+                    jReply['html'] = htmlTemplateData;
+                    return res.json(jReply);
 
                 });
             } else
-                return res.render('wikibrowse', {
-                    zzwikiPage: "",
-                    structure: '',
-                    title: "",
-                    related: "",
-                    thisPage: urlPath,
-                    rawMarkdown: "",
-                    history: updateHistory(req, urlPath),
-                    user: user,
-                    notification: notification,
-                    STACKEDITOR_URL: config.STACKEDIT_URL
-                });
+                return res.render('wikibrowse', jReply);
         }
 
         if (req.query.raw) {
-            //console.log("RAW:" + data);
             res.send(data);
             return;
         }
 
-        var doc = data;
+        let doc = data;
 
-        var htmlFile = filepath.slice(0, filepath.length - 2) + "html";
+        let htmlFile = filepath.slice(0, filepath.length - 2) + "html";
         // console.log("HTML file is: " + htmlFile);
-        var regenerate = false;
+        let regenerate = false;
         try {
             var htmlFileStats = fs.statSync(htmlFile);
             var mdFileStats = fs.statSync(filepath);
@@ -238,21 +237,21 @@ handleAPage = function(req, res) {
 
         if (regenerate) {
             // Convert markdown to html
-            console.log("regenerate " + htmlFile);
+            // console.log("regenerate " + htmlFile);
             mdToHtml(doc).then(html => {
                 fs.writeFile(htmlFile, html, function(err) {
                     console.log("write error: " + err);
                 })
-                wikiPageReplyWithMdHtml(req, res, doc, html, urlPath);
+                wikiPageReplyWithMdHtml(req, res, doc, html, jReply);
             });
         } else {
             fs.readFile(htmlFile, 'utf8', function(err, html) {
                 if (err) {
                     mdToHtml(doc).then(html => {
-                        wikiPageReplyWithMdHtml(req, res, doc, html, urlPath);
+                        wikiPageReplyWithMdHtml(req, res, doc, html, jReply);
                     });
                 } else {
-                    wikiPageReplyWithMdHtml(req, res, doc, html, urlPath);
+                    wikiPageReplyWithMdHtml(req, res, doc, html, jReply);
                 }
             });
         }
@@ -320,10 +319,8 @@ function updateHistory(req, urlPath) {
     return historyHtml;
 }
 
-function wikiPageReplyWithMdHtml(req, res, md, html, urlPath) {
-    var historyHtml = updateHistory(req, urlPath);
+function wikiPageReplyWithMdHtml(req, res, md, html, jReply) {
     var meta = null;
-
     var headings = "";
     var error = "";
     appendHeading = function(tagName, text, attribs) {
@@ -337,7 +334,7 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath) {
             if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
             if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
                 try {
-                    console.log("parsing: " + frame.text);
+                    // console.log("parsing: " + frame.text);
                     meta = JSON.parse(frame.text);
                 } catch (err) {
                     error += err.message;
@@ -352,42 +349,22 @@ function wikiPageReplyWithMdHtml(req, res, md, html, urlPath) {
     title = ""
     related = ""
     if (meta) {
-        console.log("meta " + JSON.stringify(meta));
+        // console.log("meta " + JSON.stringify(meta));
         if (meta.title) title = meta.title;
         if (meta.related) {
-            console.log("related ");
+            // console.log("related ");
             related = meta.related.map(t => LinkToLinkify(t, "rel")).join("\n");
         }
     }
 
-    user = {
-        loggedIn: (req.session.uid != undefined) ? true : false
-    };
+    jReply['title']=title;
+    jReply['related']=related;
+    jReply['structure']=headings;
+    jReply['zzwikiPage']="loading...";
+    jReply['rawMarkdown']=md;
 
     if (req.query.json)
-        res.json({
-            zzwikiPage: "loading...",
-            structure: headings,
-            title: title,
-            related: related,
-            thisPage: urlPath,
-            rawMarkdown: md,
-            history: historyHtml,
-            user: user,
-            notification: "",
-            STACKEDITOR_URL: config.STACKEDIT_URL
-        })
+        res.json(jReply);
     else
-        res.render('wikibrowse', {
-            zzwikiPage: "loading...",
-            structure: headings,
-            title: title,
-            related: related,
-            thisPage: urlPath,
-            rawMarkdown: md,
-            history: historyHtml,
-            user: user,
-            notification: "",
-            STACKEDITOR_URL: config.STACKEDIT_URL
-        });
+        res.render('wikibrowse', jReply);
 }

@@ -15,4 +15,5 @@ exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 
 exports.DEFAULT_COMMIT_MSG = "wiki commit";
 
+exports.MAIN_REPO_DIR = path.resolve("./repo/mirror");
 exports.USER_FORK_ROOT = path.resolve("./repo");

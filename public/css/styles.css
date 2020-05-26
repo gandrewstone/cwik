@@ -231,6 +231,8 @@ h1, h2, h3, h4, h5
 
 .notification {
     font-size: 140%;
+    position: fixed;
+    width: 100%;
     background-color: orange;
     z-index: 10;
     visibility: visible;
@@ -279,3 +281,10 @@ td {
 
 tr:nth-child(even) td { background: #F1F1F1; }
 tr:nth-child(odd) td { background: #FEFEFE; }  
+
+#editProposal {
+    background: #309030;
+    color: #ffffff;
+    height: 20px;
+    width: 20ch;
+}

@@ -22,8 +22,18 @@ html
     div#userBar
       //- v also check if user has commit privledges
       if user && user.loggedIn
+        input#editProposal(type="text" placeholder="edit proposal" value=user.editProposal)
+        span.horizMenu#closeEP(onclick="closeEditProposal()") close
+        span.horizMenu#openEP(onclick="openEditProposal()") open
+        |  | 
+        span.horizMenu#diffEP(onclick="diffEditProposal()") diff
+        |  | 
+      if user && user.loggedIn
         span.horizMenu(onclick="commitEdits()") commit
         |  | 
+        span.horizMenu#submitEP(onclick="submitEditProposal()") submit
+        |  | 
+
       //-  |  | 
            span.horizMenu(onclick="settings()") settings
       if user && user.loggedIn
@@ -61,11 +71,15 @@ html
               block wikipage
 
     textarea.cwikeditor
-      
+
+
+    if user && user.loggedIn
+      script.
+        setEditProposalMenuVisibility("!{user.editProposal}");
     script.
       var sidebarGrid = new Muuri('.sidebargrid', {
         dragEnabled: true
       });
- 
+       
     block endScript
           
