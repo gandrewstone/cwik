@@ -16,7 +16,7 @@ function processFetchedMd_old(text) {
         se.on('fileChange', (file) => {
             console.log("FILE CHANGE");
             document.querySelector('.wikicontent').innerHTML = file.content.html;
-            timedXformations();
+            // timedXformations();
             delete se;
             resolve(file.content.html);
         });
@@ -27,6 +27,19 @@ function processFetchedMd_old(text) {
 var sedit = new Stackedit({
     url: STACKEDITOR_URL
 });
+
+var contentRenderCallback = undefined;
+
+var wikiContentObserver = new MutationObserver(function(change, observer) {
+    console.log("wikicontent changed");
+    xformMermaids();
+    xformKatex();
+    if (contentRenderCallback) contentRenderCallback();
+});
+
+var wikicontentDom = document.querySelector('.wikicontent');
+console.log(wikicontentDom);
+wikiContentObserver.observe(wikicontentDom, { childList: true, subtree: true, characterData: true });
 
 function processFetchedMd(text) {
     return new Promise(function(resolve, reject) {
@@ -57,7 +70,7 @@ function processFetchedMd(text) {
             // console.log("render complete");
             resolve(file.content.html);
             document.querySelector('.wikicontent').innerHTML = file.content.html;
-            timedXformations();
+            // timedXformations();
             //console.log(JSON.stringify(sedit));
             sedit.off('fileChange', hdlr);
         }
@@ -101,6 +114,8 @@ function xformKatex() {
  */
 var mermaidCount = 0; // Uniquify each newly created svg tag
 function xformMermaids() {
+    while(true)
+    {
     var mermaids = document.getElementsByClassName('prism language-mermaid');
     if (mermaids.length == 0) return;
     var i = 0;
@@ -117,8 +132,8 @@ function xformMermaids() {
         mm.parentNode.outerHTML = "<div>" + svgGraph + "</div>";
     });
 
-    mermaidCount += 1;
-    xformMermaids();
+        mermaidCount += 1;
+    }
 }
 
 
@@ -152,13 +167,13 @@ function handleEditorResponse(se, url, domElem) {
     se.on('close', (file) => {
         //console.log("close");
         document.querySelector(".wikicontent").innerHTML = html;
-        timedXformations();
+        // timedXformations();
         uploadEdit(url, domElem.value);
     });
     se.on('ok', (file) => {
         //console.log("OK");
         document.querySelector(".wikicontent").innerHTML = html;
-        timedXformations();
+        // timedXformations();
         uploadEdit(url, domElem.value);
     });
     se.on('abort', (file) => {

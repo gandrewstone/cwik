@@ -1,6 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 var pagedown = require("pagedown");
+var puppeteer = require('puppeteer');
+
 var sanitizer = require("sanitize-html");
 var path = require("path");
 var git = require("./cwikgit");
@@ -49,7 +51,6 @@ function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
 }
 
-
 function ensureUserRepoCreated(userSpace, contentHome) {
     // Make a working space for this user if one does not yet exist
         if (!fs.existsSync(userSpace)) {
@@ -84,13 +85,13 @@ handleAPage = function(req, res) {
     if (req.session.uid == undefined) {
         req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
     }
-    
+
     if (req.session.uid == undefined) {
         // require login to view:
         // return res.redirect(307,"/_login_")
         user['loggedIn'] = false;
         user['editProposal'] = undefined;
-        
+
     } else {
         userSpace = config.USER_FORK_ROOT + "/" + req.session.uid.split(":")[1];
         console.log("User space: " + userSpace);
@@ -190,16 +191,17 @@ handleAPage = function(req, res) {
     jReply['related'] = "";
     jReply['title'] = "";
     jReply['structure'] = "";
-    jReply['zzwikiPage'] = "";
+    jReply['wikiPage'] = "";
     jReply['thisPage'] = urlPath;
     jReply['rawMarkdown'] = "";
     }
-    
+
     console.log("read file: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
+            console.log("no page");
             data = "";
-            notification = "nonexistent page, click 'edit' to create";
+            jReply['notification'] = "nonexistent page, click 'edit' to create";
 
             if (req.query.json) {
                 console.log("trying " + readFrom + "/cwikTemplate.html");
@@ -208,12 +210,19 @@ handleAPage = function(req, res) {
                         console.log("template missing");
                         return res.json(jReply);
                     }
-                    jReply['html'] = htmlTemplateData;
+                    jReply['html'] = htmlTemplateData;  // There's some override html
+                    jReply['wikiPage'] = undefined;     // but no html corresponding to this page
                     return res.json(jReply);
 
                 });
             } else
-                return res.render('wikibrowse', jReply);
+            {
+                console.log("wiki browse no page");
+                return fs.readFile(readFrom + "/cwikTemplate.html", 'utf8', function(err, htmlTemplateData) {
+                    jReply['wikiPage'] = htmlTemplateData;  // place override html directly into the page
+                    return res.render('wikibrowse', jReply);
+                });
+            }
         }
 
         if (req.query.raw) {
@@ -258,7 +267,7 @@ handleAPage = function(req, res) {
     });
 }
 
-function mdToHtml(md) {
+function mdToHtmlPagedown(md) {
     return new Promise(function(resolve, reject) {
         var cvt = new pagedown.Converter();
         var html = cvt.makeHtml(md);
@@ -266,27 +275,29 @@ function mdToHtml(md) {
     });
 }
 
-/*
-function mdToHtml(md) {
-    return new Promise(function (resolve, reject) {
-        //var cvt = new pagedown.Converter();
-        //var html = cvt.makeHtml(md);
-        console.log(typeof stackedit);
-        var se = new stackedit({ url: config.STACKEDIT_URL});
-        se.openFile({
-        name: "",
-        content: {
-            text: md
-        }
-    }, true); // true == silent mode
-    se.on('fileChange', (file) => {
-        console.log("md converted");
-        resolve(html);
-    });
-    });
 
+
+const PuppeteerDebug = false;
+
+// Perfect conversion of md to html is a client-side process because some libraries are not available on the server side.
+// For this reason we must create a client on the server side, and drive it to execute the conversion.
+var browser = undefined;
+puppeteer.launch({headless: !PuppeteerDebug, defaultViewport: { width:900, height:1024 }}).then(b => { browser = b; });
+
+async function mdToHtml(md) {
+    const page = await browser.newPage();
+    await page.goto(config.MY_URL + "/_cvt_");
+    
+    await page.evaluate(function(md) {
+        contentRenderCallback = function() { console.log("content rendered") };
+        return processFetchedMd(md);
+    }, md);
+    //await page.waitFor(250);  // Do I need to wait for the katex, mermaid, etc to render or is that done synchronously?  If so, can wait for custom event: https://github.com/puppeteer/puppeteer/blob/master/examples/custom-event.js
+    const contentHtml = await page.evaluate("document.querySelector('.wikicontent').innerHTML");
+    if (!PuppeteerDebug) page.close();
+    return(contentHtml);
 }
-*/
+
 
 
 function updateHistory(req, urlPath) {
@@ -328,7 +339,9 @@ function wikiPageReplyWithMdHtml(req, res, md, html, jReply) {
         headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n"
     };
     // console.log("HEADINGS: " + headings)
-    html = sanitizer(html, {
+
+    // I don't care about the xformedhtml. I just care about TOC generation
+    xformedhtml = sanitizer(html, {
         allowedTags: sanitizer.defaults.allowedTags.concat(['iframe', 'img', 'h1', 'h2']),
         exclusiveFilter: function(frame) {
             if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
@@ -360,8 +373,8 @@ function wikiPageReplyWithMdHtml(req, res, md, html, jReply) {
     jReply['title']=title;
     jReply['related']=related;
     jReply['structure']=headings;
-    jReply['zzwikiPage']="loading...";
-    jReply['rawMarkdown']=md;
+    jReply['wikiPage'] = html;
+    jReply['rawMarkdown'] = md;
 
     if (req.query.json)
         res.json(jReply);

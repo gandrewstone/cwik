@@ -17,11 +17,11 @@ block structure
   div#structureI !{ structure }
 
 block wikipage
-  div.wikicontent !{ zzwikiPage }
+  div.wikicontent !{ wikiPage }
 
 block notification
-  if notificationData
-     | !{ notificationData }
+  if notification
+     | !{ notification }
 
 block toolBar
   div.editBar
@@ -46,5 +46,13 @@ block endScript
   script(src="/_static_/js/se.js")
   script(src="/_static_/js/editLinkage.js")
   script(type="module").
-    var mdData = !{JSON.stringify(rawMarkdown)};
-    processFetchedMd(mdData);
+    let ctnt = document.querySelector(".wikicontent").innerHTML;
+    var origMdData = !{JSON.stringify(rawMarkdown)};
+    if ((ctnt == "") || (ctnt == "loading..."))
+    {
+        processFetchedMd(origMdData);
+    }
+    else
+    {
+        document.querySelector('textarea.cwikeditor').value = origMdData;
+    }

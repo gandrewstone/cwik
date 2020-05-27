@@ -82,7 +82,15 @@ function updatePage(json) {
 
 function processJsonPage(json) {
     console.log("processJsonPage");
-    if (typeof json.html !== "undefined") {
+    if (typeof json.wikiPage !== "undefined") {
+        document.querySelector('.wikicontent').innerHTML = json.wikiPage;
+        updatePage(json);
+        sidebarGrid.refreshItems().layout();
+        window.scrollTo({
+            top: 0
+        });
+        notification(json);
+    } else if (typeof json.html !== "undefined") {
         document.querySelector('.wikicontent').innerHTML = json.html;
         updatePage(json);
         sidebarGrid.refreshItems().layout();
@@ -153,6 +161,7 @@ function setupLayout(document, window) {
     // window.addEventListener("pageshow", e => backOptimizer(document, window,e));
 }
 
+// Prints out a warning or error in a prominent location.  Json is a dictionary object that may have a "notification" member
 function notification(json) {
     console.log("Notification: " + json.notification);
     if (json.notification) {

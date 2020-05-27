@@ -410,6 +410,16 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
     });
 });
 
+
+router.get('/_cvt_', function(req, res, next) {
+    let jReply = {};
+    jReply['STACKEDIT_URL'] = config.STACKEDIT_URL;
+    jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
+    jReply['wikiPage'] = "";
+    jReply['rawMarkdown'] = "";
+    res.render('cvt', jReply);
+});
+
 router.use(handleAPage);
 
 

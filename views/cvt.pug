@@ -1,0 +1,29 @@
+doctype html
+html
+  head
+    title=title
+    link(rel='icon', type='image/svg+xml', href='/_static_/images/icon.svg')
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&Oswald:wght@500&display=swap")
+    link(rel='stylesheet', href='/_static_/css/styles.css')
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css",integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j",crossorigin="anonymous")
+
+  body
+    script(src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js", integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ", crossorigin="anonymous")
+    script.
+      var STACKEDIT_URL="!{STACKEDIT_URL}";
+      var STACKEDITOR_URL="!{STACKEDIT_URL}";
+    script(src="/_static_/js/mermaid/mermaid.js")
+    script.
+      mermaid.initialize({logLevel:5, startOnLoad:true});
+    script(src="/_static_/js/mathjax/MathJax.js?config=TeX-AMS_HTML", type="text/javascript")
+    script(src="/_static_/js/se.js")
+    div#rawMarkdown
+    div.cwikcontent
+    textarea.cwikeditor
+    div.wikicontent    
+    script(src="/_static_/js/layout.js")
+    script(src="/_static_/js/editLinkage.js")
+    script.
+      setupLayout(document, window);
+
+          
