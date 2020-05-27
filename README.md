@@ -33,6 +33,14 @@ sudo apt-get install git
 
 ### Installation Procedure
 
+These packages are required so that the server can simulate a client to render markdown.  If you have installed a web browser, your linux installation may already have these dependencies.
+```
+sudo apt-get install libxcb-dri3-0
+sudo apt-get install libnss3
+sudo apt-get install libxss-dev
+sudo apt-get install libgbm-dev
+```
+
 Make a separate user:
 ```
 adduser wiki
