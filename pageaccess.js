@@ -82,9 +82,9 @@ handleAPage = function(req, res) {
     let user = {};
     let jReply = {user:user, notification:notification};
 
-    if (req.session.uid == undefined) {
-        req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
-    }
+    //if (req.session.uid == undefined) {
+    //    req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
+    //}
 
     if (req.session.uid == undefined) {
         // require login to view:
