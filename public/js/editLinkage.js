@@ -39,7 +39,11 @@ var wikiContentObserver = new MutationObserver(function(change, observer) {
 
 var wikicontentDom = document.querySelector('.wikicontent');
 console.log(wikicontentDom);
-wikiContentObserver.observe(wikicontentDom, { childList: true, subtree: true, characterData: true });
+wikiContentObserver.observe(wikicontentDom, {
+    childList: true,
+    subtree: true,
+    characterData: true
+});
 
 function processFetchedMd(text) {
     return new Promise(function(resolve, reject) {
@@ -113,23 +117,22 @@ function xformKatex() {
  */
 var mermaidCount = 0; // Uniquify each newly created svg tag
 function xformMermaids() {
-    while(true)
-    {
-    var mermaids = document.getElementsByClassName('prism language-mermaid');
-    if (mermaids.length == 0) return;
-    var i = 0;
-    // skip anything that's already been rendered.
-    for (i = 0;
-        (i < mermaids.length) && (mermaids[i].getAttribute("rendered") != null); i++);
-    if (i == mermaids.length) return;
+    while (true) {
+        var mermaids = document.getElementsByClassName('prism language-mermaid');
+        if (mermaids.length == 0) return;
+        var i = 0;
+        // skip anything that's already been rendered.
+        for (i = 0;
+            (i < mermaids.length) && (mermaids[i].getAttribute("rendered") != null); i++);
+        if (i == mermaids.length) return;
 
-    var mm = mermaids[i];
-    mm.setAttribute("rendered", true);
-    var text = mm.firstChild.data;
-    // console.log(text);
-    mermaid.render('mer' + mermaidCount, text, function(svgGraph) {
-        mm.parentNode.outerHTML = "<div>" + svgGraph + "</div>";
-    });
+        var mm = mermaids[i];
+        mm.setAttribute("rendered", true);
+        var text = mm.firstChild.data;
+        // console.log(text);
+        mermaid.render('mer' + mermaidCount, text, function(svgGraph) {
+            mm.parentNode.outerHTML = "<div>" + svgGraph + "</div>";
+        });
 
         mermaidCount += 1;
     }

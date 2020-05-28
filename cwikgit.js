@@ -63,13 +63,13 @@ pullRepo = function(repo, remoteName, branch, cb) {
 
         var remoteBranch = remoteName + '/' + branch;
         repo.fetch(remoteName, {
-                callbacks: {
-                    credentials: ccred()
-                }
-            }).then(function() {
+            callbacks: {
+                credentials: ccred()
+            }
+        }).then(function() {
             console.log("gitPull.fetch ok");
-                repo.mergeBranches(branch, remoteBranch).then(resolve,reject);
-            }, reject);
+            repo.mergeBranches(branch, remoteBranch).then(resolve, reject);
+        }, reject);
     });
 }
 
@@ -109,22 +109,19 @@ branch = function(repo, branchName, upstreamRepoName, create) {
         }, err => {
             console.log("pull Repo error: " + JSON.stringify(err));
             console.log(typeof err);
-            if (err.errno == git.Error.CODE.ENOTFOUND)  // its ok that the branch does not exist in the remote yet
+            if (err.errno == git.Error.CODE.ENOTFOUND) // its ok that the branch does not exist in the remote yet
             {
                 repo.checkoutBranch(branchName).then(resolve, reject);
-            }
-            else if (create) {
+            } else if (create) {
                 repo.getHeadCommit().then(commit => {
                     repo.createBranch(branchName, commit.id(), false).then(smth => {
                         pullRepo(repo, branchName, upstreamRepoName).then(oid => {
                             console.log("pulled branch " + branchName + "to " + oid);
                             repo.checkoutBranch(branchName).then(resolve, reject);
                         }, reject);
-                    }
-                        , reject);
+                    }, reject);
                 }, reject);
-            }
-            else {
+            } else {
                 console.log("pullRepo error: " + err);
                 reject(err);
             }
@@ -231,7 +228,7 @@ repoByUid = function(uid) {
 
     return new Promise(function(resolve, reject) {
         git.Repository.open(userSpace).then(resolve, reject);
-        });
+    });
 }
 
 
@@ -333,7 +330,7 @@ var diffBranch = function(repo, branchName) {
             console.log("head of " + branchName);
             console.log(" is " + commit.id().tostrS());
             console.log(" msg: " + commit.message());
-            diffCommit(repo, commit).then(resolve,reject);
+            diffCommit(repo, commit).then(resolve, reject);
         }, reject);
     });
 };

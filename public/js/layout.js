@@ -1,13 +1,12 @@
-var EPHEMERAL_SIDEBAR_SIZE = 600;  // If the screen width is smaller than this, auto-hide the sidebar
+var EPHEMERAL_SIDEBAR_SIZE = 600; // If the screen width is smaller than this, auto-hide the sidebar
 
 function jumpTo(spot) {
     // the innerWidth check lets us simulate this on the PC
     if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
         // by delaying a tiny bit the user sees click feedback
         setTimeout(hideSidebar, 100);
-        setTimeout(()=>jumpToWithoutClosingSidebar(spot), 120);  // Defer execution so sidebar can be closed so the position is correct
-    }
-    else jumpToWithoutClosingSidebar(spot);
+        setTimeout(() => jumpToWithoutClosingSidebar(spot), 120); // Defer execution so sidebar can be closed so the position is correct
+    } else jumpToWithoutClosingSidebar(spot);
 }
 
 function jumpToWithoutClosingSidebar(spot) {
@@ -16,7 +15,7 @@ function jumpToWithoutClosingSidebar(spot) {
         LAYOUT_HEADER_PX = 30;
     }
     var s = spot.toLowerCase().split(/\s/).join("-");
-    s = s.replace(":","");
+    s = s.replace(":", "");
     console.log("jumpTo " + s);
     var e = document.getElementById(s);
     if (e) {
@@ -43,9 +42,8 @@ function linkTo(spot) {
     if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
         // by delaying a tiny bit the user sees click feedback
         setTimeout(hideSidebar, 100);
-        setTimeout(()=>fetchJsonFor(spot), 120);  // Defer execution so sidebar can be closed so the position is correct
-    }
-    else fetchJsonFor(spot);
+        setTimeout(() => fetchJsonFor(spot), 120); // Defer execution so sidebar can be closed so the position is correct
+    } else fetchJsonFor(spot);
 }
 
 function fetchJsonFor(spot) {
@@ -101,36 +99,30 @@ function LinkToLinkify(s, cls) {
 
 function updatePage(json) {
 
-    if (typeof json.related !== "undefined")
-    {
-    let relatedStr = "";
-    for (let i=0; i< json.related.length; i++)
-        {
+    if (typeof json.related !== "undefined") {
+        let relatedStr = "";
+        for (let i = 0; i < json.related.length; i++) {
             relatedStr = relatedStr.concat(LinkToLinkify(json.related[i], "rel"));
         }
-    document.getElementById("relatedI").innerHTML = relatedStr;
-    }
-    else
+        document.getElementById("relatedI").innerHTML = relatedStr;
+    } else
         document.getElementById("relatedI").innerHTML = "";
 
     document.getElementById("historyI").innerHTML = json.history;
     document.getElementById("structureI").innerHTML = json.structure;
     document.getElementById("pageTitle").innerHTML = json.title;
 
-    if (typeof json.rawMarkdown !== "undefined")
-    {
+    if (typeof json.rawMarkdown !== "undefined") {
         document.getElementById("rawMarkdown").value = json.rawMarkdown;
     }
 
     // undefined means leave as is, "" means no edit proposal
-    if (typeof json.user.editProposal !== "undefined")
-    {
-    let epInput = document.getElementById("editProposal");
-    if (epInput)
-    {
-        console.log("EP: " + json.user.editProposal);
-        epInput.value = json.user.editProposal;
-    }
+    if (typeof json.user.editProposal !== "undefined") {
+        let epInput = document.getElementById("editProposal");
+        if (epInput) {
+            console.log("EP: " + json.user.editProposal);
+            epInput.value = json.user.editProposal;
+        }
     }
 }
 
@@ -146,8 +138,7 @@ function toggleSidebar() {
         sb.style.display = "flex";
         sidebarGrid.refreshItems().layout();
         document.getElementById("sideBarButton").src = '_static_/images/closemenuIcon.svg';
-    }
-    else {
+    } else {
         sb.style.display = "none";
         document.getElementById("sideBarButton").src = '_static_/images/openmenuIcon.svg';
     }
@@ -266,17 +257,17 @@ function closeEditProposal() {
     let epEntry = document.getElementById("editProposal");
     // Commit any pending edits first
     fetch("/_commit_").then(r => r.json().then(j => {
-    // Now close
-    fetch("/_editProposal_/close").then(response => response.json().then(json => {
-        if (json.error == 0) setEditProposalMenuVisibility("");
-        let locNoArgs = window.location.pathname;
-        fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
-            processJsonPage(json);
+        // Now close
+        fetch("/_editProposal_/close").then(response => response.json().then(json => {
+            if (json.error == 0) setEditProposalMenuVisibility("");
+            let locNoArgs = window.location.pathname;
+            fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
+                processJsonPage(json);
+            }));
+            console.log("got here");
+            notification(json);
+            epEntry.value = "";
         }));
-        console.log("got here");
-        notification(json);
-        epEntry.value = "";
-    }));
     }));
 }
 
@@ -284,16 +275,16 @@ function submitEditProposal() {
     let epEntry = document.getElementById("editProposal");
     // Commit any pending edits first
     fetch("/_commit_").then(r => r.json().then(j => {
-    // Now close
-    fetch("/_editProposal_/submit").then(response => response.json().then(json => {
-        if (json.error == 0) setEditProposalMenuVisibility("");
-        let locNoArgs = window.location.pathname;
-        fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
-            processJsonPage(json);
+        // Now close
+        fetch("/_editProposal_/submit").then(response => response.json().then(json => {
+            if (json.error == 0) setEditProposalMenuVisibility("");
+            let locNoArgs = window.location.pathname;
+            fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
+                processJsonPage(json);
+            }));
+            notification(json);
+            epEntry.value = "";
         }));
-        notification(json);
-        epEntry.value = "";
-    }));
     }));
 }
 
@@ -309,17 +300,16 @@ function diffEditProposal() {
 
 function setEditProposalMenuVisibility(ep) {
     if (ep) {
-        document.getElementById("closeEP").hidden=false;
-        document.getElementById("submitEP").hidden=false;
+        document.getElementById("closeEP").hidden = false;
+        document.getElementById("submitEP").hidden = false;
         //document.getElementById("diffEP").hidden=false;
-        document.getElementById("diffEP").hidden=true;  // for now disable
-        document.getElementById("openEP").hidden=true;
-    }
-    else {
-        document.getElementById("closeEP").hidden=true;
-        document.getElementById("submitEP").hidden=true;
-        document.getElementById("diffEP").hidden=true;
-        document.getElementById("openEP").hidden=false;
+        document.getElementById("diffEP").hidden = true; // for now disable
+        document.getElementById("openEP").hidden = true;
+    } else {
+        document.getElementById("closeEP").hidden = true;
+        document.getElementById("submitEP").hidden = true;
+        document.getElementById("diffEP").hidden = true;
+        document.getElementById("openEP").hidden = false;
     }
 }
 

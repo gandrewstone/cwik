@@ -9,8 +9,10 @@ var users = require('../knownusers.json')["KnownUsers"]
 
 // https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
 function zip(arrays) {
-    return arrays[0].map(function(_,i){
-        return arrays.map(function(array){return array[i]})
+    return arrays[0].map(function(_, i) {
+        return arrays.map(function(array) {
+            return array[i]
+        })
     });
 }
 
@@ -76,19 +78,19 @@ router.get('/_login_/auto', function(req, res, next) {
                         req.session.challenge = "solved";
                         req.session.uid = req.query.addr;
                         git.repoBranchNameByUid(req.session.uid).then(br => {
-                            if (br != config. REPO_BRANCH_NAME) req.session.editProposal = br;
+                            if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                         });
                     } else // If I connected with a different (out-of-band) session, then I need to write the sessionStore directly
                     {
                         session.challenge = "solved";
                         session.uid = req.query.addr;
                         git.repoBranchNameByUid(req.session.uid).then(br => {
-                            if (br != config. REPO_BRANCH_NAME) req.session.editProposal = br;
-                             sessionStore.set(req.query.cookie, session);
-                        }, err => {  // Even if we can't get the repo branch, still set the session
-                        sessionStore.set(req.query.cookie, session, function(err) {
-                            console.log("error?:" + JSON.stringify(err));
-                        });
+                            if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
+                            sessionStore.set(req.query.cookie, session);
+                        }, err => { // Even if we can't get the repo branch, still set the session
+                            sessionStore.set(req.query.cookie, session, function(err) {
+                                console.log("error?:" + JSON.stringify(err));
+                            });
                         });
 
                     }
@@ -162,22 +164,33 @@ router.get('/_editProposal_/close', function(req, res, next) {
         return res.json({
             notification: "unauthorized edit attempt, log in first!",
             error: 1
-            });
+        });
     }
 
     repoBranchNameByUid(req.session.uid).then(curBranch => {
-        if (curBranch == config.REPO_BRANCH_NAME)
-        {
-            return res.json({notification: "no edit proposal is open", error: 1});
+        if (curBranch == config.REPO_BRANCH_NAME) {
+            return res.json({
+                notification: "no edit proposal is open",
+                error: 1
+            });
         }
 
         git.repoByUid(req.session.uid)
             .then(repo => git.branch(repo, config.REPO_BRANCH_NAME, config.UPSTREAM_REPO_NAME, true))
-            .then(result => { req.session.editProposal = ""; return res.json({notification: "closed edit proposal '" + curBranch + "'", error: 0}); })
+            .then(result => {
+                req.session.editProposal = "";
+                return res.json({
+                    notification: "closed edit proposal '" + curBranch + "'",
+                    error: 0
+                });
+            })
             .catch(err => {
-            console.log("err " + err);
-            return res.json({notification: err, error: 1});
-        });
+                console.log("err " + err);
+                return res.json({
+                    notification: err,
+                    error: 1
+                });
+            });
     });
 });
 
@@ -189,44 +202,55 @@ router.get('/_editProposal_/submit', function(req, res, next) {
         return res.json({
             notification: "unauthorized edit attempt, log in first!",
             error: 1
-            });
+        });
     }
 
     repoBranchNameByUid(req.session.uid).then(curBranch => {
-        if (curBranch == config.REPO_BRANCH_NAME)
-        {
-            return res.json({notification: "no edit proposal is open", error: 1});
+        if (curBranch == config.REPO_BRANCH_NAME) {
+            return res.json({
+                notification: "no edit proposal is open",
+                error: 1
+            });
         }
 
         git.repoByUid(req.session.uid).then(repo => {
-        console.log("repo is " + JSON.stringify(repo));
-        git.branch(repo, config.REPO_BRANCH_NAME, config.UPSTREAM_REPO_NAME, true).then(result => {
-            console.log("branch " + result);
-            req.session.editProposal = "";
-            return res.json({notification: "submitted edit proposal '" + curBranch + "'", error: 0});
+            console.log("repo is " + JSON.stringify(repo));
+            git.branch(repo, config.REPO_BRANCH_NAME, config.UPSTREAM_REPO_NAME, true).then(result => {
+                console.log("branch " + result);
+                req.session.editProposal = "";
+                return res.json({
+                    notification: "submitted edit proposal '" + curBranch + "'",
+                    error: 0
+                });
+            }, err => {
+                console.log("err " + err);
+                return res.json({
+                    notification: err,
+                    error: 1
+                });
+            });
         }, err => {
-            console.log("err " + err);
-            return res.json({notification: err, error: 1});
+            return res.json({
+                notification: err,
+                error: 1
+            });
+            console.log(err);
         });
-    }, err => {
-        return res.json({notification: err, error: 1});
-        console.log(err);
-    });
 
     });
 });
 
 function printDiff(diff) {
     console.log("diff has " + diff.numDeltas() + " patches");
-    for (let i=0; i < diff.numDeltas(); i++) {
+    for (let i = 0; i < diff.numDeltas(); i++) {
         let delta = diff.getDelta(i);
         console.log(i + ": " + delta + " " + delta.oldFile().path() + "->" + delta.newFile().path());
-        }
+    }
 }
 
 function printPatches(patches) {
     console.log("printPatches");
-    for (let i = 0; i< patches.length; i++) {
+    for (let i = 0; i < patches.length; i++) {
         console.log("patch file: " + patches[i].oldFile().path() + "=>" + patches[i].newFile().path());
         console.log("patch stats: " + JSON.stringify(patches[i].lineStats()));
         patches[i].hunks().then(hunks => {
@@ -261,14 +285,15 @@ function resolveLines(hunk) {
             ret = [];
             for (let k = 0; k < lines.length; k++) {
                 // console.log(" line " + k + " content: " + lines[k].content());
-                ret.push({content:lines[k].content(),
-                          oldLinenum: lines[k].oldLineno(),
-                          newLinenum: lines[k].newLineno(),
-                          numLines: lines[k].numLines(),
-                          // raw: lines[k].rawContent(),
-                          offset: lines[k].contentOffset(),
-                          len: lines[k].contentLen()
-                         });
+                ret.push({
+                    content: lines[k].content(),
+                    oldLinenum: lines[k].oldLineno(),
+                    newLinenum: lines[k].newLineno(),
+                    numLines: lines[k].numLines(),
+                    // raw: lines[k].rawContent(),
+                    offset: lines[k].contentOffset(),
+                    len: lines[k].contentLen()
+                });
             }
             ok(ret);
         });
@@ -280,7 +305,7 @@ function resolveHunks(patch) {
         patch.hunks().then(hunks => {
             // console.log("resolveHunksPms");
             let pms = [];
-            for (let i=0; i < hunks.length; i++) {
+            for (let i = 0; i < hunks.length; i++) {
                 pms.push(resolveLines(hunks[i]));
             }
             return Promise.all(pms).then(ok, rej);
@@ -312,11 +337,14 @@ function resolvePatches(patches) {
         let ret = [];
         for (let i = 0; i < patches.length; i++) {
             pms.push(resolveHunks(patches[i]));
-            ret.push({ oldfile: patches[i].oldFile().path(), newfile: patches[i].newFile().path(), op: patchOp(patches[i]) });
+            ret.push({
+                oldfile: patches[i].oldFile().path(),
+                newfile: patches[i].newFile().path(),
+                op: patchOp(patches[i])
+            });
         }
         return Promise.all(pms).then(result => {
-            for (let i = 0; i < result.length ; i++)
-            {
+            for (let i = 0; i < result.length; i++) {
                 ret[i].hunks = result;
             }
             ok(ret);
@@ -340,29 +368,43 @@ router.get('/_editProposal_/diff', function(req, res, next) {
         return res.json({
             notification: "unauthorized edit attempt, log in first!",
             error: 1
-            });
+        });
     }
 
     repoBranchNameByUid(req.session.uid).then(curBranch => {
-        if (curBranch == config.REPO_BRANCH_NAME)
-        {
-            return res.json({notification: "no edit proposal is open", error: 1});
+        if (curBranch == config.REPO_BRANCH_NAME) {
+            return res.json({
+                notification: "no edit proposal is open",
+                error: 1
+            });
         }
 
         git.repoByUid(req.session.uid).then(repo => {
             console.log("repo at " + repo.path());
-            git.diffBranch(repo, config.REPO_BRANCH_NAME).then( diff => {
+            git.diffBranch(repo, config.REPO_BRANCH_NAME).then(diff => {
                 printDiff(diff);
                 //diff.patches().then(printPatches);
                 diff.patches().then(p => objectifyPatches(p).then(patchLst => {
                     console.log("Patch data: " + JSON.stringify(patchLst, null, 4));
-                }, err => { console.log("error: " + err);} ), err => { console.log("error: " + err); });
-                return res.json({notification: "diff", error:0});
-            }, err => { console.log("error: " + err);});
-    }, err => {
-        return res.json({notification: err, error: 1});
-        console.log(err);
-    });
+                }, err => {
+                    console.log("error: " + err);
+                }), err => {
+                    console.log("error: " + err);
+                });
+                return res.json({
+                    notification: "diff",
+                    error: 0
+                });
+            }, err => {
+                console.log("error: " + err);
+            });
+        }, err => {
+            return res.json({
+                notification: err,
+                error: 1
+            });
+            console.log(err);
+        });
 
     });
 });
@@ -373,8 +415,8 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
     if (req.session.uid == undefined) {
         console.log("not logged in");
         return res.json({
-                notification: "unauthorized edit attempt, log in first!"
-            });
+            notification: "unauthorized edit attempt, log in first!"
+        });
     }
 
     let ep = req.path.replace("/_editProposal_/open/", "");
@@ -382,31 +424,42 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
     ep = ep.split(' ').join('_')
     if (ep == "") {
         return res.json({
-                notification: "empty edit proposal name"
-            });
+            notification: "empty edit proposal name"
+        });
     }
 
     repoBranchNameByUid(req.session.uid).then(curBranch => {
-        if (curBranch != config.REPO_BRANCH_NAME)
-        {
-            return res.json({notification: "first close or submit your current proposal", error: 1});
+        if (curBranch != config.REPO_BRANCH_NAME) {
+            return res.json({
+                notification: "first close or submit your current proposal",
+                error: 1
+            });
         }
 
-    git.repoByUid(req.session.uid).then(repo => {
-        //res.json({notification: "ok" });
-        console.log("repo is " + JSON.stringify(repo));
-        git.branch(repo, ep, config.UPSTREAM_REPO_NAME, true).then(result => {
-            console.log("branch " + result);
-            req.session.editProposal = ep;
-            return res.json({notification: "opened edit proposal '" + ep + "'", error: 0});
+        git.repoByUid(req.session.uid).then(repo => {
+            //res.json({notification: "ok" });
+            console.log("repo is " + JSON.stringify(repo));
+            git.branch(repo, ep, config.UPSTREAM_REPO_NAME, true).then(result => {
+                console.log("branch " + result);
+                req.session.editProposal = ep;
+                return res.json({
+                    notification: "opened edit proposal '" + ep + "'",
+                    error: 0
+                });
+            }, err => {
+                console.log("err " + err);
+                return res.json({
+                    notification: err,
+                    error: 1
+                });
+            });
         }, err => {
-            console.log("err " + err);
-            return res.json({notification: err, error: 1});
+            return res.json({
+                notification: err,
+                error: 1
+            });
+            console.log(err);
         });
-    }, err => {
-        return res.json({notification: err, error: 1});
-        console.log(err);
-    });
     });
 });
 

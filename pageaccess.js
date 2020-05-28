@@ -63,23 +63,23 @@ function BadURL(req, res) {
 
 function ensureUserRepoCreated(userSpace, contentHome) {
     // Make a working space for this user if one does not yet exist
-        if (!fs.existsSync(userSpace)) {
-            // Refresh my local copy
-            git.pull(contentHome, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME,
-                function(err, oid) {
-                    if (err != null) console.log("pull " + contentHome + " error " + err);
+    if (!fs.existsSync(userSpace)) {
+        // Refresh my local copy
+        git.pull(contentHome, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME,
+            function(err, oid) {
+                if (err != null) console.log("pull " + contentHome + " error " + err);
 
-                    // then copy it to the user's space
-                    ncp(contentHome, userSpace, function(err) {
-                        if (err) {
-                            console.error("ncp copy error: " + err);
-                            return contentHome;
-                        }
-                        console.log("user scratch space created!");
-                    });
+                // then copy it to the user's space
+                ncp(contentHome, userSpace, function(err) {
+                    if (err) {
+                        console.error("ncp copy error: " + err);
+                        return contentHome;
+                    }
+                    console.log("user scratch space created!");
                 });
-            return contentHome; // While I'm waiting for the copy, allow the user to read
-        }
+            });
+        return contentHome; // While I'm waiting for the copy, allow the user to read
+    }
     return userSpace;
 }
 
@@ -90,7 +90,10 @@ handleAPage = function(req, res) {
     let userSpace = "";
     let readFrom = contentHome;
     let user = {};
-    let jReply = {user:user, notification:notification};
+    let jReply = {
+        user: user,
+        notification: notification
+    };
 
     //if (req.session.uid == undefined) {
     //    req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
@@ -112,16 +115,13 @@ handleAPage = function(req, res) {
             git.loadChangedFiles(req.session.uid, req.session);
         }
 
-        if (req.session.editProposal == undefined)
-        {
+        if (req.session.editProposal == undefined) {
             git.repoBranchNameByUid(req.session.uid).then(br => {
-                if (br != config. REPO_BRANCH_NAME) req.session.editProposal = br;
+                if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                 else req.session.editProposal = "";
-                user['editProposal'] = req.session.editProposal;  // Probably won't be updated in time for this req...
-                        });
-        }
-        else
-        {
+                user['editProposal'] = req.session.editProposal; // Probably won't be updated in time for this req...
+            });
+        } else {
             console.log("session EP is: " + req.session.editProposal);
         }
 
@@ -196,14 +196,14 @@ handleAPage = function(req, res) {
     }
 
     if (!req.query.raw) {
-    jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
-    jReply['history'] = updateHistory(req, urlPath);
-    jReply['related'] = "";
-    jReply['title'] = "";
-    jReply['structure'] = "";
-    jReply['wikiPage'] = "";
-    jReply['thisPage'] = urlPath;
-    jReply['rawMarkdown'] = "";
+        jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
+        jReply['history'] = updateHistory(req, urlPath);
+        jReply['related'] = "";
+        jReply['title'] = "";
+        jReply['structure'] = "";
+        jReply['wikiPage'] = "";
+        jReply['thisPage'] = urlPath;
+        jReply['rawMarkdown'] = "";
     }
 
     console.log("read file: " + filepath);
@@ -220,16 +220,15 @@ handleAPage = function(req, res) {
                         console.log("template missing");
                         return res.json(jReply);
                     }
-                    jReply['html'] = htmlTemplateData;  // There's some override html
-                    jReply['wikiPage'] = undefined;     // but no html corresponding to this page
+                    jReply['html'] = htmlTemplateData; // There's some override html
+                    jReply['wikiPage'] = undefined; // but no html corresponding to this page
                     return res.json(jReply);
 
                 });
-            } else
-            {
+            } else {
                 console.log("wiki browse no page");
                 return fs.readFile(readFrom + "/cwikTemplate.html", 'utf8', function(err, htmlTemplateData) {
-                    jReply['wikiPage'] = htmlTemplateData;  // place override html directly into the page
+                    jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
                     return res.render('wikibrowse', jReply);
                 });
             }
@@ -274,20 +273,20 @@ handleAPage = function(req, res) {
             });
         } else {
             fs.readFile(metaFile, 'utf8', function(err, metaData) {
-                if (err) metaData = {};  // Just ignore if metadata file does not exist
-            fs.readFile(htmlFile, 'utf8', function(err, readData) {
-                if (err) {
-                    mdToHtml(doc).then(data => {
+                if (err) metaData = {}; // Just ignore if metadata file does not exist
+                fs.readFile(htmlFile, 'utf8', function(err, readData) {
+                    if (err) {
+                        mdToHtml(doc).then(data => {
+                            updateDict(jReply, data);
+                            wikiPageReplyWithMdHtml(req, res, doc, jReply);
+                        });
+                    } else {
+                        let data = JSON.parse(metaData);
                         updateDict(jReply, data);
+                        jReply.wikiPage = readData;
                         wikiPageReplyWithMdHtml(req, res, doc, jReply);
-                    });
-                } else {
-                    let data = JSON.parse(metaData);
-                    updateDict(jReply, data);
-                    jReply.wikiPage = readData;
-                    wikiPageReplyWithMdHtml(req, res, doc, jReply);
-                }
-            });
+                    }
+                });
             });
         }
     });
@@ -306,13 +305,21 @@ const PuppeteerDebug = false;
 // Perfect conversion of md to html is a client-side process because some libraries are not available on the server side.
 // For this reason we must create a client on the server side, and drive it to execute the conversion.
 var browser = undefined;
-puppeteer.launch({headless: !PuppeteerDebug, defaultViewport: { width:900, height:1024 }}).then(b => { browser = b; });
+puppeteer.launch({
+    headless: !PuppeteerDebug,
+    defaultViewport: {
+        width: 900,
+        height: 1024
+    }
+}).then(b => {
+    browser = b;
+});
 
 async function mdToHtml(md) {
     headings = ""
     appendHeading = function(tagName, text, attribs) {
         // console.log("TAG: " + tagName + " " + text)
-        linktext = text.replace("/","");  // drop any /s
+        linktext = text.replace("/", ""); // drop any /s
         headings += '<div class="ltoc_' + tagName + '"' + ' onclick="jumpTo(\'' + linktext + '\')"><span class="itoc_' + tagName + '">' + text + "</span></div>\n"
     };
 
@@ -320,7 +327,9 @@ async function mdToHtml(md) {
     await page.goto(config.MY_URL + "/_cvt_");
 
     await page.evaluate(function(md) {
-        contentRenderCallback = function() { console.log("content rendered") };
+        contentRenderCallback = function() {
+            console.log("content rendered")
+        };
         return processFetchedMd(md);
     }, md);
     //await page.waitFor(250);  // Do I need to wait for the katex, mermaid, etc to render or is that done synchronously?  If so, can wait for custom event: https://github.com/puppeteer/puppeteer/blob/master/examples/custom-event.js
@@ -330,12 +339,17 @@ async function mdToHtml(md) {
     // If you need to see the raw content to figure out what the sanitizer is doing wrong: fs.writeFile("content.htm", contentHtml, (err) => {});
 
     xformedhtml = sanitizer(contentHtml, {
-        allowedTags: sanitizer.defaults.allowedTags.concat(['text','line','tspan','br','em','mi', 'mo','mrow','span', 'annotation', 'semantics','math','span','circle','g','path','rect','marker','defs','foreignobject','style', 'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
+        allowedTags: sanitizer.defaults.allowedTags.concat(['text', 'line', 'tspan', 'br', 'em', 'mi', 'mo', 'mrow', 'span', 'annotation', 'semantics', 'math', 'span', 'circle', 'g', 'path', 'rect', 'marker', 'defs', 'foreignobject', 'style',
+            'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+        ]),
         allowedAttributes: false,
         allowedClasses: false,
         transformTags: {
-            "h1" : (tagName, attribs) => {
-                return {tagName: tagName, attribs: attribs}
+            "h1": (tagName, attribs) => {
+                return {
+                    tagName: tagName,
+                    attribs: attribs
+                }
             },
         },
         exclusiveFilter: function(frame) {
@@ -353,7 +367,10 @@ async function mdToHtml(md) {
         }
     });
 
-    ret = {html: xformedhtml, structure: headings }
+    ret = {
+        html: xformedhtml,
+        structure: headings
+    }
     if (typeof meta.title !== "undefined") ret["title"] = meta.title;
     if (typeof meta.related !== "undefined") ret["related"] = meta.related;
     return ret;
@@ -394,14 +411,12 @@ function updateHistory(req, urlPath) {
 /* This function converts json data that would be passed directly to the client if ?json=1 into HTML appropriate for the
    pug scripts.  Changes here need equivalent changes in layout.js updatePage */
 function htmlizeJsonReply(json) {
-    if (typeof json.related !== "undefined")
-    {
-    let relatedStr = "";
-    for (let i=0; i< json.related.length; i++)
-        {
+    if (typeof json.related !== "undefined") {
+        let relatedStr = "";
+        for (let i = 0; i < json.related.length; i++) {
             relatedStr = relatedStr.concat(LinkToLinkify(json.related[i], "rel"));
         }
-    json.related = relatedStr;
+        json.related = relatedStr;
     }
 
 }

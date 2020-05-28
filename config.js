@@ -9,8 +9,7 @@ if (typeof process.env.CWIK_DEV !== "undefined") {
     exports.MY_URL = "http://192.168.1.100:8000";
     exports.STACKEDIT_URL = "http://192.168.1.100:8080/app";
     //exports.STACKEDIT_URL = "https://stackedit.io/app";
-}
-else {
+} else {
     exports.MY_URL = "http://www.nextchain.cash";
     // This is resolved client side so it must be a full domain
     exports.STACKEDIT_URL = "http://stackedit.nextchain.cash/app";
