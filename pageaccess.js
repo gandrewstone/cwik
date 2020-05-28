@@ -263,12 +263,12 @@ handleAPage = function(req, res) {
                 updateDict(jReply, data);
                 jReply.wikiPage = html;
                 wikiPageReplyWithMdHtml(req, res, doc, jReply);
-                
+
                 fs.writeFile(htmlFile, html, function(err) {
-                    console.log("write error: " + err);
+                    if (err != null) console.log("write error for: " + htmlFile + ": " + err);
                 })
                 fs.writeFile(metaFile, JSON.stringify(data), function(err) {
-                    console.log("write error: " + err);
+                    if (err != null) console.log("write error for: " + metaFile + ": " + err);
                 })
 
             });
@@ -301,8 +301,6 @@ function mdToHtmlPagedown(md) {
     });
 }
 
-
-
 const PuppeteerDebug = false;
 
 // Perfect conversion of md to html is a client-side process because some libraries are not available on the server side.
@@ -313,14 +311,14 @@ puppeteer.launch({headless: !PuppeteerDebug, defaultViewport: { width:900, heigh
 async function mdToHtml(md) {
     headings = ""
     appendHeading = function(tagName, text, attribs) {
-        console.log("TAG: " + tagName + " " + text)
+        // console.log("TAG: " + tagName + " " + text)
         linktext = text.replace("/","");  // drop any /s
         headings += '<div class="ltoc_' + tagName + '"' + ' onclick="jumpTo(\'' + linktext + '\')"><span class="itoc_' + tagName + '">' + text + "</span></div>\n"
     };
 
     const page = await browser.newPage();
     await page.goto(config.MY_URL + "/_cvt_");
-    
+
     await page.evaluate(function(md) {
         contentRenderCallback = function() { console.log("content rendered") };
         return processFetchedMd(md);
@@ -329,9 +327,12 @@ async function mdToHtml(md) {
     const contentHtml = await page.evaluate("document.querySelector('.wikicontent').innerHTML");
     if (!PuppeteerDebug) page.close();
 
+    // If you need to see the raw content to figure out what the sanitizer is doing wrong: fs.writeFile("content.htm", contentHtml, (err) => {});
+
     xformedhtml = sanitizer(contentHtml, {
-        allowedTags: sanitizer.defaults.allowedTags.concat(['div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
+        allowedTags: sanitizer.defaults.allowedTags.concat(['text','line','tspan','br','em','mi', 'mo','mrow','span', 'annotation', 'semantics','math','span','circle','g','path','rect','marker','defs','foreignobject','style', 'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
         allowedAttributes: false,
+        allowedClasses: false,
         transformTags: {
             "h1" : (tagName, attribs) => {
                 return {tagName: tagName, attribs: attribs}
@@ -341,7 +342,7 @@ async function mdToHtml(md) {
             if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
             if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
                 try {
-                    console.log("parsing: " + frame.text);
+                    // console.log("parsing: " + frame.text);
                     meta = JSON.parse(frame.text);
                 } catch (err) {
                     error += err.message;
@@ -390,7 +391,7 @@ function updateHistory(req, urlPath) {
     return historyHtml;
 }
 
-/* This function converts json data that would be passed directly to the client if ?json=1 into HTML appropriate for the 
+/* This function converts json data that would be passed directly to the client if ?json=1 into HTML appropriate for the
    pug scripts.  Changes here need equivalent changes in layout.js updatePage */
 function htmlizeJsonReply(json) {
     if (typeof json.related !== "undefined")
