@@ -1,21 +1,21 @@
 var EPHEMERAL_SIDEBAR_SIZE = 600;  // If the screen width is smaller than this, auto-hide the sidebar
 
-function sbJumpTo(spot) {
+function jumpTo(spot) {
     // the innerWidth check lets us simulate this on the PC
     if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
         // by delaying a tiny bit the user sees click feedback
         setTimeout(hideSidebar, 100);
-        setTimeout(()=>jumpTo(spot), 120);  // Defer execution so sidebar can be closed so the position is correct
+        setTimeout(()=>jumpToWithoutClosingSidebar(spot), 120);  // Defer execution so sidebar can be closed so the position is correct
     }
-    else jumpTo(spot);
+    else jumpToWithoutClosingSidebar(spot);
 }
 
-function jumpTo(spot) {
+function jumpToWithoutClosingSidebar(spot) {
     let LAYOUT_HEADER_PX = document.getElementById("cwikheader").offsetHeight;
     if (LAYOUT_HEADER_PX == undefined) {
         LAYOUT_HEADER_PX = 30;
     }
-    var s = spot.toLowerCase().split(/\s+/).join("-");
+    var s = spot.toLowerCase().split(/\s/).join("-");
     console.log("jumpTo " + s);
     var e = document.getElementById(s);
     if (e) {
@@ -88,10 +88,32 @@ function commitEdits() {
     fetch("/_commit_").then(response => response.json().then(notification));
 }
 
+/* Creates a js-handled link to another document.  Click calls the client-side js function "linkTo" */
+function LinkToLinkify(s, cls) {
+    var text = s.split("/").slice(-1)[0].replace("__", " ");
+    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
+        text = text.slice(0, text.length - 3);
+    var ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + text + '\')"><span class="i' + cls + '">' + text + "</span></div>\n";
+    return ret;
+}
+
+
 function updatePage(json) {
+
+    if (typeof json.related !== "undefined")
+    {
+    let relatedStr = "";
+    for (let i=0; i< json.related.length; i++)
+        {
+            relatedStr = relatedStr.concat(LinkToLinkify(json.related[i], "rel"));
+        }
+    document.getElementById("relatedI").innerHTML = relatedStr;
+    }
+    else
+        document.getElementById("relatedI").innerHTML = "";
+
     document.getElementById("historyI").innerHTML = json.history;
     document.getElementById("structureI").innerHTML = json.structure;
-    document.getElementById("relatedI").innerHTML = json.related;
     document.getElementById("pageTitle").innerHTML = json.title;
 
     // undefined means leave as is, "" means no edit proposal

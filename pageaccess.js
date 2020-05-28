@@ -30,25 +30,29 @@ function WikiLinkify(s) {
     return '<a class="histL" href=\"' + s + '">' + text + '</a>'
 }
 
+
 /* Creates a js-handled link to an anchor i.e. # -- an internal link to a different document section.  Click calls the client-side js function jumpTo. */
+/*
 function JumpToLinkify(s, cls) {
     var text = s.split("/").slice(-1)[0].replace("__", " ");
+    text = text.replace("/","");  // drop any /s
     if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
         text = text.slice(0, text.length - 3);
     //return '<a class="histL" href=\"' + s + '">' + text + '</a>'
     var ret = '<div class="l' + cls + '"></span><span class="i' + cls + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n";
+    //let ret = '<div class="ltoc_' + cls + '"><span class="itoc_' + cls + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n";
     console.log(ret)
     return ret;
 }
+*/
 
 /* Creates a js-handled link to another document.  Click calls the client-side js function "linkTo" */
 function LinkToLinkify(s, cls) {
     var text = s.split("/").slice(-1)[0].replace("__", " ");
     if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
         text = text.slice(0, text.length - 3);
-    //return '<a class="histL" href=\"' + s + '">' + text + '</a>'
-    var ret = '<div class="l' + cls + '"></span><span class="i' + cls + '" onclick="linkTo(\'' + text + '\')">' + text + "</span></div>\n";
-    console.log(ret)
+    var ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + text + '\')"><span class="i' + cls + '">' + text + "</span></div>\n";
+    // console.log(ret);
     return ret;
 }
 
@@ -238,7 +242,8 @@ handleAPage = function(req, res) {
 
         let doc = data;
 
-        let htmlFile = filepath.slice(0, filepath.length - 2) + "pagejson";
+        let htmlFile = filepath.slice(0, filepath.length - 2) + "htm";
+        let metaFile = filepath.slice(0, filepath.length - 2) + "meta";
         let regenerate = false;
         try {
             var htmlFileStats = fs.statSync(htmlFile);
@@ -253,14 +258,23 @@ handleAPage = function(req, res) {
             // Convert markdown to html
             // console.log("regenerate " + htmlFile);
             mdToHtml(doc).then(data => {
-                fs.writeFile(htmlFile, JSON.stringify(data), function(err) {
+                let html = data.html;
+                delete data.html;
+                updateDict(jReply, data);
+                jReply.wikiPage = html;
+                wikiPageReplyWithMdHtml(req, res, doc, jReply);
+                
+                fs.writeFile(htmlFile, html, function(err) {
+                    console.log("write error: " + err);
+                })
+                fs.writeFile(metaFile, JSON.stringify(data), function(err) {
                     console.log("write error: " + err);
                 })
 
-                updateDict(jReply, data);
-                wikiPageReplyWithMdHtml(req, res, doc, jReply);
             });
         } else {
+            fs.readFile(metaFile, 'utf8', function(err, metaData) {
+                if (err) metaData = {};  // Just ignore if metadata file does not exist
             fs.readFile(htmlFile, 'utf8', function(err, readData) {
                 if (err) {
                     mdToHtml(doc).then(data => {
@@ -268,10 +282,12 @@ handleAPage = function(req, res) {
                         wikiPageReplyWithMdHtml(req, res, doc, jReply);
                     });
                 } else {
-                    let data = JSON.parse(readData);
+                    let data = JSON.parse(metaData);
                     updateDict(jReply, data);
+                    jReply.wikiPage = readData;
                     wikiPageReplyWithMdHtml(req, res, doc, jReply);
                 }
+            });
             });
         }
     });
@@ -298,7 +314,8 @@ async function mdToHtml(md) {
     headings = ""
     appendHeading = function(tagName, text, attribs) {
         console.log("TAG: " + tagName + " " + text)
-        headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="sbJumpTo(\'' + text + '\')">' + text + "</span></div>\n"
+        linktext = text.replace("/","");  // drop any /s
+        headings += '<div class="ltoc_' + tagName + '"' + ' onclick="jumpTo(\'' + linktext + '\')"><span class="itoc_' + tagName + '">' + text + "</span></div>\n"
     };
 
     const page = await browser.newPage();
@@ -334,7 +351,11 @@ async function mdToHtml(md) {
             return false; // Don't remove anything based on this filter -- I am just trying to extract headings
         }
     });
-    return { wikiPage: xformedhtml, structure: headings, title: meta.title, related: meta.related };
+
+    ret = {html: xformedhtml, structure: headings }
+    if (typeof meta.title !== "undefined") ret["title"] = meta.title;
+    if (typeof meta.related !== "undefined") ret["related"] = meta.related;
+    return ret;
 }
 
 
@@ -369,20 +390,28 @@ function updateHistory(req, urlPath) {
     return historyHtml;
 }
 
+/* This function converts json data that would be passed directly to the client if ?json=1 into HTML appropriate for the 
+   pug scripts.  Changes here need equivalent changes in layout.js updatePage */
+function htmlizeJsonReply(json) {
+    if (typeof json.related !== "undefined")
+    {
+    let relatedStr = "";
+    for (let i=0; i< json.related.length; i++)
+        {
+            relatedStr = relatedStr.concat(LinkToLinkify(json.related[i], "rel"));
+        }
+    json.related = relatedStr;
+    }
+
+}
+
 function wikiPageReplyWithMdHtml(req, res, md, jReply) {
-    var meta = null;
-    var headings = "";
-    appendHeading = function(tagName, text, attribs) {
-        console.log("TAG: " + tagName + " " + text)
-        headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="sbJumpTo(\'' + text + '\')">' + text + "</span></div>\n"
-    };
-
-    var error = "";
-
     jReply['rawMarkdown'] = md;
 
     if (req.query.json)
         res.json(jReply);
-    else
+    else {
+        htmlizeJsonReply(jReply);
         res.render('wikibrowse', jReply);
+    }
 }
