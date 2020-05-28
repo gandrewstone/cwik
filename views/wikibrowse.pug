@@ -26,7 +26,7 @@ block notification
 block toolBar
   div.editBar
     if user && user.loggedIn
-      <span class="horizMenu" onclick="runeditor(window.location.href, document.querySelector('.cwikeditor'))">edit</span>
+      <span class="horizMenu" onclick="runeditor(window.location.href, document.getElementById('rawMarkdown'))">edit</span>
 
     //- unimplemented features
         |  | 
@@ -54,5 +54,5 @@ block endScript
     }
     else
     {
-        document.querySelector('textarea.cwikeditor').value = origMdData;
+        document.getElementById('rawMarkdown').value = origMdData;
     }

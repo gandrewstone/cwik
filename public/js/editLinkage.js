@@ -2,7 +2,7 @@
 function processFetchedMd_old(text) {
     return new Promise(function(resolve, reject) {
         console.log("processing data 2");
-        document.querySelector('textarea.cwikeditor').value = text;
+        document.getElementById('rawMarkdown').value = text;
         var se = new Stackedit({
             url: STACKEDITOR_URL
         });
@@ -43,8 +43,7 @@ wikiContentObserver.observe(wikicontentDom, { childList: true, subtree: true, ch
 
 function processFetchedMd(text) {
     return new Promise(function(resolve, reject) {
-        console.log("processing data");
-        document.querySelector('textarea.cwikeditor').value = text;
+        document.getElementById('rawMarkdown').value = text;
 
         // var seEditor = document.getElementsByClassName('stackedit-hidden-container')[0];
         if (true) // typeof seEditor === "undefined")
@@ -188,12 +187,12 @@ function handleEditorResponse(se, url, domElem) {
 function runeditor(url, domElem) {
     // console.log(url);
     // Open the iframe
-    var stackedit = new Stackedit({
+    let stackedit = new Stackedit({
         url: STACKEDITOR_URL
     });
 
     stackedit.openFile({
-        name: 'Filename', // with an optional filename
+        name: "", // with an optional filename
         content: {
             text: domElem.value // and the Markdown content.
         }
@@ -206,7 +205,7 @@ function runeditor(url, domElem) {
 
 function editWithTemplate(tmplName) {
     url = window.location.href;
-    domElem = document.querySelector('.cwikeditor')
+    domElem = document.getElementById('rawMarkdown');
 
     fetch(tmplName + "?json=1").then(response => response.json().then(json => {
 

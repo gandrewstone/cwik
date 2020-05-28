@@ -117,8 +117,13 @@ function updatePage(json) {
     document.getElementById("structureI").innerHTML = json.structure;
     document.getElementById("pageTitle").innerHTML = json.title;
 
+    if (typeof json.rawMarkdown !== "undefined")
+    {
+        document.getElementById("rawMarkdown").value = json.rawMarkdown;
+    }
+
     // undefined means leave as is, "" means no edit proposal
-    if (json.user.editProposal !== undefined)
+    if (typeof json.user.editProposal !== "undefined")
     {
     let epInput = document.getElementById("editProposal");
     if (epInput)
