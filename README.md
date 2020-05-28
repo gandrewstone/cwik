@@ -68,14 +68,24 @@ cd /opt/cwik
 npm install
 ```
 
+
+### JS file format
+
+```
+js-beautify -w 260
+```
+
+## Execution
+
+### Debug
 The site is started like any nodejs project.  A simple way to start on port 8000 is to do:
 ```
 export PORT=8000
 npm start
 ```
 
-### JS file format
+### Production
 
 ```
-js-beautify -w 260
+pm2 start start.sh --interpreter bash --name "cwik"
 ```
