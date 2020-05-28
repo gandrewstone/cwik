@@ -1,7 +1,20 @@
-var LAYOUT_HEADER_PX = 30;
+var EPHEMERAL_SIDEBAR_SIZE = 600;  // If the screen width is smaller than this, auto-hide the sidebar
 
+function sbJumpTo(spot) {
+    // the innerWidth check lets us simulate this on the PC
+    if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
+        // by delaying a tiny bit the user sees click feedback
+        setTimeout(hideSidebar, 100);
+        setTimeout(()=>jumpTo(spot), 120);  // Defer execution so sidebar can be closed so the position is correct
+    }
+    else jumpTo(spot);
+}
 
 function jumpTo(spot) {
+    let LAYOUT_HEADER_PX = document.getElementById("cwikheader").offsetHeight;
+    if (LAYOUT_HEADER_PX == undefined) {
+        LAYOUT_HEADER_PX = 30;
+    }
     var s = spot.toLowerCase().split(/\s+/).join("-");
     console.log("jumpTo " + s);
     var e = document.getElementById(s);
@@ -20,10 +33,23 @@ function jumpTo(spot) {
 }
 
 function linkTo(spot) {
+    let LAYOUT_HEADER_PX = document.getElementById("cwikheader").offsetHeight;
+    if (LAYOUT_HEADER_PX == undefined) {
+        LAYOUT_HEADER_PX = 30;
+    }
+
+    // the innerWidth check lets us simulate this on the PC
+    if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
+        // by delaying a tiny bit the user sees click feedback
+        setTimeout(hideSidebar, 100);
+        setTimeout(()=>fetchJsonFor(spot), 120);  // Defer execution so sidebar can be closed so the position is correct
+    }
+    else fetchJsonFor(spot);
+}
+
+function fetchJsonFor(spot) {
 
     var s = spot.toLowerCase().split(/\s+/).join("__");
-    console.log("linkTo " + s);
-
     fetch(s + "?json=1").then(response => response.json().then(json => {
         processJsonPage(json);
         window.history.pushState({
@@ -77,6 +103,24 @@ function updatePage(json) {
         console.log("EP: " + json.user.editProposal);
         epInput.value = json.user.editProposal;
     }
+    }
+}
+
+function hideSidebar() {
+    sb = document.querySelector(".leftsidebar");
+    sb.style.display = "none";
+    document.getElementById("sideBarButton").src = '_static_/images/openmenuIcon.svg';
+}
+function toggleSidebar() {
+    sb = document.querySelector(".leftsidebar");
+    if (sb.style.display == "none") {
+        sb.style.display = "flex";
+        sidebarGrid.refreshItems().layout();
+        document.getElementById("sideBarButton").src = '_static_/images/closemenuIcon.svg';
+    }
+    else {
+        sb.style.display = "none";
+        document.getElementById("sideBarButton").src = '_static_/images/openmenuIcon.svg';
     }
 }
 
@@ -163,16 +207,17 @@ function setupLayout(document, window) {
 
 // Prints out a warning or error in a prominent location.  Json is a dictionary object that may have a "notification" member
 function notification(json) {
-    console.log("Notification: " + json.notification);
     if (json.notification) {
-        document.querySelector('center.notifyText').innerText = json.notification;
-        document.querySelector('div.notification').visibility = "visible";
+        document.getElementById('notifyText').innerText = json.notification;
+        //document.querySelector('div.notification').visibility = "visible";
+        document.querySelector('div.notification').style.display = "block";
         setTimeout(function() {
-            if (document.querySelector('center.notifyText').innerText == json.notification) notification({});
+            if (document.getElementById('notifyText').innerText == json.notification) notification({});
         }, 5000);
     } else {
-        document.querySelector('center.notifyText').innerText = "";
-        document.querySelector('div.notification').visibility = "hidden";
+        document.getElementById('notifyText').innerText = "";
+        //document.querySelector('div.notification').visibility = "hidden";
+        document.querySelector('div.notification').style.display = "none";
     }
 }
 

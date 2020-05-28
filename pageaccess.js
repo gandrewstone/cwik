@@ -16,6 +16,12 @@ ncp.limit = 16; // number of simultaneous copy operations allowed
 
 var titles = ["h1", "h2", "h3", "h4", "h5", "h6"]
 
+function updateDict(a, b) {
+    for (let [key, value] of Object.entries(b)) {
+        a[key] = value;
+    }
+}
+
 /* Turns a wiki path into a link */
 function WikiLinkify(s) {
     var text = s.split("/").slice(-1)[0].replace("__", " ")
@@ -232,8 +238,7 @@ handleAPage = function(req, res) {
 
         let doc = data;
 
-        let htmlFile = filepath.slice(0, filepath.length - 2) + "html";
-        // console.log("HTML file is: " + htmlFile);
+        let htmlFile = filepath.slice(0, filepath.length - 2) + "pagejson";
         let regenerate = false;
         try {
             var htmlFileStats = fs.statSync(htmlFile);
@@ -247,20 +252,25 @@ handleAPage = function(req, res) {
         if (regenerate) {
             // Convert markdown to html
             // console.log("regenerate " + htmlFile);
-            mdToHtml(doc).then(html => {
-                fs.writeFile(htmlFile, html, function(err) {
+            mdToHtml(doc).then(data => {
+                fs.writeFile(htmlFile, JSON.stringify(data), function(err) {
                     console.log("write error: " + err);
                 })
-                wikiPageReplyWithMdHtml(req, res, doc, html, jReply);
+
+                updateDict(jReply, data);
+                wikiPageReplyWithMdHtml(req, res, doc, jReply);
             });
         } else {
-            fs.readFile(htmlFile, 'utf8', function(err, html) {
+            fs.readFile(htmlFile, 'utf8', function(err, readData) {
                 if (err) {
-                    mdToHtml(doc).then(html => {
-                        wikiPageReplyWithMdHtml(req, res, doc, html, jReply);
+                    mdToHtml(doc).then(data => {
+                        updateDict(jReply, data);
+                        wikiPageReplyWithMdHtml(req, res, doc, jReply);
                     });
                 } else {
-                    wikiPageReplyWithMdHtml(req, res, doc, html, jReply);
+                    let data = JSON.parse(readData);
+                    updateDict(jReply, data);
+                    wikiPageReplyWithMdHtml(req, res, doc, jReply);
                 }
             });
         }
@@ -285,6 +295,12 @@ var browser = undefined;
 puppeteer.launch({headless: !PuppeteerDebug, defaultViewport: { width:900, height:1024 }}).then(b => { browser = b; });
 
 async function mdToHtml(md) {
+    headings = ""
+    appendHeading = function(tagName, text, attribs) {
+        console.log("TAG: " + tagName + " " + text)
+        headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="sbJumpTo(\'' + text + '\')">' + text + "</span></div>\n"
+    };
+
     const page = await browser.newPage();
     await page.goto(config.MY_URL + "/_cvt_");
     
@@ -295,7 +311,30 @@ async function mdToHtml(md) {
     //await page.waitFor(250);  // Do I need to wait for the katex, mermaid, etc to render or is that done synchronously?  If so, can wait for custom event: https://github.com/puppeteer/puppeteer/blob/master/examples/custom-event.js
     const contentHtml = await page.evaluate("document.querySelector('.wikicontent').innerHTML");
     if (!PuppeteerDebug) page.close();
-    return(contentHtml);
+
+    xformedhtml = sanitizer(contentHtml, {
+        allowedTags: sanitizer.defaults.allowedTags.concat(['div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
+        allowedAttributes: false,
+        transformTags: {
+            "h1" : (tagName, attribs) => {
+                return {tagName: tagName, attribs: attribs}
+            },
+        },
+        exclusiveFilter: function(frame) {
+            if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
+            if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
+                try {
+                    console.log("parsing: " + frame.text);
+                    meta = JSON.parse(frame.text);
+                } catch (err) {
+                    error += err.message;
+                }
+                return false;
+            }
+            return false; // Don't remove anything based on this filter -- I am just trying to extract headings
+        }
+    });
+    return { wikiPage: xformedhtml, structure: headings, title: meta.title, related: meta.related };
 }
 
 
@@ -330,50 +369,16 @@ function updateHistory(req, urlPath) {
     return historyHtml;
 }
 
-function wikiPageReplyWithMdHtml(req, res, md, html, jReply) {
+function wikiPageReplyWithMdHtml(req, res, md, jReply) {
     var meta = null;
     var headings = "";
-    var error = "";
     appendHeading = function(tagName, text, attribs) {
         console.log("TAG: " + tagName + " " + text)
-        headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n"
+        headings += '<div class="ltoc_' + tagName + '"></span><span class="itoc_' + tagName + '" onclick="sbJumpTo(\'' + text + '\')">' + text + "</span></div>\n"
     };
-    // console.log("HEADINGS: " + headings)
 
-    // I don't care about the xformedhtml. I just care about TOC generation
-    xformedhtml = sanitizer(html, {
-        allowedTags: sanitizer.defaults.allowedTags.concat(['iframe', 'img', 'h1', 'h2']),
-        exclusiveFilter: function(frame) {
-            if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
-            if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
-                try {
-                    // console.log("parsing: " + frame.text);
-                    meta = JSON.parse(frame.text);
-                } catch (err) {
-                    error += err.message;
-                }
-                return true;
-            }
-            return false; // Don't remove anything based on this filter -- I am just trying to extract headings
-        }
-    });
-    //console.log("META: " + JSON.stringify(meta))
-    //console.log(html);
-    title = ""
-    related = ""
-    if (meta) {
-        // console.log("meta " + JSON.stringify(meta));
-        if (meta.title) title = meta.title;
-        if (meta.related) {
-            // console.log("related ");
-            related = meta.related.map(t => LinkToLinkify(t, "rel")).join("\n");
-        }
-    }
+    var error = "";
 
-    jReply['title']=title;
-    jReply['related']=related;
-    jReply['structure']=headings;
-    jReply['wikiPage'] = html;
     jReply['rawMarkdown'] = md;
 
     if (req.query.json)

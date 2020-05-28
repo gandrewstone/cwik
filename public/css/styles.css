@@ -10,6 +10,24 @@ html, body
 }
 
 
+/* #### Mobile Phones Portrait #### */
+@media screen and (max-device-width: 480px) and (orientation: portrait){
+  html, body
+{
+    font-size: 150%;
+}
+
+}
+
+/* #### Mobile Phones Landscape #### */
+@media screen and (max-device-width: 640px) and (orientation: landscape){
+  html, body
+{
+    font-size: 125%;
+}
+}
+
+
 h1, h2, h3, h4, h5
 {
     font-family: 'Oswald', Arial, sans-serif;
@@ -21,8 +39,7 @@ h1, h2, h3, h4, h5
 }
 
 
-
-.cwikheader {
+#cwikheader {
   display: block;
   height: 30px;
   margin: 0px;
@@ -36,21 +53,11 @@ h1, h2, h3, h4, h5
   width: 100%;
   z-index: 4;
 }
-.leftsidebar {
-  display: block;
-  position: fixed;
-  width: 25ch;
-  height: 100%;
-  margin-top: 30px;
-  z-index: 3;
-  background: #eeeeee;
-  background-image: linear-gradient(#197017, #ffffff);
-  color: #fff;
-  overflow: hidden;
-}
+
 .cwikcontent {
   display: block;
   position: absolute;
+  float: right;
   width: 100%;
   margin: 5px;
   z-index: 1;
@@ -73,15 +80,6 @@ h1, h2, h3, h4, h5
     display: none;
 }
 
-.cwikheader.muuri-item-dragging {
-  z-index: 3;
-}
-.cwikheader.muuri-item-releasing {
-  z-index: 2;
-}
-.cwikheader.muuri-item-hidden {
-  z-index: 0;
-}
 
 .item-content {
   position: relative;
@@ -94,20 +92,54 @@ h1, h2, h3, h4, h5
     color: #fca22b;
 }
 
-.VertB {
-  margin-left:25ch;
-  margin-top:30px;
-  display: block;
-  position: absolute;
+#sidebarAndContent {
+    margin-top:30px;
+    display: flex;
+  flex-direction: row;
   width: 100%;
-  max-width: 90ch;
   height: 100%;
+  z-index: 0;
+  color: #fff;
+  float: left;
+}
+.leftsidebar {
+  flex-shrink:0;
+  width: 25ch;
+  height: 100%;
+  z-index: 4;
+  color: #fff;
+  overflow: hidden;
+  float: left;
+}
+
+#lsb {
+    position: fixed;
+}
+
+#sideBarButton {
+  position: fixed;
+  left: 5px;
+  z-index: 6;
+  background-color: transparent;
+}
+
+.VertB {
+  float: left;
+  max-width: 90ch;
+  width: 100%;
+  height: 100%;
+  vertical-align: top;
   z-index: 2;
 }
 
 
 .sidebargrid {
-    position: relative;
+    position: fixed;
+    background: #eeeeee;
+    background-image: linear-gradient(#197017, #ffffff);
+    color: #fff;
+    overflow: hidden;
+    width: 25ch;
     height: 100%;
 }
 
@@ -171,7 +203,7 @@ h1, h2, h3, h4, h5
 }
 
 .toolBar {
-  display: inline block;
+  display: inline-block;
   position: absolute;
   height:100%;
   width: 24ch;
@@ -192,18 +224,26 @@ h1, h2, h3, h4, h5
   align: right;
 }
 
-#bchlogo {
+#EpBar {
   display: inline-block;
   position: fixed;
-  left: 22.5ch;
-  z-index: 6;
-  background-color: transparent;
+  right: 20ch;
+  z-index: 5;
+  color: #ffffff;
+  line-height: 30px;
+  text-align:right;
+  align: right;
 }
 
 #bchHeaderCoin
 {
-    width: 45px;
-    margin-left: 0%;
+  display: inline-block;
+  position: fixed;
+  left: 22.5ch;
+  z-index: 6;
+  background-color: transparent;    
+  width: 3.5rem;
+  margin-left: 0%;
 }
 #bchHeaderCoin:hover
 {
@@ -216,7 +256,7 @@ h1, h2, h3, h4, h5
   position: fixed;
   height: 30px;
   left: 30ch;
-  z-index: 5;
+  z-index: 6;
   color: #ffffff;
   line-height: 30px;
   text-align: center;
@@ -227,15 +267,13 @@ h1, h2, h3, h4, h5
     height:100%;
 }
 
-
-
 .notification {
     font-size: 140%;
     position: fixed;
     width: 100%;
     background-color: orange;
     z-index: 10;
-    visibility: visible;
+    display: none;
 }
 
 .headerText {
@@ -287,4 +325,75 @@ tr:nth-child(odd) td { background: #FEFEFE; }
     color: #ffffff;
     height: 20px;
     width: 20ch;
+}
+
+
+/* @media screen and (max-device-width: 640px){ */
+
+/* nav menu will auto-close so it should cover over text */
+@media (orientation: portrait) {
+    .leftsidebar {
+        display: none;
+        position: fixed;
+    }
+
+    #sideBarButton {
+       width: 64px;
+       height: 64px;
+       top: 5px;
+    }
+
+    .VertB {
+    }
+
+    #sidebarAndContent {
+        margin-top:70px;
+        display: block;
+    }
+
+    #cwikheader {
+  height: 70px;
+    }
+
+    #bchHeaderCoin
+{
+  left: 9ch;
+  z-index: 6;
+  width: 4rem;
+  margin-left: 0%;
+}
+
+.toolBar {
+    width: 5ch;
+    left: 60px;
+  z-index: 5;
+  color: #ffffff;
+  line-height: 60px;
+  text-align:center;
+}
+
+#userBar {
+  right: 1ch;
+  line-height: 60px;
+}
+
+/* TO DO, make this a dropdown */
+#EpBar {
+    display: none;
+    line-height: 60px;
+}
+
+#headerPageTitle {
+  height: 60px;
+  left: 14ch;
+  line-height: 60px;
+
+}
+
+#bchHeaderCoin:hover
+{
+    width: 80px;
+    margin-left: 0%;
+}
+
 }

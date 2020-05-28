@@ -16,11 +16,11 @@ html
     script(src="/_static_/js/layout.js")
     script.
       setupLayout(document, window);
-    div#bchlogo
-      img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('home')")
+    
+    img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('home')")
 
-    div#userBar
-      //- v also check if user has commit privledges
+    div#EpBar
+      //- v also check if user has commit priviledges
       if user && user.loggedIn
         input#editProposal(type="text" placeholder="edit proposal" value=user.editProposal)
         span.horizMenu#closeEP(onclick="closeEditProposal()") close
@@ -32,8 +32,9 @@ html
         span.horizMenu(onclick="commitEdits()") commit
         |  | 
         span.horizMenu#submitEP(onclick="submitEditProposal()") submit
-        |  | 
 
+    
+    div#userBar
       //-  |  | 
            span.horizMenu(onclick="settings()") settings
       if user && user.loggedIn
@@ -44,12 +45,15 @@ html
     div#headerPageTitle
       block header
 
-    div.cwikheader
+    div#cwikheader
+      img#sideBarButton(src='_static_/images/closemenuIcon.svg', onclick="toggleSidebar()")
       div.toolBar
         block toolBar
 
-    div.leftsidebar
-      div.item-content
+    div#sidebarAndContent
+     div.leftsidebar
+      div#lsb
+       div.item-content
         div.sidebargrid
           div.structure
              div.item-content
@@ -61,9 +65,9 @@ html
              div.item-content
                 block history
 
-    div.VertB
+     div.VertB
       div.notification
-        center.notifyText
+        div#notifyText
           block notification
       div.Content
         div.item-content
@@ -80,6 +84,11 @@ html
       var sidebarGrid = new Muuri('.sidebargrid', {
         dragEnabled: true
       });
+      if (window.innerWidth < 500) {
+          console.log("screen width: " + screen.availWidth);
+          document.querySelector(".leftsidebar").style.display = "none";
+          document.getElementById("sideBarButton").src = '_static_/images/openmenuIcon.svg';
+      }
        
     block endScript
           
