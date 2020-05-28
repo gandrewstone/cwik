@@ -84,8 +84,7 @@ html
       var sidebarGrid = new Muuri('.sidebargrid', {
         dragEnabled: true
       });
-      if (window.innerWidth < 500) {
-          console.log("screen width: " + screen.availWidth);
+      if (window.matchMedia("(orientation: portrait)").matches) {
           document.querySelector(".leftsidebar").style.display = "none";
           document.getElementById("sideBarButton").src = '_static_/images/openmenuIcon.svg';
       }

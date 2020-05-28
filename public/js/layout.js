@@ -16,6 +16,7 @@ function jumpToWithoutClosingSidebar(spot) {
         LAYOUT_HEADER_PX = 30;
     }
     var s = spot.toLowerCase().split(/\s/).join("-");
+    s = s.replace(":","");
     console.log("jumpTo " + s);
     var e = document.getElementById(s);
     if (e) {
@@ -133,6 +134,7 @@ function hideSidebar() {
     sb.style.display = "none";
     document.getElementById("sideBarButton").src = '_static_/images/openmenuIcon.svg';
 }
+
 function toggleSidebar() {
     sb = document.querySelector(".leftsidebar");
     if (sb.style.display == "none") {

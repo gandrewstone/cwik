@@ -351,6 +351,11 @@ tr:nth-child(odd) td { background: #FEFEFE; }
         display: block;
     }
 
+    .sidebargrid {
+    background: transparent;
+    background-image: none;
+    }
+
     #cwikheader {
   height: 70px;
     }
