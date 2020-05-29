@@ -11,6 +11,8 @@ var PUSH_BRANCHES = config.PUSH_BRANCHES;
 var UPSTREAM_REPO_NAME = config.UPSTREAM_REPO_NAME;
 var REPO_BRANCH_NAME = config.REPO_BRANCH_NAME;
 
+
+
 var ncp = require('ncp').ncp;
 ncp.limit = 16; // number of simultaneous copy operations allowed
 
@@ -141,13 +143,39 @@ handleAPage = function(req, res) {
     urlPath = req.path;
     decodedPath = decodeURI(urlPath);
     decodedPath = decodedPath.replace(" ", "__"); // replace spaces with double underscore
-    decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
+
+    let isMedia = -1;
+    for (let i = 0; i < config.MEDIA_EXT.length; i++) {
+        if (decodedPath.endsWith(config.MEDIA_EXT[i])) {
+            isMedia = i;
+            break;
+        }
+           }
+
+    if (isMedia==-1)
+        decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
     if (decodedPath.startsWith(".")) return BadURL(req, res); // Don't allow overwriting dot files
     if (decodedPath.includes("..")) return BadURL(req, res);
     if (decodedPath == "/") decodedPath = "/home"; // hard code / to home.md
     if (decodedPath.endsWith("/")) decodedPath = decodedPath.substring(0, decodedPath.length - 1);
+
+    if (typeof config.MY_URL !== "undefined") {
+    let canonicalURL = config.MY_URL + decodedPath;
+    if (canonicalURL.endsWith(".md")) {
+        canonicalURL = canonicalURL.slice(0, canonicalURL.length-3);
+    }
+    jReply["canonicalURL"] = canonicalURL;
+        console.log("CanonicalURL: " + canonicalURL);
+    }
+
     var filepath = readFrom + decodedPath; //  + ".md";
-    if (!filepath.endsWith(".md")) {
+
+    if (isMedia>=0) {
+        res.sendFile(filepath);
+        return;
+    }
+    
+    if (isMedia==-1 && !filepath.endsWith(".md")) {
         filepath = filepath + ".md";
     }
     console.log("access " + filepath);
@@ -316,7 +344,11 @@ puppeteer.launch({
 });
 
 async function mdToHtml(md) {
-    headings = ""
+    let headings = ""
+    let titleFromDoc = null
+    let summaryFromDoc = null
+    let picFromDoc = null
+    console.log("md to html");
     appendHeading = function(tagName, text, attribs) {
         // console.log("TAG: " + tagName + " " + text)
         linktext = text.replace("/", ""); // drop any /s
@@ -340,7 +372,7 @@ async function mdToHtml(md) {
 
     xformedhtml = sanitizer(contentHtml, {
         allowedTags: sanitizer.defaults.allowedTags.concat(['text', 'line', 'tspan', 'br', 'em', 'mi', 'mo', 'mrow', 'span', 'annotation', 'semantics', 'math', 'span', 'circle', 'g', 'path', 'rect', 'marker', 'defs', 'foreignobject', 'style',
-            'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+                                                            'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sup','sub','video','source','audio'
         ]),
         allowedAttributes: false,
         allowedClasses: false,
@@ -353,7 +385,18 @@ async function mdToHtml(md) {
             },
         },
         exclusiveFilter: function(frame) {
+            // console.log(JSON.stringify(frame));
             if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
+            if (frame.tag == "h1") {  // Use the first h1 as the title
+                if (titleFromDoc == null) titleFromDoc = frame.text;
+            }
+            if (frame.tag == "em") {  // Use the first italics (em) as the summary
+                if (summaryFromDoc == null) summaryFromDoc = frame.text;
+            }
+            if (frame.tag == "img") {  // Use the first image as the advertisement pic
+                if (picFromDoc == null) picFromDoc = frame.attribs.src;
+            }
+
             if (frame.tag == "div" && frame.attribs["class"] == "cwikmeta") {
                 try {
                     // console.log("parsing: " + frame.text);
@@ -371,8 +414,18 @@ async function mdToHtml(md) {
         html: xformedhtml,
         structure: headings
     }
+
     if (typeof meta.title !== "undefined") ret["title"] = meta.title;
+    else if (titleFromDoc) ret["title"] = titleFromDoc;
+
     if (typeof meta.related !== "undefined") ret["related"] = meta.related;
+
+    if (typeof meta.summary !== "undefined") ret["summary"] = meta.summary;
+    else if (summaryFromDoc) ret["summary"] = summaryFromDoc;
+
+    if (typeof meta.pic !== "undefined") ret["pic"] = meta.pic;
+    else if (picFromDoc) ret["pic"] = picFromDoc;
+
     return ret;
 }
 
@@ -423,6 +476,8 @@ function htmlizeJsonReply(json) {
 
 function wikiPageReplyWithMdHtml(req, res, md, jReply) {
     jReply['rawMarkdown'] = md;
+    if (typeof config.SITE_NAME !== "undefined")
+        jReply['site'] = config.SITE_NAME;
 
     if (req.query.json)
         res.json(jReply);

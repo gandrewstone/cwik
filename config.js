@@ -5,6 +5,8 @@ exports.PUSH_BRANCHES = ["refs/heads/master:refs/heads/master"];
 exports.UPSTREAM_REPO_NAME = "origin";
 exports.REPO_BRANCH_NAME = "master";
 
+exports.SITE_NAME = "NextChain";
+
 if (typeof process.env.CWIK_DEV !== "undefined") {
     exports.MY_URL = "http://192.168.1.100:8000";
     exports.STACKEDIT_URL = "http://192.168.1.100:8080/app";
@@ -22,3 +24,5 @@ exports.DEFAULT_COMMIT_MSG = "wiki commit";
 
 exports.MAIN_REPO_DIR = path.resolve("./repo/mirror");
 exports.USER_FORK_ROOT = path.resolve("./repo");
+
+exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav" ]
