@@ -480,6 +480,12 @@ function wikiPageReplyWithMdHtml(req, res, md, jReply) {
     if (typeof config.SITE_NAME !== "undefined")
         jReply['site'] = config.SITE_NAME;
 
+    if (typeof jReply['pic'] == "undefined") {
+        if (typeof config.DEFAULT_PIC !== "undefined") {
+            jReply['pic'] = config.DEFAULT_PIC;
+        }
+    }
+
     // fixup the "pic" tag to be a full URL
     if (typeof jReply['pic'] !== "undefined") {
         let pic = jReply['pic'];

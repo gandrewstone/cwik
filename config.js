@@ -6,6 +6,7 @@ exports.UPSTREAM_REPO_NAME = "origin";
 exports.REPO_BRANCH_NAME = "master";
 
 exports.SITE_NAME = "NextChain";
+exports.DEFAULT_PIC = "NextChainFlag.png";
 
 if (typeof process.env.CWIK_DEV !== "undefined") {
     exports.MY_URL = "http://192.168.1.100:8000";
