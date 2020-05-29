@@ -476,8 +476,18 @@ function htmlizeJsonReply(json) {
 
 function wikiPageReplyWithMdHtml(req, res, md, jReply) {
     jReply['rawMarkdown'] = md;
+    jReply['ogType'] = 'website';
     if (typeof config.SITE_NAME !== "undefined")
         jReply['site'] = config.SITE_NAME;
+
+    // fixup the "pic" tag to be a full URL
+    if (typeof jReply['pic'] !== "undefined") {
+        let pic = jReply['pic'];
+        if (!pic.startsWith("http")) {
+            if (!pic.startsWith("/")) pic = "/" + pic;
+                pic = (config.MY_URL + pic);
+        }
+    }
 
     if (req.query.json)
         res.json(jReply);
