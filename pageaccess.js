@@ -485,8 +485,9 @@ function wikiPageReplyWithMdHtml(req, res, md, jReply) {
         let pic = jReply['pic'];
         if (!pic.startsWith("http")) {
             if (!pic.startsWith("/")) pic = "/" + pic;
-                pic = (config.MY_URL + pic);
+            jReply['pic'] = (config.MY_URL + pic);
         }
+        
     }
 
     if (req.query.json)
