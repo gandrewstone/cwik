@@ -1,0 +1,35 @@
+extends layout
+
+block header
+  strong
+    center#pageTitle #{title}
+
+block history
+  center.headerText Recently Viewed
+  div#historyI !{history}
+
+block related
+  center.headerText Related
+  div#relatedI !{ related }
+
+block structure
+  center.headerText Contents
+  div#structureI !{ structure }
+
+block wikipage
+  div.wikicontent
+    br
+    center To replace this media, drag and drop a file into this box
+    br
+    div#dropArea
+      form.dropForm
+        if isMediaImage
+            img(src=canonicalURL)
+        input(type="file" id="fileElem" accept="*" onchange="handleFiles(this.files)")
+        
+block notification
+  if notification
+     | !{ notification }
+
+block endScript
+  script(src="/_static_/js/newMedia.js")

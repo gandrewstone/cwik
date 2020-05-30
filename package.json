@@ -22,6 +22,7 @@
     "memorystore": "^1.6.2",
     "mermaid": "^8.5.1",
     "morgan": "~1.9.0",
+    "multer": "^1.4.2",
     "muuri": "^0.7.1",
     "ncp": "^2.0.0",
     "nodegit": "^0.24.3",

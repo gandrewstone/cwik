@@ -57,7 +57,7 @@ html
       block header
 
     div#cwikheader
-      img#sideBarButton(src='_static_/images/closemenuIcon.svg', onclick="toggleSidebar()")
+      img#sideBarButton(src='/_static_/images/closemenuIcon.svg', onclick="toggleSidebar()")
       div.toolBar
         block toolBar
 
@@ -97,7 +97,7 @@ html
       });
       if (window.matchMedia("(orientation: portrait)").matches) {
           document.querySelector(".leftsidebar").style.display = "none";
-          document.getElementById("sideBarButton").src = '_static_/images/openmenuIcon.svg';
+          document.getElementById("sideBarButton").src = '/_static_/images/openmenuIcon.svg';
       }
        
     block endScript

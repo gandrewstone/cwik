@@ -4,8 +4,8 @@ var config = require("../config.js");
 var express = require('express');
 var router = express.Router();
 var users = require('../knownusers.json')["KnownUsers"]
-
-
+var multer = require('multer')
+var path = require('path');
 
 // https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
 function zip(arrays) {
@@ -471,6 +471,55 @@ router.get('/_cvt_', function(req, res, next) {
     jReply['wikiPage'] = "";
     jReply['rawMarkdown'] = "";
     res.render('cvt', jReply);
+});
+
+
+router.post('/_upload_/*', function(req, res, next) {
+    //if (req.session.uid == undefined) {
+    //    req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
+    //}
+
+    if (req.session.uid == undefined) {
+        return res.status(401).json({
+            notification: "unauthorized upload attempt, log in first!"
+        });
+    }
+
+    urlPath = req.path;
+    let decodedPath = decodeURI(urlPath);
+    decodedPath = decodedPath.replace(" ", "__");
+    decodedPath = decodedPath.slice("/_upload_".length);
+    let userSpace = config.USER_FORK_ROOT + "/" + req.session.uid.split(":")[1];
+
+    var writeFilePath = userSpace + decodedPath;
+
+    console.log("POST an upload to: " + userSpace + " file: " + decodedPath);
+    //let upload = multer({ dest: writeFilePath });
+
+    let storage = multer.diskStorage({
+        destination: path.dirname(writeFilePath),
+        filename: function(req, file, cb) {
+            cb(null, path.basename(writeFilePath));
+        }
+        // '.' + mime.extension(file.mimetype));
+    });
+
+    let upload = multer({
+        storage: storage
+    });
+    upload.single('file')(req, res, () => {}); // 3rd param is continuation if we need to process after file exists
+
+    let chFiles = git.changedFiles[req.session.uid];
+    let repoRelativeFilePath = decodedPath.slice(1);
+    if (!chFiles.has(repoRelativeFilePath)) {
+        chFiles.add(repoRelativeFilePath);
+        git.saveChangedFiles(req.session.uid, chFiles);
+    }
+
+    return res.json({
+        notification: "upload succeeded"
+    });
+
 });
 
 router.use(handleAPage);

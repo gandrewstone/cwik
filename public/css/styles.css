@@ -323,7 +323,32 @@ tr:nth-child(odd) td { background: #FEFEFE; }
     width: 20ch;
 }
 
+/* new media */
 
+#mediaFigure {
+
+}
+
+#dropArea {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+  min-width: 500px;
+  min-height: 400px;
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+#dropArea.highlight {
+  border-color: purple;
+}
+
+#fileElem {
+  display: none;
+}
 /* @media screen and (max-device-width: 640px){ */
 
 /* nav menu will auto-close so it should cover over text */

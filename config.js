@@ -26,4 +26,4 @@ exports.DEFAULT_COMMIT_MSG = "wiki commit";
 exports.MAIN_REPO_DIR = path.resolve("./repo/mirror");
 exports.USER_FORK_ROOT = path.resolve("./repo");
 
-exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav" ]
+exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav"]

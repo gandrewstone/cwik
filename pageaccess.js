@@ -150,9 +150,9 @@ handleAPage = function(req, res) {
             isMedia = i;
             break;
         }
-           }
+    }
 
-    if (isMedia==-1)
+    if (isMedia == -1)
         decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
     if (decodedPath.startsWith(".")) return BadURL(req, res); // Don't allow overwriting dot files
     if (decodedPath.includes("..")) return BadURL(req, res);
@@ -160,28 +160,38 @@ handleAPage = function(req, res) {
     if (decodedPath.endsWith("/")) decodedPath = decodedPath.substring(0, decodedPath.length - 1);
 
     if (typeof config.MY_URL !== "undefined") {
-    let canonicalURL = config.MY_URL + decodedPath;
-    if (canonicalURL.endsWith(".md")) {
-        canonicalURL = canonicalURL.slice(0, canonicalURL.length-3);
-    }
-    jReply["canonicalURL"] = canonicalURL;
+        let canonicalURL = config.MY_URL + decodedPath;
+        if (canonicalURL.endsWith(".md")) {
+            canonicalURL = canonicalURL.slice(0, canonicalURL.length - 3);
+        }
+        jReply["canonicalURL"] = canonicalURL;
         console.log("CanonicalURL: " + canonicalURL);
     }
 
     var filepath = readFrom + decodedPath; //  + ".md";
 
-    if (isMedia>=0) {
-        res.sendFile(filepath);
+    if (isMedia >= 0) {
+        if (!user.loggedIn) return res.sendFile(filepath);
+        try {
+            let mediaFileStats = fs.statSync(filepath);
+            if (req.query.upload) {
+                jReply["isMediaImage"] = true;
+                res.render('newMedia', jReply);
+            } else res.sendFile(filepath);
+        } catch (err) {
+            res.status(404).render('newMedia', jReply);
+        }
+
         return;
     }
-    
-    if (isMedia==-1 && !filepath.endsWith(".md")) {
+
+    if (isMedia == -1 && !filepath.endsWith(".md")) {
         filepath = filepath + ".md";
     }
     console.log("access " + filepath);
 
     if (req.method == "POST") {
-        var repoRelativeFilePath = decodedPath.slice(1);
+        let repoRelativeFilePath = decodedPath.slice(1);
 
         if (!repoRelativeFilePath.endsWith(".md")) {
             repoRelativeFilePath = repoRelativeFilePath + ".md";
@@ -237,7 +247,6 @@ handleAPage = function(req, res) {
     console.log("read file: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
-            console.log("no page");
             data = "";
             jReply['notification'] = "nonexistent page, click 'edit' to create";
 
@@ -273,9 +282,9 @@ handleAPage = function(req, res) {
         let metaFile = filepath.slice(0, filepath.length - 2) + "meta";
         let regenerate = false;
         try {
-            var htmlFileStats = fs.statSync(htmlFile);
-            var mdFileStats = fs.statSync(filepath);
-            console.log("Times: html: " + htmlFileStats.mtime + "md: " + mdFileStats.mtime);
+            let htmlFileStats = fs.statSync(htmlFile);
+            let mdFileStats = fs.statSync(filepath);
+            console.log("Times: html: " + htmlFileStats.mtime + " md: " + mdFileStats.mtime);
             if (htmlFileStats.mtime <= mdFileStats.mtime) regenerate = true;
         } catch (err) {
             regenerate = true;
@@ -372,7 +381,7 @@ async function mdToHtml(md) {
 
     xformedhtml = sanitizer(contentHtml, {
         allowedTags: sanitizer.defaults.allowedTags.concat(['text', 'line', 'tspan', 'br', 'em', 'mi', 'mo', 'mrow', 'span', 'annotation', 'semantics', 'math', 'span', 'circle', 'g', 'path', 'rect', 'marker', 'defs', 'foreignobject', 'style',
-                                                            'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sup','sub','video','source','audio'
+            'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sup', 'sub', 'video', 'source', 'audio'
         ]),
         allowedAttributes: false,
         allowedClasses: false,
@@ -387,13 +396,13 @@ async function mdToHtml(md) {
         exclusiveFilter: function(frame) {
             // console.log(JSON.stringify(frame));
             if (titles.includes(frame.tag)) appendHeading(frame.tag, frame.text, frame.attribs);
-            if (frame.tag == "h1") {  // Use the first h1 as the title
+            if (frame.tag == "h1") { // Use the first h1 as the title
                 if (titleFromDoc == null) titleFromDoc = frame.text;
             }
-            if (frame.tag == "em") {  // Use the first italics (em) as the summary
+            if (frame.tag == "em") { // Use the first italics (em) as the summary
                 if (summaryFromDoc == null) summaryFromDoc = frame.text;
             }
-            if (frame.tag == "img") {  // Use the first image as the advertisement pic
+            if (frame.tag == "img") { // Use the first image as the advertisement pic
                 if (picFromDoc == null) picFromDoc = frame.attribs.src;
             }
 
@@ -493,7 +502,7 @@ function wikiPageReplyWithMdHtml(req, res, md, jReply) {
             if (!pic.startsWith("/")) pic = "/" + pic;
             jReply['pic'] = (config.MY_URL + pic);
         }
-        
+
     }
 
     if (req.query.json)

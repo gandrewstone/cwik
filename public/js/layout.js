@@ -146,6 +146,7 @@ function toggleSidebar() {
 
 function processJsonPage(json) {
     console.log("processJsonPage");
+    notification(json);
     if (typeof json.wikiPage !== "undefined") {
         document.querySelector('.wikicontent').innerHTML = json.wikiPage;
         updatePage(json);
@@ -153,7 +154,6 @@ function processJsonPage(json) {
         window.scrollTo({
             top: 0
         });
-        notification(json);
     } else if (typeof json.html !== "undefined") {
         document.querySelector('.wikicontent').innerHTML = json.html;
         updatePage(json);
@@ -161,15 +161,13 @@ function processJsonPage(json) {
         window.scrollTo({
             top: 0
         });
-        notification(json);
-    } else {
+    } else if (typeof json.rawMarkdown !== "undefined") {
         processFetchedMd(json.rawMarkdown).then(html => {
             updatePage(json);
             sidebarGrid.refreshItems().layout();
             window.scrollTo({
                 top: 0
             });
-            notification(json);
         });
     }
 }
