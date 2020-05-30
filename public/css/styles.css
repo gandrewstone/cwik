@@ -33,6 +33,20 @@ h1, h2, h3, h4, h5
     font-family: 'Oswald', Arial, sans-serif;
 }
 
+br.clear {
+    clear: both;
+}
+
+hr {
+    display: block;
+    margin: 5px 0px;
+    overflow: hidden;
+    border: none;
+
+    background-image: linear-gradient(to right, #ccffcc, #207020, #207020, #ffffff);
+    height: 5px;
+}
+
 .outergrid {
     position: relative;
     height: 100%;
@@ -43,7 +57,6 @@ h1, h2, h3, h4, h5
   display: block;
   height: 30px;
   margin: 0px;
-  z-index: 1;
   background: #197717;
   color: #fff;
 
@@ -102,7 +115,7 @@ h1, h2, h3, h4, h5
   flex-shrink:0;
   width: 25ch;
   height: 100%;
-  z-index: 4;
+  z-index: 3;
   color: #fff;
   overflow: hidden;
   float: left;
@@ -198,6 +211,7 @@ h1, h2, h3, h4, h5
     font-size: 90%;
 }
 
+
 .toolBar {
   display: inline-block;
   position: absolute;
@@ -207,6 +221,12 @@ h1, h2, h3, h4, h5
   color: #ffffff;
   line-height: 30px;
   text-align:center;
+}
+
+#editBar {
+    display: inline-block;
+    position: fixed;
+    z-index: 6;
 }
 
 #userBar {
