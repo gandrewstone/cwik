@@ -25,6 +25,7 @@ getChallengeString = _ => {
 
 
 verifySig = function(challenge, addr, signature) {
+    if (!addr.includes(":")) addr = "bitcoincash:" + addr;
     console.log("verifysig: " + addr);
     var result = verifySignature.messageVerify({
         challenge: challenge,

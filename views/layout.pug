@@ -24,11 +24,12 @@ html
     script(src="/_static_/js/muuri.js")
     script.
       var STACKEDITOR_URL="!{STACKEDITOR_URL}";
+      var SITE_NAME="!{SITE_NAME}";
     script(src="/_static_/js/layout.js")
     script.
       setupLayout(document, window);
     
-    img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('home')")
+    img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('home')", title="home")
 
     div#EpBar
       //- v also check if user has commit priviledges
@@ -57,7 +58,7 @@ html
       block header
 
     div#cwikheader
-      img#sideBarButton(src='/_static_/images/closemenuIcon.svg', onclick="toggleSidebar()")
+      img#sideBarButton(src='/_static_/images/closemenuIcon.svg', onclick="toggleSidebar()", title="toggle menu")
       div.toolBar
         block toolBar
 

@@ -31,14 +31,13 @@ var sedit = new Stackedit({
 var contentRenderCallback = undefined;
 
 var wikiContentObserver = new MutationObserver(function(change, observer) {
-    console.log("wikicontent changed");
+    //    console.log("wikicontent changed");
     xformMermaids();
     xformKatex();
     if (contentRenderCallback) contentRenderCallback();
 });
 
 var wikicontentDom = document.querySelector('.wikicontent');
-console.log(wikicontentDom);
 wikiContentObserver.observe(wikicontentDom, {
     childList: true,
     subtree: true,

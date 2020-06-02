@@ -5,35 +5,45 @@ block header
     center Login
 
 block history
-  center Recently Viewed
+  center.headerText Recently Viewed
+  div#historyI !{history}
 
 block related
-  div.relatedI
-  
+  center.headerText Related
+  div#relatedI !{ related }
+
 block structure
-  div.structureI
+  center.headerText Page Contents
+  div#structureI !{ structure }
+
+block notification
+  if notification
+     | !{ notification }
 
 block wikipage
   div.login
+   center
+      H2 Registration
+      p Contact the site administrator and provide a BCH address to gain edit access to this site.
    form(action="/_login_", method="POST")
-    center#QRcode QR graphic here
     center
+      H2 Sign-in via BCH Identity Protocol
+      div#QRcode QR graphic here
       small
         a(href=QRsignCode, id="bchidentity_op_login") login with local app
       
     center
       H2 Manual Entry
-    center Challenge
+      p Many Bitcoin Cash wallets support "sign message" functionality.  You may sign into this site by using that wallet to sign challenge below and provide the resulting address and signature.  This can be inconvenient to do manually, but once you've logged in, your session will persist for a month or until the server is restarted.
     center
+      | Challenge
       input#challenge(type="text", name='challenge',readonly='true', value=challenge)
-    center Address
-    center
+      | Address
       input#addr(name='addr')
-    center Signature
-    center
+      | Signature
       input#sig(name='sig')
-    center
       input(type="submit", value="login")
+
   script(type="text/javascript",src="/_static_/js/qrcode.js")
   script.
     var typeNumber = 12;
@@ -42,6 +52,8 @@ block wikipage
     qr.addData("!{QRsignCode}");
     qr.make();
     document.getElementById('QRcode').innerHTML = qr.createImgTag();
+    let notif = document.querySelector(".notification");
+    if (notif.textContent) notif.style.display="block";
     loginPolling();
 
 block toolBar

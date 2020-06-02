@@ -7,6 +7,7 @@ var sanitizer = require("sanitize-html");
 var path = require("path");
 var git = require("./cwikgit");
 var config = require("./config");
+var misc = require("./misc");
 var PUSH_BRANCHES = config.PUSH_BRANCHES;
 var UPSTREAM_REPO_NAME = config.UPSTREAM_REPO_NAME;
 var REPO_BRANCH_NAME = config.REPO_BRANCH_NAME;
@@ -17,46 +18,6 @@ var ncp = require('ncp').ncp;
 ncp.limit = 16; // number of simultaneous copy operations allowed
 
 var titles = ["h1", "h2", "h3", "h4", "h5", "h6"]
-
-function updateDict(a, b) {
-    for (let [key, value] of Object.entries(b)) {
-        a[key] = value;
-    }
-}
-
-/* Turns a wiki path into a link */
-function WikiLinkify(s) {
-    var text = s.split("/").slice(-1)[0].replace("__", " ")
-    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
-        text = text.slice(0, text.length - 3)
-    return '<a class="histL" href=\"' + s + '">' + text + '</a>'
-}
-
-
-/* Creates a js-handled link to an anchor i.e. # -- an internal link to a different document section.  Click calls the client-side js function jumpTo. */
-/*
-function JumpToLinkify(s, cls) {
-    var text = s.split("/").slice(-1)[0].replace("__", " ");
-    text = text.replace("/","");  // drop any /s
-    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
-        text = text.slice(0, text.length - 3);
-    //return '<a class="histL" href=\"' + s + '">' + text + '</a>'
-    var ret = '<div class="l' + cls + '"></span><span class="i' + cls + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n";
-    //let ret = '<div class="ltoc_' + cls + '"><span class="itoc_' + cls + '" onclick="jumpTo(\'' + text + '\')">' + text + "</span></div>\n";
-    console.log(ret)
-    return ret;
-}
-*/
-
-/* Creates a js-handled link to another document.  Click calls the client-side js function "linkTo" */
-function LinkToLinkify(s, cls) {
-    var text = s.split("/").slice(-1)[0].replace("__", " ");
-    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
-        text = text.slice(0, text.length - 3);
-    var ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + text + '\')"><span class="i' + cls + '">' + text + "</span></div>\n";
-    // console.log(ret);
-    return ret;
-}
 
 
 function BadURL(req, res) {
@@ -263,11 +224,20 @@ handleAPage = function(req, res) {
 
                 });
             } else {
-                console.log("wiki browse no page");
-                return fs.readFile(readFrom + "/cwikTemplate.html", 'utf8', function(err, htmlTemplateData) {
-                    jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
-                    return res.render('wikibrowse', jReply);
-                });
+                if (user.loggedIn) {
+                    jReply['SITE_NAME'] = config.SITE_NAME;
+                    console.log("wiki browse no page");
+                    return fs.readFile(readFrom + "/cwikTemplate.html", 'utf8', function(err, htmlTemplateData) {
+                        jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
+                        return res.render('wikibrowse', jReply);
+                    });
+                }
+                else {
+                    return fs.readFile("noPageNoUser.html", 'utf8', function(err, htmlTemplateData) {
+                        jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
+                        return res.render('wikibrowse', jReply);
+                    });
+                }
             }
         }
 
@@ -296,7 +266,7 @@ handleAPage = function(req, res) {
             mdToHtml(doc).then(data => {
                 let html = data.html;
                 delete data.html;
-                updateDict(jReply, data);
+                misc.updateDict(jReply, data);
                 jReply.wikiPage = html;
                 wikiPageReplyWithMdHtml(req, res, doc, jReply);
 
@@ -314,12 +284,12 @@ handleAPage = function(req, res) {
                 fs.readFile(htmlFile, 'utf8', function(err, readData) {
                     if (err) {
                         mdToHtml(doc).then(data => {
-                            updateDict(jReply, data);
+                            misc.updateDict(jReply, data);
                             wikiPageReplyWithMdHtml(req, res, doc, jReply);
                         });
                     } else {
                         let data = JSON.parse(metaData);
-                        updateDict(jReply, data);
+                        misc.updateDict(jReply, data);
                         jReply.wikiPage = readData;
                         wikiPageReplyWithMdHtml(req, res, doc, jReply);
                     }
@@ -466,7 +436,7 @@ function updateHistory(req, urlPath) {
     }
 
 
-    historyHtml = req.session.history.reverse().map(s => LinkToLinkify(s, "his")).join("\n");
+    historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
     return historyHtml;
 }
 
@@ -476,7 +446,7 @@ function htmlizeJsonReply(json) {
     if (typeof json.related !== "undefined") {
         let relatedStr = "";
         for (let i = 0; i < json.related.length; i++) {
-            relatedStr = relatedStr.concat(LinkToLinkify(json.related[i], "rel"));
+            relatedStr = relatedStr.concat(misc.LinkToLinkify(json.related[i], "rel"));
         }
         json.related = relatedStr;
     }
@@ -509,6 +479,7 @@ function wikiPageReplyWithMdHtml(req, res, md, jReply) {
         res.json(jReply);
     else {
         htmlizeJsonReply(jReply);
+        jReply['SITE_NAME'] = config.SITE_NAME;
         res.render('wikibrowse', jReply);
     }
 }

@@ -1,4 +1,5 @@
 var EPHEMERAL_SIDEBAR_SIZE = 600; // If the screen width is smaller than this, auto-hide the sidebar
+var NOTIFICATION_DELAY = 15000;
 
 function jumpTo(spot) {
     // the innerWidth check lets us simulate this on the PC
@@ -33,11 +34,6 @@ function jumpToWithoutClosingSidebar(spot) {
 }
 
 function linkTo(spot) {
-    let LAYOUT_HEADER_PX = document.getElementById("cwikheader").offsetHeight;
-    if (LAYOUT_HEADER_PX == undefined) {
-        LAYOUT_HEADER_PX = 30;
-    }
-
     // the innerWidth check lets us simulate this on the PC
     if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
         // by delaying a tiny bit the user sees click feedback
@@ -47,16 +43,24 @@ function linkTo(spot) {
 }
 
 function fetchJsonFor(spot) {
+    let wc = document.querySelector('.wikicontent')
+    // Our current page template isn't capable of showing wiki pages so reload the entire page
+    if (wc == null) {
+        window.location.href = spot;
+        return;
+    }
 
     var s = spot.toLowerCase().split(/\s+/).join("__");
+    if (s.endsWith(".md")) s = s.slice(0,s.length-3);
+
     fetch(s + "?json=1").then(response => response.json().then(json => {
         processJsonPage(json);
         window.history.pushState({
             "json": json,
             "pageTitle": json.thisPage
         }, "", json.thisPage);
-        document.title = json.thisPage;
     }));
+    return s;
 }
 
 function logout() {
@@ -145,17 +149,31 @@ function toggleSidebar() {
 }
 
 function processJsonPage(json) {
-    console.log("processJsonPage");
+    //console.log("processJsonPage ");
+    //console.log(json);
     notification(json);
+    if ((typeof json.title !== "undefined") && (json.title != ""))
+    {
+        document.title = json.title + " - " + SITE_NAME;
+    }
+    else document.title = SITE_NAME;
+
+    let wc = document.querySelector('.wikicontent')
+    // Our current page template isn't capable of showing wiki pages so reload the entire page
+    if (wc == null) {
+        window.location.href = json.canonicalURL;
+        return;
+    }
+
     if (typeof json.wikiPage !== "undefined") {
-        document.querySelector('.wikicontent').innerHTML = json.wikiPage;
+        wc.innerHTML = json.wikiPage;
         updatePage(json);
         sidebarGrid.refreshItems().layout();
         window.scrollTo({
             top: 0
         });
     } else if (typeof json.html !== "undefined") {
-        document.querySelector('.wikicontent').innerHTML = json.html;
+        wc.innerHTML = json.html;
         updatePage(json);
         sidebarGrid.refreshItems().layout();
         window.scrollTo({
@@ -182,26 +200,14 @@ function internalLinkOptimizer(doc, wnd, e) {
         {
             e.preventDefault();
             e.stopPropagation();
-            fetch(tgt.href + "?json=1").then(response => response.json().then(json => {
-                processJsonPage(json);
-                window.history.pushState({
-                    "json": json,
-                    "pageTitle": tgt.href
-                }, "", tgt.href);
-                document.title = tgt.href;
-
-            }));
+            let r = fetchJsonFor(tgt.href);
         }
     }
 }
 
 function backOptimizer(doc, wnd, e) {
-    console.log(wnd.history.state);
-    console.log("BackOptimizer");
-    console.log(e);
     if (e.state) {
         var json = e.state.json;
-        console.log(json);
         if (json) {
             e.preventDefault();
             e.stopPropagation();
@@ -231,7 +237,7 @@ function notification(json) {
         document.querySelector('div.notification').style.display = "block";
         setTimeout(function() {
             if (document.getElementById('notifyText').innerText == json.notification) notification({});
-        }, 5000);
+        }, NOTIFICATION_DELAY);
     } else {
         document.getElementById('notifyText').innerText = "";
         //document.querySelector('div.notification').visibility = "hidden";

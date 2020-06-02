@@ -1,6 +1,7 @@
 var auth = require("../auth.js");
 var git = require("../cwikgit.js");
 var config = require("../config.js");
+var misc = require("../misc.js");
 var express = require('express');
 var router = express.Router();
 var users = require('../knownusers.json')["KnownUsers"]
@@ -55,19 +56,22 @@ router.get('/_login_/auto', function(req, res, next) {
     console.log("cookie=" + req.query.cookie);
     if (req.query.op == "login") {
         console.log("login");
+        let addr = req.query.addr;
+        if (!addr.includes(":")) addr = "bitcoincash:" + addr;
+
         sessionStore.get(req.query.cookie, function(err, session) {
             if (err != null)
                 console.log("session store: " + err.message);
             else
                 console.log("got session for cookie");
             if (session != null) {
-                if (!KnownUser(req.query.addr)) {
-                    console.log("unknown user " + req.query.addr);
-                    res.status(200).send("unknown identity");
+                if (!KnownUser(addr)) {
+                    console.log("unknown user " + addr);
+                    res.status(200).send("unknown identity: " + addr);
                     return;
 
                 }
-                if (verifySig(req.headers.host + "_bchidentity_login_" + session.challenge, req.query.addr, req.query.sig)) {
+                if (verifySig(req.headers.host + "_bchidentity_login_" + session.challenge, addr, req.query.sig)) {
                     sessionStore.get(req.query.cookie, function(err, session2) {
                         console.log("reloaded session: " + JSON.stringify(session2));
                     });
@@ -76,14 +80,14 @@ router.get('/_login_/auto', function(req, res, next) {
                     // when this function returns.
                     if (req.query.cookie == req.sessionID) {
                         req.session.challenge = "solved";
-                        req.session.uid = req.query.addr;
+                        req.session.uid = addr;
                         git.repoBranchNameByUid(req.session.uid).then(br => {
                             if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                         });
                     } else // If I connected with a different (out-of-band) session, then I need to write the sessionStore directly
                     {
                         session.challenge = "solved";
-                        session.uid = req.query.addr;
+                        session.uid = addr;
                         git.repoBranchNameByUid(req.session.uid).then(br => {
                             if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                             sessionStore.set(req.query.cookie, session);
@@ -94,7 +98,7 @@ router.get('/_login_/auto', function(req, res, next) {
                         });
 
                     }
-                    git.refreshRepo(req.query.addr, config.UPSTREAM_REPO_NAME);
+                    git.refreshRepo(addr, config.UPSTREAM_REPO_NAME);
                     console.log("login accepted");
                     res.status(200).send("login accepted");
                     return;
@@ -130,12 +134,17 @@ router.get('/_login_', function(req, res, next) {
         req.session.challenge = getChallengeString();
     }
     console.log("session challenge: " + req.session.challenge);
-    var QRcodeText = "bchidentity://" + req.headers.host + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
-    user = {
+    let QRcodeText = "bchidentity://" + req.headers.host + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    let user = {
         loggedIn: (req.session.uid != undefined) ? true : false
     };
+    let historyHtml = "";
+    if (typeof req.session.history !== "undefined") {
+        historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
+    }
     res.render('login', {
         challenge: req.headers.host + "_login_" + req.session.challenge,
+        history: historyHtml,
         QRsignCode: QRcodeText,
         user: user
     });
@@ -144,16 +153,37 @@ router.get('/_login_', function(req, res, next) {
 router.post('/_login_', function(req, res, next) {
     console.log("_login_: POST of " + JSON.stringify(req.body));
     sess = req.session;
+    let error = "";
+    let addr = req.body.addr;
+    if (!addr.includes(":")) addr = "bitcoincash:" + addr;
     if (req.headers.host + "_login_" + req.session.challenge != req.body.challenge) {
-        res.send("stale challenge string");
-    } else if (KnownUser(req.body.addr) == false) {
-        res.send("unknown user");
-    } else if (verifySig(req.body.challenge, req.body.addr, req.body.sig)) {
-        sess.uid = req.body.addr;
-        res.redirect("/");
+        error = "stale challenge string, try again";
+        req.session.challenge = getChallengeString();
+    } else if (KnownUser(addr) == false) {
+        error = "unknown address";
+    } else if (verifySig(req.body.challenge, addr, req.body.sig)) {
+        sess.uid = addr;
+        return res.redirect("/");
     } else {
-        res.send("bad sig");
+        error = "incorrect signature";
     }
+
+    let user = {
+        loggedIn: (req.session.uid != undefined) ? true : false
+    };
+    let historyHtml = "";
+    if (typeof req.session.history !== "undefined") {
+        historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
+    }
+    let QRcodeText = "bchidentity://" + req.headers.host + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    console.log("error: " + error);
+    res.render('login', {
+        notification: error,
+        challenge: req.headers.host + "_login_" + req.session.challenge,
+        history: historyHtml,
+        QRsignCode: QRcodeText,
+        user: user
+    });
 });
 
 

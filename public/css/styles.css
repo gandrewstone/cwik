@@ -72,7 +72,7 @@ hr {
   position: absolute;
   float: right;
   width: 100%;
-  margin: 5px;
+  margin: 15px;
   z-index: 1;
   background: #ffffff;
   color: #000000;
@@ -99,6 +99,7 @@ hr {
 
 .horizMenu:hover {
     color: #fca22b;
+    cursor: pointer;
 }
 
 #sidebarAndContent {
@@ -161,7 +162,7 @@ hr {
   margin-top:5px;
   z-index: 2;
   color: #000000;
-  border-radius: 20px;
+  border-radius: 8px;
   border: 2px solid #197717;
   background: #d0d0d0;
   color: #000000;
@@ -176,7 +177,7 @@ hr {
   margin-top:5px;
   z-index: 2;
   color: #000000;
-  border-radius: 20px;
+  border-radius: 8px;
   border: 2px solid #197717;
   background: #d0d0d0;
   color: #000000;
@@ -190,7 +191,7 @@ hr {
   margin-left: 3px;
   margin-top:5px;
   z-index: 2;
-  border-radius: 20px;
+  border-radius: 8px;
   border: 2px solid #197717;
   background: #d0d0d0;
   color: #000000;
@@ -257,7 +258,7 @@ hr {
   position: fixed;
   left: 22.5ch;
   z-index: 6;
-  background-color: transparent;    
+  background-color: transparent;
   width: 3.5rem;
   margin-left: 0%;
 }
@@ -265,6 +266,7 @@ hr {
 {
     width: 4.5rem;
     margin-left: 0%;
+    cursor: pointer;
 }
 
 #headerPageTitle {
