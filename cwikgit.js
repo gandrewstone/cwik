@@ -4,6 +4,9 @@ var fs = require('fs');
 
 var EP_SUBMISSIONS = "SUBMIT";
 
+function repoUserDir(repoCfg, uid) {
+    return repoCfg.DIR + "/" + uid.split(":")[1];
+}
 
 /* Provide git ssh credentials -- but only try 5 times then give up (otherwise nodeget goes into an infinite loop */
 function ccred() {
@@ -134,16 +137,22 @@ branch = function(repo, branchName, upstreamRepoName, create) {
 // Perhaps this can be better accomplished with a git command
 changedFiles = {}; // This is a dictionary of uid, Set() pairs
 
-commitEdits = function(req, res, upstreamRepoName, comment) {
+commitEdits = function(req, res, repoCfg, comment) {
     var uid = req.session.uid;
-    var user = uid.split(":")[1];
-    var userSpace = config.USER_FORK_ROOT + "/" + user;
-    if (comment == undefined) comment = config.DEFAULT_COMMIT_MSG;
-    console.log("commit edits run: " + user + " repo " + userSpace);
+    let userName = uid.split(":")[1];
+    if (typeof req.session.userName !== "undefined")
+        userName = req.session.userName;
+    let userEmail = uid + "@" + config.MY_URL.split("//")[1];
+    if (typeof req.session.userEmail !== "undefined")
+        userEmail = req.session.userEmail;
+    var userSpace = repoUserDir(repoCfg, uid);
+    console.log("commit")
+    if (typeof comment == "undefined") comment = config.DEFAULT_COMMIT_MSG;
+    console.log("commit edits run: " + userName + " repo " + userSpace);
     git.Repository.open(userSpace).then(function(repo) {
-            var author = git.Signature.now(user, user + "@reference.cash");
+            var author = git.Signature.now(userName, userEmail);
             var committer = git.Signature.now(config.COMMITTER_USERNAME, config.COMMITTER_EMAIL);
-            console.log("author " + user + "@reference.cash");
+            console.log("author " + userName + " " + userEmail);
             console.log("committer " + "buwiki@protonmail.com");
             files = Array.from(changedFiles[uid].keys());
             console.log("files " + JSON.stringify(files));
@@ -151,8 +160,8 @@ commitEdits = function(req, res, upstreamRepoName, comment) {
                 function(oid) {
                     console.log("commit worked " + oid);
                     changedFiles[uid].clear();
-                    saveChangedFiles(uid, changedFiles[uid]);
-                    push(repo, upstreamRepoName).then(function(number) {
+                    saveChangedFiles(repoCfg, uid, changedFiles[uid]);
+                    push(repo, repoCfg.UPSTREAM_NAME).then(function(number) {
                             console.log("push completed. returned " + number);
                             res.json({
                                 notification: "commit and push completed"
@@ -186,16 +195,18 @@ const getDirectories = source =>
 
 /** Pull from the origin in every user's repo */
 refreshRepoEveryone = function() {
-    repoDirs = getDirectories(config.USER_FORK_ROOT);
-    console.log("repo dirs: " + repoDirs);
-    for (i = 0; i < repoDirs.length; i++) {
-        refreshRepoByDir(config.USER_FORK_ROOT + "/" + repoDirs[i], config.UPSTREAM_REPO_NAME);
-    }
+    config.REPOS.forEach(repo => {
+        repoDirs = getDirectories(repo.DIR);
+        console.log("repo dirs: " + repoDirs);
+        for (i = 0; i < repoDirs.length; i++) {
+            refreshRepoByDir(repo.DIR + "/" + repoDirs[i], repo.UPSTREAM_NAME);
+        }
+    });
 }
 
-repoBranchNameByUid = function(uid) {
+repoBranchNameByUid = function(repoCfg, uid) {
     return new Promise(function(resolve, reject) {
-        repoBranchByUid(uid).then(branch => resolve(branch.shorthand()), reject);
+        repoBranchByUid(repoCfg, uid).then(branch => resolve(branch.shorthand()), reject);
     });
 }
 
@@ -205,11 +216,20 @@ repoBranchNameByDir = function(dir) {
     });
 }
 
-repoBranchByUid = function(uid) {
-    var user = uid.split(":")[1];
-    var userSpace = config.USER_FORK_ROOT + "/" + user;
+repoBranchByUid = function(repoCfg, uid) {
+    let userSpace = repoUserDir(repoCfg, uid);
     return repoBranchByDir(userSpace);
+};
+
+/*
+repoBranchByUid = function(uid) {
+    let user = uid.split(":")[1];
+    return Promise.all(config.REPOS.map(repo => {
+        let userSpace = config.USER_FORK_ROOT + "/" + user;
+        return repoBranchByDir(userSpace);
+    }));
 }
+*/
 
 repoBranchByDir = function(userSpace) {
     return new Promise(function(resolve, reject) {
@@ -218,13 +238,11 @@ repoBranchByDir = function(userSpace) {
                 resolve(branch);
             }, reject);
         }, reject);
-
     });
 }
 
-repoByUid = function(uid) {
-    let user = uid.split(":")[1];
-    let userSpace = config.USER_FORK_ROOT + "/" + user;
+repoByUid = function(repoCfg, uid) {
+    let userSpace = repoUserDir(repoCfg.DIR, uid);
 
     return new Promise(function(resolve, reject) {
         git.Repository.open(userSpace).then(resolve, reject);
@@ -234,16 +252,21 @@ repoByUid = function(uid) {
 
 
 // do a git pull to sync the user's repo with the latest changes
-refreshRepo = function(uid, upstreamRepoName) {
-    var user = uid.split(":")[1];
-    var userSpace = config.USER_FORK_ROOT + "/" + user;
-    console.log("refresh repo: " + user + " dir: " + userSpace);
+refreshRepo = function(repoCfg, uid) {
+    let userSpace = repoUserDir(repoCfg, uid);
+    console.log("refresh repo: " + userSpace);
 
-    repoBranchNameByUid(uid).then(result =>
-        pull(userSpace, upstreamRepoName, result, function(err, oid) {
+    return repoBranchNameByDir(userSpace).then(result =>
+        pull(userSpace, repoCfg.UPSTREAM_NAME, result, function(err, oid) {
             if (err != null) console.log("pull error " + err);
         }));
 }
+
+// do a git pull to sync the user's repo with the latest changes
+refreshRepoUser = function(uid) {
+    return Promise.all(config.REPOS.map(repoCfg => refreshRepo(repoCfg, uid)));
+}
+
 
 // do a git pull to sync a repo with the latest changes
 refreshRepoByDir = function(dir, upstreamRepoName) {
@@ -257,8 +280,8 @@ refreshRepoByDir = function(dir, upstreamRepoName) {
 }
 
 // Load the list of changed files from disk.
-loadChangedFiles = function(uid, sess) {
-    let userSpace = config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+loadChangedFiles = function(repoCfg, uid, sess) {
+    let userSpace = repoUserDir(repoCfg, uid);
     let filepath = userSpace + "/.changedFiles.lst";
     console.log("load edited files from: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
@@ -274,9 +297,9 @@ loadChangedFiles = function(uid, sess) {
 }
 
 // Save the list of changed files to a file on disk.
-saveChangedFiles = function(uid, changedFiles) {
+saveChangedFiles = function(repoCfg, uid, changedFiles) {
     console.log("saveChangedFiles " + uid);
-    let userSpace = config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+    let userSpace = repoUserDir(repoCfg, uid);
     console.log("userSpace " + userSpace);
     let filepath = userSpace + "/.changedFiles.lst";
     console.log("writing file change list: " + filepath);
@@ -290,8 +313,8 @@ saveChangedFiles = function(uid, changedFiles) {
 }
 
 // Load the list of edit proposals from disk.
-loadEditProposals = function(uid) {
-    let userSpace = (uid == EP_SUBMISSIONS) ? config.MAIN_REPO_DIR : config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+loadEditProposals = function(repoCfg, uid) {
+    let userSpace = (uid == EP_SUBMISSIONS) ? config.MAIN_REPO_DIR : repoUserDir(repoCfg, uid);
     let filepath = userSpace + "/.editProposals.lst";
     console.log("load edited files from: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
@@ -308,7 +331,7 @@ loadEditProposals = function(uid) {
 // Save the list of changed files to a file on disk.
 saveEditProposals = function(uid, editProposals) {
     console.log("saveEditProposals " + uid);
-    let userSpace = (uid == EP_SUBMISSIONS) ? config.MAIN_REPO_DIR : config.USER_FORK_ROOT + "/" + uid.split(":")[1];
+    let userSpace = (uid == EP_SUBMISSIONS) ? config.MAIN_REPO_DIR : repoUserDir(repoCfg, uid);
     console.log("userSpace " + userSpace);
     let filepath = userSpace + "/.editProposals.lst";
     console.log("writing file change list: " + filepath);
@@ -348,7 +371,7 @@ var diffCommit = function(repo, commit) {
 exports.pull = pull;
 exports.commitEdits = commitEdits;
 exports.refreshRepoEveryone = refreshRepoEveryone;
-exports.refreshRepo = refreshRepo;
+exports.refreshRepoUser = refreshRepoUser;
 exports.refreshRepoByDir = refreshRepoByDir;
 
 exports.changedFiles = changedFiles;

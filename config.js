@@ -1,9 +1,13 @@
 var path = require('path');
 
-exports.REPO_URL = "ssh:git@gitlab.com:nextchain/www.git"; // "https://github.com/bitcoin-unlimited/BUwiki"
-exports.PUSH_BRANCHES = ["refs/heads/master:refs/heads/master"];
-exports.UPSTREAM_REPO_NAME = "origin";
-exports.REPO_BRANCH_NAME = "master";
+exports.REPOS = [{
+    URL: "ssh:git@gitlab.com:nextchain/www.git",
+    PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
+    UPSTREAM_NAME: "origin",
+    BRANCH_NAME: "master",
+    DIR: "repo",
+    PREFIX: ""
+}]
 
 exports.SITE_NAME = "NextChain";
 exports.DEFAULT_PIC = "NextChainFlag.png";
@@ -23,7 +27,6 @@ exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 
 exports.DEFAULT_COMMIT_MSG = "wiki commit";
 
-exports.MAIN_REPO_DIR = path.resolve("./repo/mirror");
-exports.USER_FORK_ROOT = path.resolve("./repo");
+exports.ANON_REPO_SUBDIR = "mirror";
 
 exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav"]

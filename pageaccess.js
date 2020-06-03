@@ -8,11 +8,6 @@ var path = require("path");
 var git = require("./cwikgit");
 var config = require("./config");
 var misc = require("./misc");
-var PUSH_BRANCHES = config.PUSH_BRANCHES;
-var UPSTREAM_REPO_NAME = config.UPSTREAM_REPO_NAME;
-var REPO_BRANCH_NAME = config.REPO_BRANCH_NAME;
-
-
 
 var ncp = require('ncp').ncp;
 ncp.limit = 16; // number of simultaneous copy operations allowed
@@ -24,11 +19,11 @@ function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
 }
 
-function ensureUserRepoCreated(userSpace, contentHome) {
+function ensureUserRepoCreated(repoCfg, userSpace, contentHome) {
     // Make a working space for this user if one does not yet exist
     if (!fs.existsSync(userSpace)) {
         // Refresh my local copy
-        git.pull(contentHome, UPSTREAM_REPO_NAME, REPO_BRANCH_NAME,
+        git.pull(contentHome, repoCfg.UPSTREAM_NAME, repoCfg.BRANCH_NAME,
             function(err, oid) {
                 if (err != null) console.log("pull " + contentHome + " error " + err);
 
@@ -51,7 +46,6 @@ function ensureUserRepoCreated(userSpace, contentHome) {
 handleAPage = function(req, res) {
     let notification = undefined;
     let userSpace = "";
-    let readFrom = contentHome;
     let user = {};
     let jReply = {
         user: user,
@@ -61,26 +55,31 @@ handleAPage = function(req, res) {
     //if (req.session.uid == undefined) {
     //    req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
     //}
+    let repoCfg = config.REPOS[0]; // TODO determine the repo from the page URL
+    let readFrom = "";
 
     if (req.session.uid == undefined) {
         // require login to view:
         // return res.redirect(307,"/_login_")
         user['loggedIn'] = false;
         user['editProposal'] = undefined;
+        userSpace = repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR;
+        readFrom = path.resolve(userSpace);
+
 
     } else {
-        userSpace = config.USER_FORK_ROOT + "/" + req.session.uid.split(":")[1];
+        userSpace = repoCfg.DIR + "/" + req.session.uid.split(":")[1];
         console.log("User space: " + userSpace);
 
-        readFrom = ensureUserRepoCreated(userSpace, contentHome);
+        readFrom = ensureUserRepoCreated(repoCfg, userSpace, contentHome);
 
         if (git.changedFiles[req.session.uid] == undefined) {
-            git.loadChangedFiles(req.session.uid, req.session);
+            git.loadChangedFiles(repoCfg, req.session.uid, req.session);
         }
 
         if (req.session.editProposal == undefined) {
-            git.repoBranchNameByUid(req.session.uid).then(br => {
-                if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
+            git.repoBranchNameByUid(repoCfg, req.session.uid).then(br => {
+                if (br != repoCfg.BRANCH_NAME) req.session.editProposal = br;
                 else req.session.editProposal = "";
                 user['editProposal'] = req.session.editProposal; // Probably won't be updated in time for this req...
             });
@@ -95,6 +94,7 @@ handleAPage = function(req, res) {
     console.log("handle a page: " + req.path);
     console.log("hostname: " + req.hostname);
     console.log("originalUrl: " + req.originalUrl);
+    console.log("readFrom: " + readFrom);
 
     if (req.path == "/favicon.ico") {
         res.sendFile("public/images/icon.ico");
@@ -132,6 +132,8 @@ handleAPage = function(req, res) {
     var filepath = readFrom + decodedPath; //  + ".md";
 
     if (isMedia >= 0) {
+        filepath = path.resolve(filepath);
+        console.log("media file path: " + filepath);
         if (!user.loggedIn) return res.sendFile(filepath);
         try {
             let mediaFileStats = fs.statSync(filepath);
@@ -171,7 +173,7 @@ handleAPage = function(req, res) {
 
         if (!chFiles.has(repoRelativeFilePath)) {
             chFiles.add(repoRelativeFilePath);
-            git.saveChangedFiles(req.session.uid, chFiles);
+            git.saveChangedFiles(repoCfg, req.session.uid, chFiles);
         }
 
         var dirOfPost = path.dirname(filepath);
@@ -231,8 +233,7 @@ handleAPage = function(req, res) {
                         jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
                         return res.render('wikibrowse', jReply);
                     });
-                }
-                else {
+                } else {
                     return fs.readFile("noPageNoUser.html", 'utf8', function(err, htmlTemplateData) {
                         jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
                         return res.render('wikibrowse', jReply);

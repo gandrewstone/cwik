@@ -21,16 +21,22 @@ var nodegit = require("nodegit");
 var app = express();
 app.use(compression());
 
-console.log("repo clone: " + config.REPO_URL);
-nodegit.Clone(config.REPO_URL, contentHome).then(function(repo) {
-    gitrepo = repo;
-    console.log("repo cloned");
-}, function(error) {
-    console.log("repo clone error" + error);
-})
+console.log("clone all repos");
+config.REPOS.forEach(repoCfg => {
+    let contentHome = path.resolve(repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR);
+    console.log(contentHome);
+    nodegit.Clone(repoCfg.URL, contentHome).then(function(repo) {
+        gitrepo = repo;
+        console.log("repo " + repoCfg.URL + " cloned");
+    }, function(error) {
+        console.log("repo " + repoCfg.URL + " clone error: " + error);
+    });
+});
 
-git.refreshRepoByDir(contentHome, config.UPSTREAM_REPO_NAME);
-git.repoBranchByDir(contentHome, config.UPSTREAM_REPO_NAME).then(r => console.log("branch " + r));
+config.REPOS.forEach(repoCfg => {
+    let contentHome = path.resolve(repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR);
+    git.refreshRepoByDir(contentHome, repoCfg.UPSTREAM_NAME);
+});
 
 sessionStore = new memoryStore({
     checkPeriod: 86400000 // prune expired entries every 24hrs

@@ -51,7 +51,7 @@ function fetchJsonFor(spot) {
     }
 
     var s = spot.toLowerCase().split(/\s+/).join("__");
-    if (s.endsWith(".md")) s = s.slice(0,s.length-3);
+    if (s.endsWith(".md")) s = s.slice(0, s.length - 3);
 
     fetch(s + "?json=1").then(response => response.json().then(json => {
         processJsonPage(json);
@@ -152,11 +152,9 @@ function processJsonPage(json) {
     //console.log("processJsonPage ");
     //console.log(json);
     notification(json);
-    if ((typeof json.title !== "undefined") && (json.title != ""))
-    {
+    if ((typeof json.title !== "undefined") && (json.title != "")) {
         document.title = json.title + " - " + SITE_NAME;
-    }
-    else document.title = SITE_NAME;
+    } else document.title = SITE_NAME;
 
     let wc = document.querySelector('.wikicontent')
     // Our current page template isn't capable of showing wiki pages so reload the entire page

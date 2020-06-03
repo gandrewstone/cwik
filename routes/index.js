@@ -45,7 +45,9 @@ router.get('/_commit_', function(req, res, next) {
         return;
     }
     console.log("commit to repo");
-    git.commitEdits(req, res, config.UPSTREAM_REPO_NAME); // sets res to a json response detailing whether the commit was successful
+    config.REPOS.forEach(repo => {
+        git.commitEdits(req, res, repo); // sets res to a json response detailing whether the commit was successful
+    });
 });
 
 router.get('/_login_/auto', function(req, res, next) {
@@ -81,14 +83,14 @@ router.get('/_login_/auto', function(req, res, next) {
                     if (req.query.cookie == req.sessionID) {
                         req.session.challenge = "solved";
                         req.session.uid = addr;
-                        git.repoBranchNameByUid(req.session.uid).then(br => {
+                        git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
                             if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                         });
                     } else // If I connected with a different (out-of-band) session, then I need to write the sessionStore directly
                     {
                         session.challenge = "solved";
                         session.uid = addr;
-                        git.repoBranchNameByUid(req.session.uid).then(br => {
+                        git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
                             if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                             sessionStore.set(req.query.cookie, session);
                         }, err => { // Even if we can't get the repo branch, still set the session
@@ -98,7 +100,7 @@ router.get('/_login_/auto', function(req, res, next) {
                         });
 
                     }
-                    git.refreshRepo(addr, config.UPSTREAM_REPO_NAME);
+                    git.refreshRepoUser(addr);
                     console.log("login accepted");
                     res.status(200).send("login accepted");
                     return;
@@ -197,7 +199,7 @@ router.get('/_editProposal_/close', function(req, res, next) {
         });
     }
 
-    repoBranchNameByUid(req.session.uid).then(curBranch => {
+    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
         if (curBranch == config.REPO_BRANCH_NAME) {
             return res.json({
                 notification: "no edit proposal is open",
@@ -235,7 +237,7 @@ router.get('/_editProposal_/submit', function(req, res, next) {
         });
     }
 
-    repoBranchNameByUid(req.session.uid).then(curBranch => {
+    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
         if (curBranch == config.REPO_BRANCH_NAME) {
             return res.json({
                 notification: "no edit proposal is open",
@@ -401,7 +403,7 @@ router.get('/_editProposal_/diff', function(req, res, next) {
         });
     }
 
-    repoBranchNameByUid(req.session.uid).then(curBranch => {
+    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
         if (curBranch == config.REPO_BRANCH_NAME) {
             return res.json({
                 notification: "no edit proposal is open",
@@ -458,7 +460,7 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
         });
     }
 
-    repoBranchNameByUid(req.session.uid).then(curBranch => {
+    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
         if (curBranch != config.REPO_BRANCH_NAME) {
             return res.json({
                 notification: "first close or submit your current proposal",
@@ -519,7 +521,7 @@ router.post('/_upload_/*', function(req, res, next) {
     let decodedPath = decodeURI(urlPath);
     decodedPath = decodedPath.replace(" ", "__");
     decodedPath = decodedPath.slice("/_upload_".length);
-    let userSpace = config.USER_FORK_ROOT + "/" + req.session.uid.split(":")[1];
+    let userSpace = config.REPOS[0].DIR + "/" + req.session.uid.split(":")[1];
 
     var writeFilePath = userSpace + decodedPath;
 
