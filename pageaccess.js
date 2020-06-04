@@ -12,8 +12,86 @@ var misc = require("./misc");
 var ncp = require('ncp').ncp;
 ncp.limit = 16; // number of simultaneous copy operations allowed
 
-var titles = ["h1", "h2", "h3", "h4", "h5", "h6"]
+var titles = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
+let acceptableTags = ['text', 'line', 'tspan', 'br', 'em', 'mi', 'mo', 'mn', 'msup', 'mrow', 'mspace', 'span', 'annotation', 'semantics', 'math', 'span', 'circle', 'g', 'path', 'rect', 'polygon', 'marker', 'defs', 'foreignobject', 'style', 'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sup', 'sub', 'video', 'source', 'audio' ];
+
+let mathMLTags = ['abs', 'and', 'annotation', 'annotation-xml', 'apply', 'approx', 'arccos', 'arccosh', 'arccot', 'arccoth', 'arccsc', 'arccsch', 'arcsec', 'arcsech', 'arcsin', 'arcsinh', 'arctan', 'arctanh', 'arg', 'bvar', 'card', 'cartesianproduct', 'ceiling', 'ci', 'cn', 'codomain', 'complexes', 'compose', 'condition', 'conjugate', 'cos', 'cosh', 'cot', 'coth', 'csc', 'csch', 'csymbol', 'curl', 'declare', 'degree', 'determinant', 'diff', 'divergence', 'divide', 'domain', 'domainofapplication', 'emptyset', 'encoding', 'eq', 'equivalent', 'eulergamma', 'exists', 'exp', 'exponentiale', 'factorial', 'factorof', 'false', 'floor', 'fn', 'forall', 'function', 'gcd', 'geq', 'grad', 'gt', 'ident', 'image', 'imaginary', 'imaginaryi', 'implies', 'in', 'infinity', 'int', 'integers', 'intersect', 'interval', 'inverse', 'lambda', 'laplacian', 'lcm', 'leq', 'limit', 'list', 'ln', 'log', 'logbase', 'lowlimit', 'lt', 'm:apply', 'm:mrow', 'maction', 'malign', 'maligngroup', 'malignmark', 'malignscope', 'math', 'matrix', 'matrixrow', 'max', 'mean', 'median', 'menclose', 'merror', 'mfenced', 'mfrac', 'mfraction', 'mglyph', 'mi', 'min', 'minus', 'mlabeledtr', 'mmultiscripts', 'mn', 'mo', 'mode', 'moment', 'momentabout', 'mover', 'mpadded', 'mphantom', 'mprescripts', 'mroot', 'mrow', 'ms', 'mspace', 'msqrt', 'mstyle', 'msub', 'msubsup', 'msup', 'mtable', 'mtd', 'mtext', 'mtr', 'munder', 'munderover', 'naturalnumbers', 'neq', 'none', 'not', 'notanumber', 'notin', 'notprsubset', 'notsubset', 'or', 'otherwise', 'outerproduct', 'partialdiff', 'pi', 'piece', 'piecewice', 'piecewise', 'plus', 'power', 'primes', 'product', 'prsubset', 'quotient', 'rationals', 'real', 'reals', 'reln', 'rem', 'root', 'scalarproduct', 'sdev', 'sec', 'sech', 'selector', 'semantics', 'sep', 'set', 'setdiff', 'sin', 'sinh', 'subset', 'sum', 'tan', 'tanh', 'tendsto', 'times', 'transpose', 'true', 'union', 'uplimit', 'variance', 'vector', 'vectorproduct', 'xor' ]
+
+let svgTags = ['a',
+    'animate',
+    'animateMotion',
+    'animateTransform',
+    'circle',
+    'clipPath',
+    'color-profile',
+    'defs',
+    'desc',
+    'discard',
+    'ellipse',
+    'feBlend',
+    'feColorMatrix',
+    'feComponentTransfer',
+    'feComposite',
+    'feConvolveMatrix',
+    'feDiffuseLighting',
+    'feDisplacementMap',
+    'feDistantLight',
+    'feDropShadow',
+    'feFlood',
+    'feFuncA',
+    'feFuncB',
+    'feFuncG',
+    'feFuncR',
+    'feGaussianBlur',
+    'feImage',
+    'feMerge',
+    'feMergeNode',
+    'feMorphology',
+    'feOffset',
+    'fePointLight',
+    'feSpecularLighting',
+    'feSpotLight',
+    'feTile',
+    'feTurbulence',
+    'filter',
+    'foreignObject',
+    'g',
+    'hatch',
+    'hatchpath',
+    'image',
+    'line',
+    'linearGradient',
+    'marker',
+    'mask',
+    'mesh',
+    'meshgradient',
+    'meshpatch',
+    'meshrow',
+    'metadata',
+    'mpath',
+    'path',
+    'pattern',
+    'polygon',
+    'polyline',
+    'radialGradient',
+    'rect',
+    'script',
+    'set',
+    'solidcolor',
+    'stop',
+    'style',
+    'svg',
+    'switch',
+    'symbol',
+    'text',
+    'textPath',
+    'title',
+    'tspan',
+    'unknown',
+    'use',
+    'view'
+]
 
 function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
@@ -348,12 +426,16 @@ async function mdToHtml(md) {
     const contentHtml = await page.evaluate("document.querySelector('.wikicontent').innerHTML");
     if (!PuppeteerDebug) page.close();
 
-    // If you need to see the raw content to figure out what the sanitizer is doing wrong: fs.writeFile("content.htm", contentHtml, (err) => {});
+    // If you need to see the raw content to figure out what the sanitizer is doing wrong:
+    fs.writeFile("content.htm", contentHtml, (err) => {});
+
+    let okTags = sanitizer.defaults.allowedTags;
+    okTags = okTags.concat(mathMLTags);
+    okTags = okTags.concat(svgTags);
+    okTags = okTags.concat(acceptableTags);
 
     xformedhtml = sanitizer(contentHtml, {
-        allowedTags: sanitizer.defaults.allowedTags.concat(['text', 'line', 'tspan', 'br', 'em', 'mi', 'mo', 'mrow', 'span', 'annotation', 'semantics', 'math', 'span', 'circle', 'g', 'path', 'rect', 'marker', 'defs', 'foreignobject', 'style',
-            'svg', 'div', 'iframe', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sup', 'sub', 'video', 'source', 'audio'
-        ]),
+        allowedTags: okTags,
         allowedAttributes: false,
         allowedClasses: false,
         transformTags: {

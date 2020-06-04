@@ -9,7 +9,6 @@ html, body
     font-family: 'Lato', Arial, sans-serif;
 }
 
-
 /* #### Mobile Phones Portrait #### */
 @media screen and (max-device-width: 480px) and (orientation: portrait){
   html, body
@@ -32,6 +31,13 @@ h1, h2, h3, h4, h5
 {
     font-family: 'Oswald', Arial, sans-serif;
 }
+
+svg
+{
+    font-family: initial;
+    font-size: initial;
+}
+
 
 br.clear {
     clear: both;
