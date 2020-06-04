@@ -124,12 +124,13 @@ hr {
   height: 100%;
   z-index: 3;
   color: #fff;
-  overflow: hidden;
+  overflow: visible;
   float: left;
 }
 
 #lsb {
-    position: fixed;
+  position: fixed;
+  overflow: visible;
 }
 
 #sideBarButton {
