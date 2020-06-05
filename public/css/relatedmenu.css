@@ -33,7 +33,7 @@
     background-image: linear-gradient(#cecece, #b8b8b8,#b8b8b8,#c0c0c0);
 }
 
-.lrel:hover .irel {
+.lrel:hover {
     /* color: #805000; */
     font-weight: bold;
     /* font-size: 105%; */

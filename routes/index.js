@@ -7,6 +7,7 @@ var router = express.Router();
 var users = require('../knownusers.json')["KnownUsers"]
 var multer = require('multer')
 var path = require('path');
+var search = require("../search");
 
 // https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
 function zip(arrays) {
@@ -496,8 +497,38 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
 });
 
 
+router.post('/_search_', function(req, res, next) {
+    console.log("POST _search_ of: " + req.body);
+    let user = {};
+    let jReply = {
+        user: user
+    };
+    if (req.session.uid == undefined) {
+        user['loggedIn'] = false;
+        user['editProposal'] = undefined;
+    } else {
+        user['loggedIn'] = true;
+        user['editProposal'] = req.session.editProposal;
+    }
+    jReply['STACKEDIT_URL'] = config.STACKEDIT_URL;
+    jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
+
+    let result = search.search(req.body);
+    jReply['searchResults'] = result;
+    res.json(jReply);
+});
+
+
+/*
+router.get('/_search_/*', function(req, res, next) {
+    let result = search.search("test");
+    res.send(JSON.stringify(result));
+});
+*/
+
 router.get('/_cvt_', function(req, res, next) {
     let jReply = {};
+
     jReply['STACKEDIT_URL'] = config.STACKEDIT_URL;
     jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
     jReply['wikiPage'] = "";

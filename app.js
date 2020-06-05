@@ -13,6 +13,8 @@ var pageaccess = require("./pageaccess");
 var index = require('./routes/index');
 var users = require('./routes/users');
 var git = require("./cwikgit");
+var search = require("./search");
+var mdtohtml = require("./mdtohtml");
 
 gitrepo = null;
 contentHome = path.resolve("./repo/mirror");
@@ -37,6 +39,14 @@ config.REPOS.forEach(repoCfg => {
     let contentHome = path.resolve(repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR);
     git.refreshRepoByDir(contentHome, repoCfg.UPSTREAM_NAME);
 });
+
+console.log("generate");
+
+(async () => {
+    await mdtohtml.init();
+    await mdtohtml.generate();
+    await search.reindex();
+})();
 
 sessionStore = new memoryStore({
     checkPeriod: 86400000 // prune expired entries every 24hrs

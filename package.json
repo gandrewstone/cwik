@@ -18,6 +18,7 @@
     "hammerjs": "^2.0.8",
     "he": "^1.2.0",
     "katex": "^0.10.2",
+    "lunr": "^2.3.8",
     "mathjax-node": "^2.1.1",
     "memorystore": "^1.6.2",
     "mermaid": "^8.5.1",

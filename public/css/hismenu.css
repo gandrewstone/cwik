@@ -33,7 +33,7 @@
     cursor: pointer;
 }
 
-.lhis:hover .ihis {
+.lhis:hover {
     /* color: #805000; */
     font-weight: bold;
     font-size: 100%;

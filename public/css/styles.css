@@ -1,6 +1,7 @@
 @import "tocmenu.css";
 @import "relatedmenu.css";
 @import "hismenu.css";
+@import "searchmenu.css";
 
 html, body
 {
@@ -150,12 +151,11 @@ hr {
 }
 
 
-.sidebargrid {
+#sidebargrid {
     position: fixed;
     background: #eeeeee;
     background-image: linear-gradient(#197017, #ffffff);
     color: #fff;
-    overflow: hidden;
     width: 25ch;
     height: 100%;
 }
@@ -197,6 +197,19 @@ hr {
   width: 95%;
   margin-left: 3px;
   margin-top:5px;
+  z-index: 2;
+  border-radius: 8px;
+  border: 2px solid #197717;
+  background: #d0d0d0;
+  color: #000000;
+}
+
+.sbBubble {
+  display: block;
+  position: absolute;
+  width: 95%;
+  margin-left: 3px;
+  margin-top: 5px;
   z-index: 2;
   border-radius: 8px;
   border: 2px solid #197717;
@@ -250,13 +263,69 @@ hr {
 
 #EpBar {
   display: inline-block;
-  position: fixed;
-  right: 20ch;
+  position: absolute;
+  left: 60ch;
   z-index: 5;
   color: #ffffff;
   line-height: 30px;
   text-align:right;
   align: right;
+}
+
+#searchBarPos {
+    display: inline-block;
+    position: absolute;
+  right: 50ch;
+  z-index: 5;
+  color: #ffffff;
+  align: right;
+}
+
+#searchBar {
+  z-index: 10;
+  display: block;
+}
+
+#searchButton {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: center;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 4px;
+}
+
+#searchTextPositioner {
+    display: inline-block;
+    position: absolute;
+    padding-top: 2px;
+    }
+
+#searchText {
+    display: inline-block;
+    align: top;
+    background: #309030;
+    color: #ffffff;
+    padding-top: 0px;
+    margin-top: 4px;
+    vertical-align: top;
+}
+
+#searchText:focus {
+    background: #309030;
+    color: #ffffff;
+    height: 100%;
+    padding-top: 2px;
+}
+
+#hiddenSubmit {
+    display: none;
+}
+
+
+#searchButton:hover {
+    cursor: pointer;
 }
 
 #bchHeaderCoin
@@ -380,6 +449,22 @@ tr:nth-child(odd) td { background: #FEFEFE; }
 }
 /* @media screen and (max-device-width: 640px){ */
 
+.searchTextPortraitPositioner {
+        display: inline-block;
+        width: 90%;
+        margin-right: auto;
+        margin-left: 5%;
+        margin-bottom: 5px;
+        padding 2px;
+        text-align: center;
+    }
+    
+.searchTextPortrait {
+        font-size: 100%;
+        width: 100%;
+        text-align: center;
+    }
+
 /* nav menu will auto-close so it should cover over text */
 @media (orientation: portrait) {
     .leftsidebar {
@@ -401,7 +486,7 @@ tr:nth-child(odd) td { background: #FEFEFE; }
         display: block;
     }
 
-    .sidebargrid {
+    #sidebargrid {
     background: transparent;
     background-image: none;
     }
