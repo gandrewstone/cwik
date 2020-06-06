@@ -282,8 +282,11 @@ hr {
 }
 
 #searchBar {
-  z-index: 10;
-  display: block;
+  display: inline-block;
+}
+
+#searchResults {
+    min-height: 70px;
 }
 
 #searchButton {
@@ -298,18 +301,14 @@ hr {
 
 #searchTextPositioner {
     display: inline-block;
-    position: absolute;
-    padding-top: 2px;
+    vertical-align: top;
+    margin-top: 3px;
     }
 
 #searchText {
     display: inline-block;
-    align: top;
     background: #309030;
     color: #ffffff;
-    padding-top: 0px;
-    margin-top: 4px;
-    vertical-align: top;
 }
 
 #searchText:focus {
