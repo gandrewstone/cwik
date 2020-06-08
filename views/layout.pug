@@ -29,7 +29,7 @@ html
     script.
       setupLayout(document, window);
     
-    img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('home')", title="home")
+    img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('/home')", title="home")
 
     
     div#userBar
@@ -113,6 +113,12 @@ html
         document.getElementById("searchTextPositioner").classList.add('searchTextPortraitPositioner');
         document.getElementById("searchText").classList.add('searchTextPortrait');
         document.getElementById("searchButton").style.display = "none";  // No magnifying glass in the sidebar
+
+        document.getElementById("searchBar").addEventListener("submit", function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            search();
+        }, false);
       }
       
       var sidebarGrid = new Muuri('#sidebargrid', {

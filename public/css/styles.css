@@ -491,7 +491,7 @@ tr:nth-child(odd) td { background: #FEFEFE; }
     }
 
     #cwikheader {
-  height: 70px;
+        height: 70px;
     }
 
     #bchHeaderCoin

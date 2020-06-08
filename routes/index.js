@@ -84,6 +84,7 @@ router.get('/_login_/auto', function(req, res, next) {
                     if (req.query.cookie == req.sessionID) {
                         req.session.challenge = "solved";
                         req.session.uid = addr;
+                        git.ensureUserReposCreated(addr);
                         git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
                             if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                         });
@@ -91,6 +92,7 @@ router.get('/_login_/auto', function(req, res, next) {
                     {
                         session.challenge = "solved";
                         session.uid = addr;
+                        git.ensureUserReposCreated(addr);
                         git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
                             if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
                             sessionStore.set(req.query.cookie, session);

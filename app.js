@@ -19,20 +19,31 @@ var mdtohtml = require("./mdtohtml");
 gitrepo = null;
 contentHome = path.resolve("./repo/mirror");
 var nodegit = require("nodegit");
+var cwikgit = require("./cwikgit");
 
 var app = express();
 app.use(compression());
 
-console.log("clone all repos");
+
+let cloned = [];
+
+if (typeof config.REPOS == "undefined") console.log("\n\nBAD CONFIGURATON!  Must define some Markdown Repositories (config.REPOS)");
+
 config.REPOS.forEach(repoCfg => {
     let contentHome = path.resolve(repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR);
-    console.log(contentHome);
-    nodegit.Clone(repoCfg.URL, contentHome).then(function(repo) {
+    console.log("Cloning: " + repoCfg.URL + " to: " + contentHome);
+    cloned.push(nodegit.Clone(repoCfg.URL, contentHome, {
+        fetchOpts: {
+            callbacks: {
+                credentials: cwikgit.ccred()
+            }
+        }
+    }).then(function(repo) {
         gitrepo = repo;
-        console.log("repo " + repoCfg.URL + " cloned");
+        console.log("Repo " + repoCfg.URL + " cloned");
     }, function(error) {
-        console.log("repo " + repoCfg.URL + " clone error: " + error);
-    });
+        console.log("Repo '" + repoCfg.URL + "' clone error: " + error);
+    }));
 });
 
 config.REPOS.forEach(repoCfg => {
@@ -43,6 +54,7 @@ config.REPOS.forEach(repoCfg => {
 console.log("generate");
 
 (async () => {
+    await Promise.all(cloned);
     await mdtohtml.init();
     await mdtohtml.generate();
     await search.reindex();

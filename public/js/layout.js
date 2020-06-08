@@ -33,6 +33,8 @@ function jumpToWithoutClosingSidebar(spot) {
     }
     var s = spot.toLowerCase().split(/\s/).join("-");
     s = s.replace(":", "");
+    s = s.replace("(", "");
+    s = s.replace(")", "");
     console.log("jumpTo " + s);
     var e = document.getElementById(s);
     if (e) {
@@ -69,11 +71,22 @@ function fetchJsonFor(spot) {
     var s = spot.toLowerCase().split(/\s+/).join("__");
     if (s.endsWith(".md")) s = s.slice(0, s.length - 3);
 
-    fetch(s + "?json=1").then(response => {
+    let anchor = null;
+    let jreq = null;
+    if (s.includes('#')) { // is there an anchor
+        let spanchor = s.split("#")
+        anchor = spanchor[1];
+        jreq = spanchor[0] + "?json=1" + "#" + anchor;
+    } else jreq = s + "?json=1"
+
+    console.log("Requesting: " + jreq)
+    fetch(jreq).then(response => {
             console.log(response);
             return response.json();
         })
         .then(json => {
+            console.log("process json");
+            if (json.anchor == null) json.anchor = anchor;
             processJsonPage(json);
             window.history.pushState({
                 "json": json,
@@ -245,23 +258,35 @@ function processJsonPage(json) {
         wc.innerHTML = json.wikiPage;
         updatePage(json);
         sidebarGrid.refreshItems().layout();
-        window.scrollTo({
-            top: 0
-        });
+        if (json.anchor == null) {
+            window.scrollTo({
+                top: 0
+            });
+        } else {
+            jumpTo(json.anchor);
+        }
     } else if (typeof json.html !== "undefined") {
         wc.innerHTML = json.html;
         updatePage(json);
         sidebarGrid.refreshItems().layout();
-        window.scrollTo({
-            top: 0
-        });
+        if (json.anchor == null) {
+            window.scrollTo({
+                top: 0
+            });
+        } else {
+            jumpTo(json.anchor);
+        }
     } else if (typeof json.rawMarkdown !== "undefined") {
         processFetchedMd(json.rawMarkdown).then(html => {
             updatePage(json);
             sidebarGrid.refreshItems().layout();
-            window.scrollTo({
-                top: 0
-            });
+            if (json.anchor == null) {
+                window.scrollTo({
+                    top: 0
+                });
+            } else {
+                jumpTo(json.anchor);
+            }
         });
     }
 }
@@ -270,15 +295,17 @@ function internalLinkOptimizer(doc, wnd, e) {
     //console.log("clicked on ", e);
     var loc = wnd.location;
     var tgt = e.target;
-    if (tgt.tagName == "A") {
-        //console.log("its A", tgt.host, loc.host);
+    if ((tgt.tagName == "A") || (tgt.tagName == "a")) {
+        console.log("its A", tgt.host, loc.host);
         if (tgt.host == loc.host) // I will handle this via JSON
         {
             e.preventDefault();
             e.stopPropagation();
             let r = fetchJsonFor(tgt.href);
         }
+        return false;
     }
+    return true;
 }
 
 function backOptimizer(doc, wnd, e) {
@@ -288,6 +315,7 @@ function backOptimizer(doc, wnd, e) {
             e.preventDefault();
             e.stopPropagation();
             processJsonPage(json);
+            return false;
         } else {
             window.location.reload(false);
         }
@@ -295,6 +323,7 @@ function backOptimizer(doc, wnd, e) {
         window.location.reload(false);
     }
 
+    return true;
 }
 
 

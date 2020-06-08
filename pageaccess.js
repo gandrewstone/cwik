@@ -8,36 +8,108 @@ var git = require("./cwikgit");
 var config = require("./config");
 var misc = require("./misc");
 
-var ncp = require('ncp').ncp;
-ncp.limit = 16; // number of simultaneous copy operations allowed
-
-
 function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
 }
 
-function ensureUserRepoCreated(repoCfg, userSpace, contentHome) {
-    // Make a working space for this user if one does not yet exist
-    if (!fs.existsSync(userSpace)) {
-        // Refresh my local copy
-        git.pull(contentHome, repoCfg.UPSTREAM_NAME, repoCfg.BRANCH_NAME,
-            function(err, oid) {
-                if (err != null) console.log("pull " + contentHome + " error " + err);
 
-                // then copy it to the user's space
-                ncp(contentHome, userSpace, function(err) {
-                    if (err) {
-                        console.error("ncp copy error: " + err);
-                        return contentHome;
-                    }
-                    console.log("user scratch space created!");
-                });
-            });
-        return contentHome; // While I'm waiting for the copy, allow the user to read
+function determineRepoAndDir(uid, filepath) {
+    let userDir = (uid == null) ? null : misc.userDir(uid);
+
+    let media = isMedia(filepath);
+
+    let suffixPath = cleanupPath(filepath, media);
+    let firstPath = null;
+
+    for (let j = 0; j < config.REPOS.length; j++) {
+        let repoCfg = config.REPOS[j];
+        if (userDir) {
+            try {
+                let canonicalSuffix = "/" + userDir + suffixPath;
+                console.log("Trying: " + repoCfg.DIR + canonicalSuffix);
+                let fullpath = path.resolve(repoCfg.DIR + canonicalSuffix);
+                if (firstPath == null) firstPath = fullpath;
+                let mediaFileStats = fs.statSync(fullpath);
+                return [repoCfg, fullpath, repoCfg.PREFIX + suffixPath, media];
+            } catch (err) {
+                console.log("NO");
+                if (err.code != "ENOENT") console.log(err);
+                // maybe repo not cloned to the user
+            }
+        }
+
+        // Check internal link in a repo.  TODO we might want to check the last session request to discover which repo its in.
+        try {
+            let canonicalSuffix = "/" + config.ANON_REPO_SUBDIR + suffixPath;
+            console.log("Trying: " + repoCfg.DIR + canonicalSuffix);
+            let fullpath = path.resolve(repoCfg.DIR + canonicalSuffix);
+            if (firstPath == null) firstPath = fullpath;
+            let mediaFileStats = fs.statSync(fullpath);
+            console.log("found!");
+            return [repoCfg, fullpath, "/" + repoCfg.PREFIX + suffixPath, media];
+        } catch (err) {
+            console.log("NO");
+            if (err.code != "ENOENT") console.log(err);
+            // Ok not in this repo
+        }
+
+
+        if (suffixPath.startsWith("/" + repoCfg.PREFIX)) {
+            let tmp = suffixPath.slice(repoCfg.PREFIX.length + 1);
+            try {
+                console.log("trying: " + repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR + tmp);
+                let fullPath = path.resolve(repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR + tmp);
+                if (firstPath == null) firstPath = fullPath;
+                let mediaFileStats = fs.statSync(fullPath);
+                console.log("found!");
+                return [repoCfg, fullPath, "/" + repoCfg.PREFIX + tmp, media];
+            } catch (err) {
+                console.log("NO");
+                if (err.code != "ENOENT") console.log(err);
+                // Ok not in this repo
+            }
+        }
+
     }
-    return userSpace;
+
+    // for now, a nonexistent file is assumed to be a new file in the first repo
+    // TODO figure out placement by subdir
+    return [config.REPOS[0], firstPath, media];
 }
 
+function isMedia(filepath) {
+    let isMedia = -1;
+    for (let i = 0; i < config.MEDIA_EXT.length; i++) {
+        if (filepath.endsWith(config.MEDIA_EXT[i])) {
+            return config.MEDIA_EXT[i];
+        }
+    }
+    return null;
+}
+
+function cleanupPath(filepath, isMedia) {
+    let decodedPath = decodeURI(filepath);
+    console.log(decodedPath);
+    decodedPath = decodedPath.replace(" ", "__"); // replace spaces with double underscore
+
+    // TODO
+    if (decodedPath.startsWith(".")) throw BadURL(req, res); // Don't allow overwriting dot files
+    if (decodedPath.includes("..")) throw BadURL(req, res);
+
+    if (isMedia == null) {
+        decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
+        if (decodedPath == "/") decodedPath = "/home"; // hard code / to home.md
+    }
+
+    if (decodedPath.endsWith("/")) decodedPath = decodedPath.substring(0, decodedPath.length - 1);
+
+    if (isMedia == null && !decodedPath.endsWith(".md")) {
+        decodedPath = decodedPath + ".md";
+    }
+
+    console.log("cleanup path: " + decodedPath);
+    return decodedPath;
+}
 
 // Return a requested page
 handleAPage = function(req, res) {
@@ -55,20 +127,24 @@ handleAPage = function(req, res) {
     let repoCfg = config.REPOS[0]; // TODO determine the repo from the page URL
     let readFrom = "";
 
+    let media = null;
+
+    [repoCfg, readFrom, canonicalSuffix, media] = determineRepoAndDir(req.session.uid, req.path);
+    console.log("repoCfg: " + JSON.stringify(repoCfg) + " readFrom: " + readFrom + " media: " + media);
+
     if (req.session.uid == undefined) {
         // require login to view:
         // return res.redirect(307,"/_login_")
         user['loggedIn'] = false;
         user['editProposal'] = undefined;
-        userSpace = repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR;
-        readFrom = path.resolve(userSpace);
-
-
+        //userSpace = repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR;
+        //readFrom = path.resolve(userSpace);
     } else {
-        userSpace = repoCfg.DIR + "/" + req.session.uid.split(":")[1];
-        console.log("User space: " + userSpace);
+        //userSpace = repoCfg.DIR + "/" + req.session.uid.split(":")[1];
+        //console.log("User space: " + userSpace);
 
-        readFrom = ensureUserRepoCreated(repoCfg, userSpace, contentHome);
+        // shouldn't be needed
+        // readFrom = git.ensureUserRepoCreated(repoCfg, userSpace, contentHome);
 
         if (git.changedFiles[req.session.uid] == undefined) {
             git.loadChangedFiles(repoCfg, req.session.uid, req.session);
@@ -99,6 +175,8 @@ handleAPage = function(req, res) {
     }
 
     urlPath = req.path;
+
+    /*
     decodedPath = decodeURI(urlPath);
     decodedPath = decodedPath.replace(" ", "__"); // replace spaces with double underscore
 
@@ -116,9 +194,13 @@ handleAPage = function(req, res) {
     if (decodedPath.includes("..")) return BadURL(req, res);
     if (decodedPath == "/") decodedPath = "/home"; // hard code / to home.md
     if (decodedPath.endsWith("/")) decodedPath = decodedPath.substring(0, decodedPath.length - 1);
+    var filepath = readFrom + decodedPath; //  + ".md";
+    */
+
+    let filepath = readFrom;
 
     if (typeof config.MY_URL !== "undefined") {
-        let canonicalURL = config.MY_URL + decodedPath;
+        let canonicalURL = config.MY_URL + canonicalSuffix;
         if (canonicalURL.endsWith(".md")) {
             canonicalURL = canonicalURL.slice(0, canonicalURL.length - 3);
         }
@@ -126,9 +208,8 @@ handleAPage = function(req, res) {
         console.log("CanonicalURL: " + canonicalURL);
     }
 
-    var filepath = readFrom + decodedPath; //  + ".md";
 
-    if (isMedia >= 0) {
+    if (media != null) {
         filepath = path.resolve(filepath);
         console.log("media file path: " + filepath);
         if (!user.loggedIn) return res.sendFile(filepath);
@@ -145,7 +226,7 @@ handleAPage = function(req, res) {
         return;
     }
 
-    if (isMedia == -1 && !filepath.endsWith(".md")) {
+    if (media == null && !filepath.endsWith(".md")) {
         filepath = filepath + ".md";
     }
     console.log("access " + filepath);
@@ -207,6 +288,7 @@ handleAPage = function(req, res) {
     console.log("read file: " + filepath);
     fs.readFile(filepath, 'utf8', function(err, data) {
         if (err) {
+            console.log(err);
             data = "";
             jReply['notification'] = "nonexistent page, click 'edit' to create";
 
@@ -240,10 +322,12 @@ handleAPage = function(req, res) {
         }
 
         if (req.query.raw) {
+            console.log(raw);
             res.send(data);
             return;
         }
 
+        console.log("file pulled");
         let doc = data;
 
         let htmlFile = filepath.slice(0, filepath.length - 2) + "htm";
@@ -255,7 +339,7 @@ handleAPage = function(req, res) {
             console.log("Times: html: " + htmlFileStats.mtime + " md: " + mdFileStats.mtime);
             if (htmlFileStats.mtime <= mdFileStats.mtime) regenerate = true;
         } catch (err) {
-            // console.log(err);
+            console.log("html vs md fstat: " + err);
             regenerate = true;
         }
 
@@ -279,10 +363,12 @@ handleAPage = function(req, res) {
 
             });
         } else {
+            console.log("read metafile");
             fs.readFile(metaFile, 'utf8', function(err, metaData) {
                 if (err) metaData = {}; // Just ignore if metadata file does not exist
                 fs.readFile(htmlFile, 'utf8', function(err, readData) {
                     if (err) {
+                        console.log("read metafile error:" + err);
                         mdToHtml.mdToHtml(doc).then(data => {
                             misc.updateDict(jReply, data);
                             wikiPageReplyWithMdHtml(req, res, doc, jReply);
@@ -351,6 +437,7 @@ function htmlizeJsonReply(json) {
 }
 
 function wikiPageReplyWithMdHtml(req, res, md, jReply) {
+    console.log("wikiPageReplyWithMdHtml");
     jReply['rawMarkdown'] = md;
     jReply['ogType'] = 'website';
     if (typeof config.SITE_NAME !== "undefined")
@@ -372,9 +459,11 @@ function wikiPageReplyWithMdHtml(req, res, md, jReply) {
 
     }
 
-    if (req.query.json)
+    if (req.query.json) {
+        console.log("json reply");
         res.json(jReply);
-    else {
+    } else {
+        console.log("html reply");
         htmlizeJsonReply(jReply);
         jReply['SITE_NAME'] = config.SITE_NAME;
         res.render('wikibrowse', jReply);

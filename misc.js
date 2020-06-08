@@ -1,6 +1,12 @@
 var fs = require('fs').promises;
 var path = require('path');
 
+
+function userDir(uid) {
+    return uid.split(":")[1];
+}
+
+
 function updateDict(a, b) {
     for (let [key, value] of Object.entries(b)) {
         a[key] = value;
@@ -93,3 +99,4 @@ exports.LinkToLinkify = LinkToLinkify;
 exports.WikiLinkify = WikiLinkify;
 exports.updateDict = updateDict;
 exports.allSettled = allSettled;
+exports.userDir = userDir;

@@ -1,6 +1,8 @@
 var config = require("./config");
 var git = require("nodegit");
 var fs = require('fs');
+var ncp = require('ncp').ncp;
+ncp.limit = 16; // number of simultaneous copy operations allowed
 
 var EP_SUBMISSIONS = "SUBMIT";
 
@@ -368,6 +370,60 @@ var diffCommit = function(repo, commit) {
     })
 };
 
+function ensureUserRepoCreated(repoCfg, userSpace, contentHome) {
+    // Make a working space for this user if one does not yet exist
+    if (!fs.existsSync(userSpace)) {
+        // Refresh my local copy
+        git.pull(contentHome, repoCfg.UPSTREAM_NAME, repoCfg.BRANCH_NAME,
+            function(err, oid) {
+                if (err != null) console.log("pull " + contentHome + " error " + err);
+
+                // then copy it to the user's space
+                ncp(contentHome, userSpace, function(err) {
+                    if (err) {
+                        console.error("ncp copy error: " + err);
+                        return contentHome;
+                    }
+                    console.log("user scratch space created!");
+                });
+            });
+        return contentHome; // While I'm waiting for the copy, allow the user to read
+    }
+    return userSpace;
+}
+
+function ensureUserRepoCreated2(repoCfg, uid) {
+    let userSpace = repoUserDir(repoCfg, uid);
+    let anonSpace = repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR;
+
+    // Make a working space for this user if one does not yet exist
+    if (!fs.existsSync(userSpace)) {
+        // Refresh my local copy
+        pull(anonSpace, repoCfg.UPSTREAM_NAME, repoCfg.BRANCH_NAME,
+            function(err, oid) {
+                if (err != null) console.log("pull " + contentHome + " error " + err);
+
+                // then copy it to the user's space
+                ncp(anonSpace, userSpace, function(err) {
+                    if (err) {
+                        console.error("ncp copy error: " + err);
+                        return contentHome;
+                    }
+                    console.log("user scratch space created!");
+                });
+            });
+        return anonSpace; // While I'm waiting for the copy, allow the user to read
+    }
+    return userSpace;
+}
+
+
+
+function ensureUserReposCreated(uid) {
+    return Promise.all(config.REPOS.map(repoCfg => ensureUserRepoCreated2(repoCfg, uid)));
+}
+
+
 exports.pull = pull;
 exports.commitEdits = commitEdits;
 exports.refreshRepoEveryone = refreshRepoEveryone;
@@ -385,3 +441,7 @@ exports.branch = branch;
 exports.EP_SUBMISSIONS = EP_SUBMISSIONS;
 exports.diffBranch = diffBranch;
 exports.diffCommit = diffCommit;
+
+exports.ccred = ccred;
+
+exports.ensureUserReposCreated = ensureUserReposCreated;
