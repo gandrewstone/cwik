@@ -36,6 +36,24 @@ function determineRepoAndDir(uid, filepath) {
                 if (err.code != "ENOENT") console.log(err);
                 // maybe repo not cloned to the user
             }
+
+        if (suffixPath.startsWith("/" + repoCfg.PREFIX)) {
+            let tmp = suffixPath.slice(repoCfg.PREFIX.length + 1);
+            try {
+                console.log("trying: " + repoCfg.DIR + "/" + userDir + tmp);
+                let fullPath = path.resolve(repoCfg.DIR + "/" + userDir + tmp);
+                if (firstPath == null) firstPath = fullPath;
+                let mediaFileStats = fs.statSync(fullPath);
+                console.log("found!");
+                return [repoCfg, fullPath, "/" + repoCfg.PREFIX + tmp, media];
+            } catch (err) {
+                console.log("NO");
+                if (err.code != "ENOENT") console.log(err);
+                // Ok not in this repo
+            }
+        }
+
+	    
         }
 
         // Check internal link in a repo.  TODO we might want to check the last session request to discover which repo its in.
@@ -176,26 +194,6 @@ handleAPage = function(req, res) {
 
     urlPath = req.path;
 
-    /*
-    decodedPath = decodeURI(urlPath);
-    decodedPath = decodedPath.replace(" ", "__"); // replace spaces with double underscore
-
-    let isMedia = -1;
-    for (let i = 0; i < config.MEDIA_EXT.length; i++) {
-        if (decodedPath.endsWith(config.MEDIA_EXT[i])) {
-            isMedia = i;
-            break;
-        }
-    }
-
-    if (isMedia == -1)
-        decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
-    if (decodedPath.startsWith(".")) return BadURL(req, res); // Don't allow overwriting dot files
-    if (decodedPath.includes("..")) return BadURL(req, res);
-    if (decodedPath == "/") decodedPath = "/home"; // hard code / to home.md
-    if (decodedPath.endsWith("/")) decodedPath = decodedPath.substring(0, decodedPath.length - 1);
-    var filepath = readFrom + decodedPath; //  + ".md";
-    */
 
     let filepath = readFrom;
 
@@ -232,20 +230,26 @@ handleAPage = function(req, res) {
     console.log("access " + filepath);
 
     if (req.method == "POST") {
-        let repoRelativeFilePath = decodedPath.slice(1);
-
-        if (!repoRelativeFilePath.endsWith(".md")) {
-            repoRelativeFilePath = repoRelativeFilePath + ".md";
-        }
-
-        var writeFilePath = userSpace + repoRelativeFilePath;
-
         if (req.session.uid == undefined) {
             res.json({
                 notification: "unauthorized edit attempt, log in first!"
             });
             return;
         }
+	
+        let writeFilePath = readFrom;
+	let userDir = misc.userDir(req.session.uid);
+
+	let repoPrefix = path.resolve(repoCfg.DIR + "/" + userDir);
+	if (!writeFilePath.startsWith(repoPrefix)) {
+	    console.log("Attempt to edit " + writeFilePath + ", expecting " + repoPrefix);
+	    return res.json({
+                notification: "unauthorized edit location!"
+            });
+	}
+	
+	let repoRelativeFilePath = writeFilePath.slice(repoPrefix.length+1);  // +1 chops off the /
+
 
         var chFiles = git.changedFiles[req.session.uid];
 
@@ -254,13 +258,13 @@ handleAPage = function(req, res) {
             git.saveChangedFiles(repoCfg, req.session.uid, chFiles);
         }
 
-        var dirOfPost = path.dirname(filepath);
+        var dirOfPost = path.dirname(writeFilePath);
         if (!fs.existsSync(dirOfPost))
             fs.mkdirSync(dirOfPost, {
                 recursive: true
             });
 
-        fs.writeFile(filepath, req.body, (err) => {
+        fs.writeFile(writeFilePath, req.body, (err) => {
             if (err) {
                 console.log("POST content file write error: " + err.message);
                 res.json({
