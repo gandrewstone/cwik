@@ -16,7 +16,7 @@ if (typeof process.env.NXC !== "undefined") {
     exports.STACKEDIT_URL = "http://stackedit.nextchain.cash/app";
 
 } else if (typeof process.env.BUNET !== "undefined") {
-
+    console.log("Running www.bitcoinunlimited.net configuration");
     exports.REPOS = [{
         URL: "git@github.com:bitcoin-unlimited/BUwiki.git",
         PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
@@ -36,7 +36,7 @@ if (typeof process.env.NXC !== "undefined") {
     exports.SITE_NAME = "BitcoinUnlimited";
     exports.DEFAULT_PIC = "bunet.png";
     exports.MY_URL = "http://www.bitcoinunlimited.net";
-    exports.STACKEDIT_URL = "http://www.bitcoinunlimited.net/app";
+    exports.STACKEDIT_URL = "http://stackedit.bitcoinunlimited.net/app";
 }
 
 // Override for dev env
