@@ -114,7 +114,7 @@ function loginPolling() {
             }
             if (response.status != 401) clearInterval(intervalID);
         });
-    }, 500);
+    }, 5000);
 }
 
 function commitEdits() {

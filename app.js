@@ -11,7 +11,6 @@ var memoryStore = require('memorystore')(session);
 var config = require("./config");
 var pageaccess = require("./pageaccess");
 var index = require('./routes/index');
-var users = require('./routes/users');
 var git = require("./cwikgit");
 var search = require("./search");
 var mdtohtml = require("./mdtohtml");
@@ -84,7 +83,14 @@ app.set('view engine', 'pug');
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+    verify: function(req, res, buf, encoding) {
+        // get rawBody
+        req.rawBody = buf.toString();
+        console.log("raw body: " + req.rawBody);
+    }
+}));
+
 app.use(bodyParser.urlencoded({
     extended: false
 }));
@@ -100,7 +106,7 @@ app.use("/_static_", express.static(path.join(__dirname, 'public'), {
 //app.use("/_static_/js", express.static(path.join(__dirname, 'node_modules'),{extensions:['js','css','json','html']}));
 
 app.use('/', index);
-app.use('/users', users);
+// app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

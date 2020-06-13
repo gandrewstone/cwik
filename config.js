@@ -1,5 +1,7 @@
 var path = require('path');
 
+exports.allowRegistration = "";
+
 if (typeof process.env.NXC !== "undefined") {
     exports.REPOS = [{
         URL: "ssh:git@gitlab.com:nextchain/www.git",
@@ -14,6 +16,7 @@ if (typeof process.env.NXC !== "undefined") {
     exports.DEFAULT_PIC = "NextChainFlag.png";
     exports.MY_URL = "http://www.nextchain.cash";
     exports.STACKEDIT_URL = "http://stackedit.nextchain.cash/app";
+    exports.allowRegistration = "bchidentity";
 
 } else if (typeof process.env.BUNET !== "undefined") {
     console.log("Running www.bitcoinunlimited.net configuration");
@@ -52,3 +55,7 @@ exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 exports.DEFAULT_COMMIT_MSG = "wiki commit";
 exports.ANON_REPO_SUBDIR = "mirror";
 exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav"]
+
+exports.USERS = {
+        "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs": { "hdl":"Andrew Stone","email":"g.andrew.stone@gmail.com", "push": true, "merge": true, "propose": true, "comment": true }
+        }

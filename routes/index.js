@@ -4,10 +4,10 @@ var config = require("../config.js");
 var misc = require("../misc.js");
 var express = require('express');
 var router = express.Router();
-var users = require('../knownusers.json')["KnownUsers"]
 var multer = require('multer')
 var path = require('path');
 var search = require("../search");
+var users = require("../users");
 
 // https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
 function zip(arrays) {
@@ -16,15 +16,6 @@ function zip(arrays) {
             return array[i]
         })
     });
-}
-
-KnownUser = function(identity) {
-    for (i = 0; i < users.length; i++) {
-        if (users[i] == identity) {
-            return true;
-        }
-    }
-    return false;
 }
 
 /* GET home page. */
@@ -45,43 +36,56 @@ router.get('/_commit_', function(req, res, next) {
         });
         return;
     }
+    let user = users.known(req.session.uid);
+    if (user == null) {
+        res.json({
+            notification: "unauthorized commit: unregistered user"
+        });
+        return;
+    }
+
+    // TODO: figure out if there's an active edit proposal
+    if (!user.push) {
+        res.json({
+            notification: "you are not authorized to commit"
+        });
+        return;
+    }
     console.log("commit to repo");
     config.REPOS.forEach(repo => {
-        git.commitEdits(req, res, repo); // sets res to a json response detailing whether the commit was successful
+        git.commitEdits(req, res, repo, null, user); // sets res to a json response detailing whether the commit was successful
     });
 });
 
-router.get('/_login_/auto', function(req, res, next) {
-    console.log("connecting with session: " + req.sessionID);
-    console.log("op=" + req.query.op);
-    console.log("addr=" + req.query.addr);
-    console.log("sig size: " + req.query.sig.length + " sig=" + req.query.sig);
-    console.log("cookie=" + req.query.cookie);
-    if (req.query.op == "login") {
-        console.log("login");
-        let addr = req.query.addr;
-        if (!addr.includes(":")) addr = "bitcoincash:" + addr;
 
-        sessionStore.get(req.query.cookie, function(err, session) {
+function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
+    console.log("processLogin");
+    console.log(host + " " + addr + " " + cookie + " " + sig);
+    if (!addr.includes(":")) addr = "bitcoincash:" + addr;
+    console.log("processLogin2");
+
+    return new Promise(function(ok, err) {
+
+        sessionStore.get(cookie, function(err, session) {
             if (err != null)
                 console.log("session store: " + err.message);
             else
                 console.log("got session for cookie");
             if (session != null) {
-                if (!KnownUser(addr)) {
+                let userInfo = users.known(addr);
+                if (!userInfo) {
                     console.log("unknown user " + addr);
-                    res.status(200).send("unknown identity: " + addr);
-                    return;
-
+                    if (!allowUnknownUser) return ok([200, "unknown identity: " + addr]);
                 }
-                if (verifySig(req.headers.host + "_bchidentity_login_" + session.challenge, addr, req.query.sig)) {
-                    sessionStore.get(req.query.cookie, function(err, session2) {
+                if (verifySig(host + "_bchidentity_" + op + "_" + session.challenge, addr, sig)) {
+
+                    sessionStore.get(cookie, function(err, session2) {
                         console.log("reloaded session: " + JSON.stringify(session2));
                     });
 
                     // If connect with same session I need to write req because changing the sessionStore directly will be overwritten
                     // when this function returns.
-                    if (req.query.cookie == req.sessionID) {
+                    if (cookie == req.sessionID) {
                         req.session.challenge = "solved";
                         req.session.uid = addr;
                         git.ensureUserReposCreated(addr);
@@ -95,9 +99,9 @@ router.get('/_login_/auto', function(req, res, next) {
                         git.ensureUserReposCreated(addr);
                         git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
                             if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
-                            sessionStore.set(req.query.cookie, session);
+                            sessionStore.set(cookie, session);
                         }, err => { // Even if we can't get the repo branch, still set the session
-                            sessionStore.set(req.query.cookie, session, function(err) {
+                            sessionStore.set(cookie, session, function(err) {
                                 console.log("error?:" + JSON.stringify(err));
                             });
                         });
@@ -105,18 +109,62 @@ router.get('/_login_/auto', function(req, res, next) {
                     }
                     git.refreshRepoUser(addr);
                     console.log("login accepted");
-                    res.status(200).send("login accepted");
+                    if (userInfo) {
+                        ok([200, "accepted"]);
+                    } else {
+                        ok([201, "accepted unknown user"]);
+                    }
                     return;
                 } else {
-                    console.log("bad signature for challenge " + req.headers.host + "_login_" + session.challenge);
-                    res.status(200).send("bad signature");
+                    console.log("bad signature for challenge " + host + "_login_" + session.challenge);
+                    ok([200, "bad signature"]);
                     return;
                 }
             } else {
                 console.log("unknown session");
-                res.status(404).send("unknown session");
+                ok([404, "unknown session"]);
             }
         });
+    });
+}
+
+
+router.post('/_reg_/auto', function(req, res, next) {
+    console.log("POST registration call")
+    console.log(JSON.stringify(req.body))
+
+    if (req.body.op == "reg") {
+        console.log("registration login");
+        processLogin("reg", req.headers.host, req.body.addr, req.body.cookie, req.body.sig, req, true).then(
+            (result) => {
+                const [code, response] = result;
+                console.log("sending: " + response);
+                if (code == 201) {  // accepted unknown user, so add to database
+                    users.create(req.body.addr, req.body.hdl, req.body.email);
+                    users.save();
+                }
+                res.status(code).send(response);
+
+            });
+    } else {
+        res.status(404).send("unknown operation");
+    }
+    console.log("reg fun finished");
+});
+
+router.get('/_login_/auto', function(req, res, next) {
+    console.log("connecting with session: " + req.sessionID);
+    console.log("op=" + req.query.op);
+    console.log("addr=" + req.query.addr);
+    console.log("sig size: " + req.query.sig.length + " sig=" + req.query.sig);
+    console.log("cookie=" + req.query.cookie);
+    if (req.query.op == "login") {
+        processLogin("login", req.headers.host, req.query.addr, req.query.cookie, req.query.sig, req, false).then(
+            (result) => {
+                const [code, response] = result;
+                console.log("sending: " + response);
+                res.status(code).send(response);
+            });
     } else {
         res.status(404).send("unknown operation");
     }
@@ -147,10 +195,18 @@ router.get('/_login_', function(req, res, next) {
     if (typeof req.session.history !== "undefined") {
         historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
     }
+
+    let QRregisterText = null;
+    if (config.allowRegistration.includes("bchidentity")) {
+        QRregisterText = "bchidentity://" + req.headers.host + '/_reg_/auto?op=reg&chal=' + req.session.challenge + "&cookie=" + req.sessionID + "&hdl=r&email=o";
+    }
+
     res.render('login', {
         challenge: req.headers.host + "_login_" + req.session.challenge,
         history: historyHtml,
+        allowRegistration: config.allowRegistration,
         QRsignCode: QRcodeText,
+        QRregCode: QRregisterText,
         user: user
     });
 });

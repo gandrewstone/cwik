@@ -464,6 +464,35 @@ tr:nth-child(odd) td { background: #FEFEFE; }
         text-align: center;
     }
 
+
+#register {
+    display: inline-block;
+    width:45%;
+    vertical-align: top;
+}
+#login {
+    display: inline-block;
+    width:45%;
+    vertical-align: top;
+}
+
+#login h2 {
+display: block;
+margin-left: auto;
+margin-right: auto;
+}
+
+#bchidentity_op_reg {
+    margin: auto;
+}
+
+#RegQRcode,#LoginQRCode {
+display: block;
+margin-left: auto;
+margin-right: auto;
+}
+
+
 /* nav menu will auto-close so it should cover over text */
 @media (orientation: portrait) {
     .leftsidebar {

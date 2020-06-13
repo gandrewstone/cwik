@@ -1,7 +1,1 @@
-{
-    "KnownUsers" : [
-    "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs",
-    "bitcoincash:qrwddp7gxl50fpl2tgz003zfahysks4w7yylm72h0m",
-    "bchreg:qpqqupa2luurjyfnypzka4sguqkcty96guj0m70ng0"
-    ]
-}
+{"bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs":{"hdl":"Andrew Stone","email":"g.andrew.stone@gmail.com","push":true,"merge":true,"propose":true,"comment":true},"bitcoincash:qr8th72h3jzrjl4nq6fjee6gcrknjn6d2c33yfdhtu":{"push":false,"merge":false,"propose":true,"comment":true}}

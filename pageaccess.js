@@ -7,6 +7,7 @@ var path = require("path");
 var git = require("./cwikgit");
 var config = require("./config");
 var misc = require("./misc");
+var users = require("./users");
 
 function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
@@ -150,17 +151,14 @@ handleAPage = function(req, res) {
     [repoCfg, readFrom, canonicalSuffix, media] = determineRepoAndDir(req.session.uid, req.path);
     console.log("repoCfg: " + JSON.stringify(repoCfg) + " readFrom: " + readFrom + " media: " + media);
 
+    let userPerms = {};
+
     if (req.session.uid == undefined) {
         // require login to view:
         // return res.redirect(307,"/_login_")
         user['loggedIn'] = false;
         user['editProposal'] = undefined;
-        //userSpace = repoCfg.DIR + "/" + config.ANON_REPO_SUBDIR;
-        //readFrom = path.resolve(userSpace);
     } else {
-        //userSpace = repoCfg.DIR + "/" + req.session.uid.split(":")[1];
-        //console.log("User space: " + userSpace);
-
         // shouldn't be needed
         // readFrom = git.ensureUserRepoCreated(repoCfg, userSpace, contentHome);
 
@@ -180,6 +178,7 @@ handleAPage = function(req, res) {
 
         user['loggedIn'] = true;
         user['editProposal'] = req.session.editProposal;
+        userPerms = users.known(req.session.uid);
     }
 
     console.log("handle a page: " + req.path);
@@ -193,8 +192,6 @@ handleAPage = function(req, res) {
     }
 
     urlPath = req.path;
-
-
     let filepath = readFrom;
 
     if (typeof config.MY_URL !== "undefined") {
@@ -227,7 +224,6 @@ handleAPage = function(req, res) {
     if (media == null && !filepath.endsWith(".md")) {
         filepath = filepath + ".md";
     }
-    console.log("access " + filepath);
 
     if (req.method == "POST") {
         if (req.session.uid == undefined) {
@@ -271,12 +267,14 @@ handleAPage = function(req, res) {
                     notification: err.message
                 });
             } else {
-                console.log("file write success");
+                console.log("file write success: " + filepath);
                 res.send("ok");
             }
         });
         return;
     }
+
+    console.log("reading " + filepath);
 
     if (!req.query.raw) {
         jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;

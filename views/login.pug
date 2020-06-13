@@ -21,19 +21,28 @@ block notification
      | !{ notification }
 
 block wikipage
-  div.login
-   center
-      H2 Registration
-      p Contact the site administrator and provide a BCH address to gain edit access to this site.
-   form(action="/_login_", method="POST")
-    center
-      H2 Sign-in via BCH Identity Protocol
-      div#QRcode QR graphic here
+  div#loginPage
+   div#login
+     center
+      H2 Sign-in
+      p Sign-in via BCH Identity Protocol
+      div#LoginQRcode QR graphic here
       small
-        a(href=QRsignCode, id="bchidentity_op_login") login with local app
-      
+          a(href=QRsignCode, id="bchidentity_op_login") login with local app
+   div#register
+     center
+      H2 Registration
+      if allowRegistration.includes("bchidentity")
+        p Register via BCH Identity Protocol
+        div#RegQRcode QR registration graphic here
+        small
+            a(href=QRregCode, id="bchidentity_op_reg") register with local app
+      else
+        p Contact the site administrator and provide a BCH address to gain edit access to this site.
+   div#manualLogin  
     center
       H2 Manual Entry
+      form(action="/_login_", method="POST")
       p Many Bitcoin Cash wallets support "sign message" functionality.  You may sign into this site by using that wallet to sign challenge below and provide the resulting address and signature.  This can be inconvenient to do manually, but once you've logged in, your session will persist for a month or until the server is restarted.
     center
       | Challenge
@@ -45,13 +54,24 @@ block wikipage
       input(type="submit", value="login")
 
   script(type="text/javascript",src="/_static_/js/qrcode.js")
+  if allowRegistration.includes("bchidentity")
+    script.
+      let typeNumber = 12;
+      let errorCorrectionLevel = 'L';
+      let rqr = qrcode(typeNumber, errorCorrectionLevel);
+      rqr.addData("!{QRregCode}");
+      rqr.make();
+      document.getElementById('RegQRcode').innerHTML = rqr.createImgTag();
+      
   script.
-    var typeNumber = 12;
-    var errorCorrectionLevel = 'L';
-    var qr = qrcode(typeNumber, errorCorrectionLevel);
+    if (true) {
+    let typeNumber = 12;
+    let errorCorrectionLevel = 'L';
+    let qr = qrcode(typeNumber, errorCorrectionLevel);
     qr.addData("!{QRsignCode}");
     qr.make();
-    document.getElementById('QRcode').innerHTML = qr.createImgTag();
+    document.getElementById('LoginQRcode').innerHTML = qr.createImgTag();
+    }
     let notif = document.querySelector(".notification");
     if (notif.textContent) notif.style.display="block";
     loginPolling();

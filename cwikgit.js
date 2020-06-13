@@ -139,17 +139,17 @@ branch = function(repo, branchName, upstreamRepoName, create) {
 // Perhaps this can be better accomplished with a git command
 changedFiles = {}; // This is a dictionary of uid, Set() pairs
 
-commitEdits = function(req, res, repoCfg, comment) {
+commitEdits = function(req, res, repoCfg, comment, userInfo) {
     var uid = req.session.uid;
     let userName = uid.split(":")[1];
-    if (typeof req.session.userName !== "undefined")
-        userName = req.session.userName;
+    if (typeof userInfo.hdl !== "undefined")
+        userName = userInfo.hdl;
     let userEmail = uid + "@" + config.MY_URL.split("//")[1];
-    if (typeof req.session.userEmail !== "undefined")
-        userEmail = req.session.userEmail;
+    if (typeof userInfo.email !== "undefined")
+        userEmail = userInfo.email;
     var userSpace = repoUserDir(repoCfg, uid);
     console.log("commit")
-    if (typeof comment == "undefined") comment = config.DEFAULT_COMMIT_MSG;
+    if (comment == null) comment = config.DEFAULT_COMMIT_MSG;
     console.log("commit edits run: " + userName + " repo " + userSpace);
     git.Repository.open(userSpace).then(function(repo) {
             var author = git.Signature.now(userName, userEmail);
