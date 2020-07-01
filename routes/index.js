@@ -27,6 +27,7 @@ router.get('/', function(req, res, next) {
 router.get('/_logout_', function(req, res, next) {
     req.session.challenge = undefined;
     req.session.uid = undefined;
+    req.session.editProposal = "";
     res.redirect("/");
 });
 
@@ -286,6 +287,7 @@ router.get('/_editProposal_/close', function(req, res, next) {
 
     git.repoBranchNameByUid(repoCfg, req.session.uid).then(curBranch => {
         if (curBranch == repoCfg.BRANCH_NAME) {
+            req.session.editProposal = "";
             return res.json({
                 notification: "no edit proposal is open",
                 error: 1
