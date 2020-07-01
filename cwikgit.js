@@ -113,18 +113,48 @@ branch = function(repo, branchName, upstreamRepoName, create) {
             repo.checkoutBranch(branchName).then(resolve, reject);
         }, err => {
             console.log("pull Repo error: " + JSON.stringify(err));
-            console.log(typeof err);
-            if (err.errno == git.Error.CODE.ENOTFOUND) // its ok that the branch does not exist in the remote yet
+            if (err.errno != git.Error.CODE.ENOTFOUND) // its ok that the branch does not exist in the remote yet
             {
                 repo.checkoutBranch(branchName).then(resolve, reject);
-            } else if (create) {
+            }
+            else if (create) {
+                console.log("creating branch");
                 repo.getHeadCommit().then(commit => {
-                    repo.createBranch(branchName, commit.id(), false).then(smth => {
-                        pullRepo(repo, branchName, upstreamRepoName).then(oid => {
+                    console.log("got head commit");
+                    repo.createBranch(branchName, commit.id(), false).then(
+                        smth => {
+                        console.log("created branch");
+                        pullRepo(repo, branchName, upstreamRepoName).then(
+                            oid => {
                             console.log("pulled branch " + branchName + "to " + oid);
                             repo.checkoutBranch(branchName).then(resolve, reject);
-                        }, reject);
-                    }, reject);
+                        },
+                            err => {  // Not a problem is the branch already exists
+                                if (err.errno == git.Error.CODE.EEXISTS) {
+                                    pullRepo(repo, branchName, upstreamRepoName).then(oid => {
+                                    console.log("pulled branch " + branchName + "to " + oid);
+                                    repo.checkoutBranch(branchName).then(resolve, reject);
+                                });
+                            }
+                            else reject(err);
+                        });
+                        },
+                        err => {  // Not a problem the branch already exists
+                            if (err.errno == git.Error.CODE.EEXISTS) {
+                                // pull it from the remote
+                                pullRepo(repo, branchName, upstreamRepoName).then(
+                                    oid => {
+                                        console.log("pulled branch " + branchName + "to " + oid);
+                                        repo.checkoutBranch(branchName).then(resolve, reject);
+                                    },
+                                    err => {
+                                        // OK doesn't exist in the remote so open locally only
+                                        repo.checkoutBranch(branchName).then(resolve, reject);
+                                        });
+                            }
+                            else reject(err);
+                        }
+                    );
                 }, reject);
             } else {
                 console.log("pullRepo error: " + err);
@@ -207,8 +237,12 @@ refreshRepoEveryone = function() {
 }
 
 repoBranchNameByUid = function(repoCfg, uid) {
+    console.log("repoBranchNameByUid");
     return new Promise(function(resolve, reject) {
-        repoBranchByUid(repoCfg, uid).then(branch => resolve(branch.shorthand()), reject);
+        repoBranchByUid(repoCfg, uid).then(branch => {
+            console.log("branch shorthand: " + branch.shorthand());
+            resolve(branch.shorthand())
+        }, reject);
     });
 }
 
@@ -234,9 +268,13 @@ repoBranchByUid = function(uid) {
 */
 
 repoBranchByDir = function(userSpace) {
+    console.log("repoBranchByDir");
     return new Promise(function(resolve, reject) {
+        console.log("repoBranchByDir promise " + userSpace);
         git.Repository.open(userSpace).then(repo => {
+            console.log("Opened repo");
             repo.getCurrentBranch().then(branch => {
+                console.log("got branch");
                 resolve(branch);
             }, reject);
         }, reject);
@@ -244,7 +282,9 @@ repoBranchByDir = function(userSpace) {
 }
 
 repoByUid = function(repoCfg, uid) {
-    let userSpace = repoUserDir(repoCfg.DIR, uid);
+    console.log("repoCfg is " + JSON.stringify(repoCfg));
+    let userSpace = repoUserDir(repoCfg, uid);
+    console.log("userspace: " + userSpace + " " + repoCfg.DIR + " " + uid);
 
     return new Promise(function(resolve, reject) {
         git.Repository.open(userSpace).then(resolve, reject);
@@ -425,6 +465,7 @@ function ensureUserReposCreated(uid) {
 
 
 exports.pull = pull;
+exports.push = push;
 exports.commitEdits = commitEdits;
 exports.refreshRepoEveryone = refreshRepoEveryone;
 exports.refreshRepoUser = refreshRepoUser;

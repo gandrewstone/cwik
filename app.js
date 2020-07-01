@@ -50,13 +50,16 @@ config.REPOS.forEach(repoCfg => {
     git.refreshRepoByDir(contentHome, repoCfg.UPSTREAM_NAME);
 });
 
-console.log("generate");
-
 (async () => {
+    console.log("generate html from md");
     await Promise.all(cloned);
+    console.log("clone complete");
     await mdtohtml.init();
+    console.log("mdtohtml inited, generating files.  If generation does not progress, config.STACKEDIT_URL is very likely not properly set.");
     await mdtohtml.generate();
+    console.log("mdtohtml generate complete");
     await search.reindex();
+    console.log("generate complete");
 })();
 
 sessionStore = new memoryStore({

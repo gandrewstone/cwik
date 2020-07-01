@@ -7,7 +7,7 @@ var fs = fssync.promises;
 
 var path = require('path');
 
-const PuppeteerDebug = false;
+const PuppeteerDebug = false; // true;
 
 let titles = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
@@ -253,13 +253,15 @@ async function generate() {
 
 
                 if (regenerate) try {
+                    console.log("regeneration of " + f + " required.");
                     let hdl = await fs.open(f, 'r');
                     let data = await hdl.readFile({
                         encoding: "utf-8"
                     });
                     await hdl.close();
-
+                    console.log("file loaded");
                     let result = await mdToHtml(data);
+                    console.log("file converted");
                     let html = result.html;
                     delete result.html;
 

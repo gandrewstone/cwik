@@ -8,6 +8,7 @@ var multer = require('multer')
 var path = require('path');
 var search = require("../search");
 var users = require("../users");
+var fs = require('fs');
 
 // https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
 function zip(arrays) {
@@ -44,12 +45,21 @@ router.get('/_commit_', function(req, res, next) {
         return;
     }
 
-    // TODO: figure out if there's an active edit proposal
+
+    if (req.session.editProposal)
+    {
+        if (!user.propose) return res.json({
+                notification: "unauthorized commit: contact site administrator"
+            });
+    }
+    else
+    {
+    // If I don't have push access make sure I have access
     if (!user.push) {
-        res.json({
-            notification: "you are not authorized to commit"
-        });
-        return;
+            res.json({
+                notification: "unauthorized commit: open an edit proposal first"
+            });
+        }
     }
     console.log("commit to repo");
     config.REPOS.forEach(repo => {
@@ -75,7 +85,7 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                 let userInfo = users.known(addr);
                 if (!userInfo) {
                     console.log("unknown user " + addr);
-                    if (!allowUnknownUser) return ok([200, "unknown identity: " + addr]);
+                    if (!allowUnknownUser) return ok([203, "unknown identity: " + addr]);
                 }
                 if (verifySig(host + "_bchidentity_" + op + "_" + session.challenge, addr, sig)) {
 
@@ -90,7 +100,7 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                         req.session.uid = addr;
                         git.ensureUserReposCreated(addr);
                         git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
-                            if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
+                            if (br != config.REPOS[0].BRANCH_NAME) req.session.editProposal = br;
                         });
                     } else // If I connected with a different (out-of-band) session, then I need to write the sessionStore directly
                     {
@@ -98,7 +108,7 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                         session.uid = addr;
                         git.ensureUserReposCreated(addr);
                         git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
-                            if (br != config.REPO_BRANCH_NAME) req.session.editProposal = br;
+                            if (br != config.REPOS[0].BRANCH_NAME) req.session.editProposal = br;
                             sessionStore.set(cookie, session);
                         }, err => { // Even if we can't get the repo branch, still set the session
                             sessionStore.set(cookie, session, function(err) {
@@ -117,7 +127,7 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                     return;
                 } else {
                     console.log("bad signature for challenge " + host + "_login_" + session.challenge);
-                    ok([200, "bad signature"]);
+                    ok([202, "bad signature"]);
                     return;
                 }
             } else {
@@ -143,8 +153,22 @@ router.post('/_reg_/auto', function(req, res, next) {
                     users.create(req.body.addr, req.body.hdl, req.body.email);
                     users.save();
                 }
+                if (code == 200) {  // accepted known user, see if user updated any data
+                    let changed = false;
+                    user = users.known(req.body.addr);
+                    if (req.body.hdl && (req.body.hdl != user.hdl))
+                    {
+                        changed = true;
+                        user.hdl = req.body.hdl;
+                    }
+                    if (req.body.email && (req.body.email != user.email))
+                    {
+                        changed = true;
+                        user.email = req.body.email;
+                    }
+                    if (changed) users.save();
+                }
                 res.status(code).send(response);
-
             });
     } else {
         res.status(404).send("unknown operation");
@@ -258,16 +282,18 @@ router.get('/_editProposal_/close', function(req, res, next) {
         });
     }
 
-    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
-        if (curBranch == config.REPO_BRANCH_NAME) {
+    let repoCfg = config.REPOS[0];
+
+    git.repoBranchNameByUid(repoCfg, req.session.uid).then(curBranch => {
+        if (curBranch == repoCfg.BRANCH_NAME) {
             return res.json({
                 notification: "no edit proposal is open",
                 error: 1
             });
         }
 
-        git.repoByUid(req.session.uid)
-            .then(repo => git.branch(repo, config.REPO_BRANCH_NAME, config.UPSTREAM_REPO_NAME, true))
+        git.repoByUid(repoCfg, req.session.uid)
+            .then(repo => git.branch(repo, repoCfg.BRANCH_NAME, repoCfg.UPSTREAM_NAME, true))
             .then(result => {
                 req.session.editProposal = "";
                 return res.json({
@@ -278,7 +304,7 @@ router.get('/_editProposal_/close', function(req, res, next) {
             .catch(err => {
                 console.log("err " + err);
                 return res.json({
-                    notification: err,
+                    notification: "Internal Error: " + err.message,
                     error: 1
                 });
             });
@@ -296,17 +322,24 @@ router.get('/_editProposal_/submit', function(req, res, next) {
         });
     }
 
-    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
-        if (curBranch == config.REPO_BRANCH_NAME) {
+    let repoCfg = config.REPOS[0];
+
+    git.repoBranchNameByUid(repoCfg, req.session.uid).then(curBranch => {
+        if (curBranch == repoCfg.BRANCH_NAME) {
             return res.json({
                 notification: "no edit proposal is open",
                 error: 1
             });
         }
 
-        git.repoByUid(req.session.uid).then(repo => {
+        fs.appendFile(repoCfg.DIR + "/submittedEditProposals.txt", curBranch + "\n", err => { console.log ("error appending to submitted EP: " + curBranch)});
+        git.repoByUid(repoCfg, req.session.uid).then(repo => {
             console.log("repo is " + JSON.stringify(repo));
-            git.branch(repo, config.REPO_BRANCH_NAME, config.UPSTREAM_REPO_NAME, true).then(result => {
+
+            // Push this branch to origin
+            git.push(repo, repoCfg.UPSTREAM_NAME).then(ok => {
+            // now switch back to master
+            git.branch(repo, repoCfg.BRANCH_NAME, repoCfg.UPSTREAM_NAME, true).then(result => {
                 console.log("branch " + result);
                 req.session.editProposal = "";
                 return res.json({
@@ -319,6 +352,7 @@ router.get('/_editProposal_/submit', function(req, res, next) {
                     notification: err,
                     error: 1
                 });
+            });
             });
         }, err => {
             return res.json({
@@ -462,8 +496,10 @@ router.get('/_editProposal_/diff', function(req, res, next) {
         });
     }
 
-    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
-        if (curBranch == config.REPO_BRANCH_NAME) {
+    let repoCfg = config.REPOS[0];
+
+    git.repoBranchNameByUid(repoCfg, req.session.uid).then(curBranch => {
+        if (curBranch == repoCfg.BRANCH_NAME) {
             return res.json({
                 notification: "no edit proposal is open",
                 error: 1
@@ -472,7 +508,7 @@ router.get('/_editProposal_/diff', function(req, res, next) {
 
         git.repoByUid(req.session.uid).then(repo => {
             console.log("repo at " + repo.path());
-            git.diffBranch(repo, config.REPO_BRANCH_NAME).then(diff => {
+            git.diffBranch(repo, repoCfg.BRANCH_NAME).then(diff => {
                 printDiff(diff);
                 //diff.patches().then(printPatches);
                 diff.patches().then(p => objectifyPatches(p).then(patchLst => {
@@ -510,27 +546,58 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
         });
     }
 
+    let user = users.known(req.session.uid);
+    if (user == null) {
+        return res.json({
+            notification: "unauthorized operation: unregistered user"
+        });
+    }
+    if (user.propose != true) {
+        return res.json({
+            notification: "unauthorized operation: contact site administrator"
+        });
+    }
+    
     let ep = req.path.replace("/_editProposal_/open/", "");
-    console.log(ep);
     ep = ep.split(' ').join('_')
+    console.log("EP Name is: " + ep);
     if (ep == "") {
         return res.json({
             notification: "empty edit proposal name"
         });
     }
 
-    repoBranchNameByUid(config.REPOS[0], req.session.uid).then(curBranch => {
-        if (curBranch != config.REPO_BRANCH_NAME) {
+    console.log("1");
+    let repos = config.REPOS;
+    console.log("2");
+    if (repos == undefined) return res.json({
+                notification: "repo config error (undefined), contact administrator",
+                error: 1
+            });
+    console.log("3");
+    if (repos.length == 0) return res.json({
+                notification: "repo config error (length), contact administrator",
+                error: 1
+            });
+    console.log("4");
+    console.log("repos " + JSON.stringify(repos));
+    let repocfg = repos[0];
+    console.log("repo " + JSON.stringify(repocfg));
+
+    git.repoBranchNameByUid(repocfg, req.session.uid).then(curBranch => {
+        if (curBranch != repocfg.BRANCH_NAME) {
             return res.json({
-                notification: "first close or submit your current proposal",
+                notification: "close or submit your current proposal",
                 error: 1
             });
         }
 
-        git.repoByUid(req.session.uid).then(repo => {
-            //res.json({notification: "ok" });
+        console.log("No current EP");
+        console.log(repocfg.DIR);
+
+        git.repoByUid(repocfg, req.session.uid).then(repo => {
             console.log("repo is " + JSON.stringify(repo));
-            git.branch(repo, ep, config.UPSTREAM_REPO_NAME, true).then(result => {
+            git.branch(repo, ep, repocfg.UPSTREAM_NAME, true).then(result => {
                 console.log("branch " + result);
                 req.session.editProposal = ep;
                 return res.json({

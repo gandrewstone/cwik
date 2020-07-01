@@ -31,42 +31,41 @@ html
     
     img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('/home')", title="home")
 
-    
-    div#userBar
-      //-  |  | 
-           span.horizMenu(onclick="settings()") settings
-      if user && user.loggedIn
-        span.horizMenu(onclick="logout()") logout
-      else
-        span.horizMenu(onclick="login()") login
-    
-    div#headerPageTitle
-      block header
 
     div#cwikheader
       img#sideBarButton(src='/_static_/images/closemenuIcon.svg', onclick="toggleSidebar()", title="toggle menu")
       div.toolBar
         block toolBar
-      div#EpBar
-        //- v also check if user has commit priviledges
-        if user && user.loggedIn
-          input#editProposal(type="text" placeholder="edit proposal" value=user.editProposal)
-          span.horizMenu#closeEP(onclick="closeEditProposal()") close
-          span.horizMenu#openEP(onclick="openEditProposal()") open
-          |  | 
-          span.horizMenu#diffEP(onclick="diffEditProposal()") diff
-          span#diffEPsep | 
-        if user && user.loggedIn
-          span.horizMenu(onclick="commitEdits()") commit
-          |  | 
-          span.horizMenu#submitEP(onclick="submitEditProposal()") submit
-
-      div#searchBarPos
-        form#searchBar
-          img#searchButton(src="/_static_/images/search.svg", onclick="search()")
-          div#searchTextPositioner
-            input#searchText(type="text" placeholder="search" value=(lastSearch ? lastSearch : ""))
-          input#hiddenSubmit(type="submit", onclick="search(); return false;")
+      div#headerPageTitle
+        block header
+      div#titleMenus
+        div#EpBar
+          //- v also check if user has commit priviledges
+          if user && user.loggedIn
+            input#editProposal(type="text" placeholder="edit proposal" value=user.editProposal)
+            |  
+            span.horizMenu#closeEP(onclick="return closeEditProposal();") close
+            span.horizMenu#openEP(onclick="return openEditProposal();") open
+            |  | 
+            span.horizMenu#diffEP(onclick="diffEditProposal(); return false;") diff
+            span#diffEPsep | 
+          if user && user.loggedIn
+            span.horizMenu#commitMenuItem(onclick="commitEdits(); return false;") commit
+            |  | 
+            span.horizMenu#submitEP(onclick="submitEditProposal(); return false;") submit
+        div#userBar
+         div#searchTextPositioner
+           form#searchBar
+              img#searchButton(src="/_static_/images/search.svg", onclick="search()")
+              input#searchText(type="text" placeholder="search" value=(lastSearch ? lastSearch : ""))
+              input#hiddenSubmit(type="submit", onclick="search(); return false;")
+         |   
+         div#LogInOutDiv 
+           if user && user.loggedIn
+              span.horizMenu(onclick="logout()") logout
+           else
+              span.horizMenu(onclick="login()") login
+        
 
     div#sidebarAndContent
      div.leftsidebar
@@ -125,11 +124,12 @@ html
         dragEnabled: true, dragAxis: 'y'
       });
 
-      if (!portrait) sidebarGrid.hide(document.getElementById("searchResults"), {instant: true});  
+      if (!portrait) sidebarGrid.hide(document.getElementById("searchResults"), {instant: true});
       sidebarGrid.refreshItems().layout();
 
 
       if (portrait) {
+          document.getElementById("EpBar").style.display = "none";  // No room in portrait mode to offer this
           document.querySelector(".leftsidebar").style.display = "none";
           document.getElementById("sideBarButton").src = '/_static_/images/openmenuIcon.svg';
       }

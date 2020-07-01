@@ -335,18 +335,24 @@ function setupLayout(document, window) {
 }
 
 // Prints out a warning or error in a prominent location.  Json is a dictionary object that may have a "notification" member
+
+function clearNotification() {
+    console.log("NOTIFY: clear");
+    document.getElementById('notifyText').innerText = "";
+    //document.querySelector('div.notification').visibility = "hidden";
+    document.querySelector('div.notification').style.display = "none";
+}
+
 function notification(json) {
     if (json.notification) {
+        console.log("NOTIFY: " + json.notification);
+        console.trace();
         document.getElementById('notifyText').innerText = json.notification;
         //document.querySelector('div.notification').visibility = "visible";
         document.querySelector('div.notification').style.display = "block";
         setTimeout(function() {
-            if (document.getElementById('notifyText').innerText == json.notification) notification({});
+            if (document.getElementById('notifyText').innerText == json.notification) clearNotification();
         }, NOTIFICATION_DELAY);
-    } else {
-        document.getElementById('notifyText').innerText = "";
-        //document.querySelector('div.notification').visibility = "hidden";
-        document.querySelector('div.notification').style.display = "none";
     }
 }
 
@@ -360,6 +366,7 @@ function openEditProposal() {
         }));
         notification(json);
     }));
+    return false;
 }
 
 function closeEditProposal() {
@@ -378,6 +385,7 @@ function closeEditProposal() {
             epEntry.value = "";
         }));
     }));
+    return false;
 }
 
 function submitEditProposal() {

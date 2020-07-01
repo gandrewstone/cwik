@@ -53,8 +53,6 @@ function determineRepoAndDir(uid, filepath) {
                 // Ok not in this repo
             }
         }
-
-	    
         }
 
         // Check internal link in a repo.  TODO we might want to check the last session request to discover which repo its in.
