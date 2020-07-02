@@ -116,30 +116,28 @@ branch = function(repo, branchName, upstreamRepoName, create) {
             if (err.errno != git.Error.CODE.ENOTFOUND) // its ok that the branch does not exist in the remote yet
             {
                 repo.checkoutBranch(branchName).then(resolve, reject);
-            }
-            else if (create) {
+            } else if (create) {
                 console.log("creating branch");
                 repo.getHeadCommit().then(commit => {
                     console.log("got head commit");
                     repo.createBranch(branchName, commit.id(), false).then(
                         smth => {
-                        console.log("created branch");
-                        pullRepo(repo, branchName, upstreamRepoName).then(
-                            oid => {
-                            console.log("pulled branch " + branchName + "to " + oid);
-                            repo.checkoutBranch(branchName).then(resolve, reject);
-                        },
-                            err => {  // Not a problem is the branch already exists
-                                if (err.errno == git.Error.CODE.EEXISTS) {
-                                    pullRepo(repo, branchName, upstreamRepoName).then(oid => {
+                            console.log("created branch");
+                            pullRepo(repo, branchName, upstreamRepoName).then(
+                                oid => {
                                     console.log("pulled branch " + branchName + "to " + oid);
                                     repo.checkoutBranch(branchName).then(resolve, reject);
+                                },
+                                err => { // Not a problem is the branch already exists
+                                    if (err.errno == git.Error.CODE.EEXISTS) {
+                                        pullRepo(repo, branchName, upstreamRepoName).then(oid => {
+                                            console.log("pulled branch " + branchName + "to " + oid);
+                                            repo.checkoutBranch(branchName).then(resolve, reject);
+                                        });
+                                    } else reject(err);
                                 });
-                            }
-                            else reject(err);
-                        });
                         },
-                        err => {  // Not a problem the branch already exists
+                        err => { // Not a problem the branch already exists
                             if (err.errno == git.Error.CODE.EEXISTS) {
                                 // pull it from the remote
                                 pullRepo(repo, branchName, upstreamRepoName).then(
@@ -150,9 +148,8 @@ branch = function(repo, branchName, upstreamRepoName, create) {
                                     err => {
                                         // OK doesn't exist in the remote so open locally only
                                         repo.checkoutBranch(branchName).then(resolve, reject);
-                                        });
-                            }
-                            else reject(err);
+                                    });
+                            } else reject(err);
                         }
                     );
                 }, reject);
@@ -330,7 +327,7 @@ loadChangedFiles = function(repoCfg, uid, sess) {
         if (err) {
             console.log("file doesn't exist: " + err);
             changedFiles[uid] = new Set();
-            console.log("assigned changedFiles ");
+            // console.log("assigned changedFiles ");
             return;
         }
         changedFiles[uid] = new Set(JSON.parse(data));

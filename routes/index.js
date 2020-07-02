@@ -47,16 +47,13 @@ router.get('/_commit_', function(req, res, next) {
     }
 
 
-    if (req.session.editProposal)
-    {
+    if (req.session.editProposal) {
         if (!user.propose) return res.json({
-                notification: "unauthorized commit: contact site administrator"
-            });
-    }
-    else
-    {
-    // If I don't have push access make sure I have access
-    if (!user.push) {
+            notification: "unauthorized commit: contact site administrator"
+        });
+    } else {
+        // If I don't have push access make sure I have access
+        if (!user.push) {
             res.json({
                 notification: "unauthorized commit: open an edit proposal first"
             });
@@ -150,20 +147,18 @@ router.post('/_reg_/auto', function(req, res, next) {
             (result) => {
                 const [code, response] = result;
                 console.log("sending: " + response);
-                if (code == 201) {  // accepted unknown user, so add to database
+                if (code == 201) { // accepted unknown user, so add to database
                     users.create(req.body.addr, req.body.hdl, req.body.email);
                     users.save();
                 }
-                if (code == 200) {  // accepted known user, see if user updated any data
+                if (code == 200) { // accepted known user, see if user updated any data
                     let changed = false;
                     user = users.known(req.body.addr);
-                    if (req.body.hdl && (req.body.hdl != user.hdl))
-                    {
+                    if (req.body.hdl && (req.body.hdl != user.hdl)) {
                         changed = true;
                         user.hdl = req.body.hdl;
                     }
-                    if (req.body.email && (req.body.email != user.email))
-                    {
+                    if (req.body.email && (req.body.email != user.email)) {
                         changed = true;
                         user.email = req.body.email;
                     }
@@ -334,27 +329,29 @@ router.get('/_editProposal_/submit', function(req, res, next) {
             });
         }
 
-        fs.appendFile(repoCfg.DIR + "/submittedEditProposals.txt", curBranch + "\n", err => { console.log ("error appending to submitted EP: " + curBranch)});
+        fs.appendFile(repoCfg.DIR + "/submittedEditProposals.txt", curBranch + "\n", err => {
+            console.log("error appending to submitted EP: " + curBranch)
+        });
         git.repoByUid(repoCfg, req.session.uid).then(repo => {
             console.log("repo is " + JSON.stringify(repo));
 
             // Push this branch to origin
             git.push(repo, repoCfg.UPSTREAM_NAME).then(ok => {
-            // now switch back to master
-            git.branch(repo, repoCfg.BRANCH_NAME, repoCfg.UPSTREAM_NAME, true).then(result => {
-                console.log("branch " + result);
-                req.session.editProposal = "";
-                return res.json({
-                    notification: "submitted edit proposal '" + curBranch + "'",
-                    error: 0
+                // now switch back to master
+                git.branch(repo, repoCfg.BRANCH_NAME, repoCfg.UPSTREAM_NAME, true).then(result => {
+                    console.log("branch " + result);
+                    req.session.editProposal = "";
+                    return res.json({
+                        notification: "submitted edit proposal '" + curBranch + "'",
+                        error: 0
+                    });
+                }, err => {
+                    console.log("err " + err);
+                    return res.json({
+                        notification: err,
+                        error: 1
+                    });
                 });
-            }, err => {
-                console.log("err " + err);
-                return res.json({
-                    notification: err,
-                    error: 1
-                });
-            });
             });
         }, err => {
             return res.json({
@@ -559,7 +556,7 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
             notification: "unauthorized operation: contact site administrator"
         });
     }
-    
+
     let ep = req.path.replace("/_editProposal_/open/", "");
     ep = ep.split(' ').join('_')
     console.log("EP Name is: " + ep);
@@ -569,22 +566,16 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
         });
     }
 
-    console.log("1");
     let repos = config.REPOS;
-    console.log("2");
     if (repos == undefined) return res.json({
-                notification: "repo config error (undefined), contact administrator",
-                error: 1
-            });
-    console.log("3");
+        notification: "repo config error (undefined), contact administrator",
+        error: 1
+    });
     if (repos.length == 0) return res.json({
-                notification: "repo config error (length), contact administrator",
-                error: 1
-            });
-    console.log("4");
-    console.log("repos " + JSON.stringify(repos));
+        notification: "repo config error (length), contact administrator",
+        error: 1
+    });
     let repocfg = repos[0];
-    console.log("repo " + JSON.stringify(repocfg));
 
     git.repoBranchNameByUid(repocfg, req.session.uid).then(curBranch => {
         if (curBranch != repocfg.BRANCH_NAME) {
@@ -593,9 +584,6 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
                 error: 1
             });
         }
-
-        console.log("No current EP");
-        console.log(repocfg.DIR);
 
         git.repoByUid(repocfg, req.session.uid).then(repo => {
             console.log("repo is " + JSON.stringify(repo));
@@ -665,26 +653,22 @@ router.get('/_cvt_', function(req, res, next) {
 
 
 router.post('/_upload_/*', function(req, res, next) {
-    //if (req.session.uid == undefined) {
-    //    req.session.uid = "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs";
-    //}
-
     if (req.session.uid == undefined) {
         return res.status(401).json({
             notification: "unauthorized upload attempt, log in first!"
         });
     }
 
-    urlPath = req.path;
+    let repoCfg = config.REPOS[0];
+
+    let urlPath = req.path;
     let decodedPath = decodeURI(urlPath);
     decodedPath = decodedPath.replace(" ", "__");
     decodedPath = decodedPath.slice("/_upload_".length);
-    let userSpace = config.REPOS[0].DIR + "/" + req.session.uid.split(":")[1];
-
+    let userSpace = repoCfg.DIR + "/" + req.session.uid.split(":")[1];
     var writeFilePath = userSpace + decodedPath;
 
     console.log("POST an upload to: " + userSpace + " file: " + decodedPath);
-    //let upload = multer({ dest: writeFilePath });
 
     let storage = multer.diskStorage({
         destination: path.dirname(writeFilePath),
@@ -703,7 +687,7 @@ router.post('/_upload_/*', function(req, res, next) {
     let repoRelativeFilePath = decodedPath.slice(1);
     if (!chFiles.has(repoRelativeFilePath)) {
         chFiles.add(repoRelativeFilePath);
-        git.saveChangedFiles(req.session.uid, chFiles);
+        git.saveChangedFiles(repoCfg, req.session.uid, chFiles);
     }
 
     return res.json({

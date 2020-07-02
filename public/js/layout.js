@@ -3,10 +3,21 @@ var NOTIFICATION_DELAY = 15000;
 
 var lastSearch = "";
 
+// TODO, get this from config.js
+var MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz"];
+
+function isMedia(filepath) {
+    for (let i = 0; i < MEDIA_EXT.length; i++) {
+        if (filepath.endsWith(MEDIA_EXT[i])) {
+            return MEDIA_EXT[i];
+        }
+    }
+    return null;
+}
 
 // see: https://stackoverflow.com/questions/8335834/how-can-i-hide-the-android-keyboard-using-javascript
 function hideKeyboard(element) {
-    console.log(element);
+    // console.log(element);
     element.setAttribute('readonly', 'readonly'); // Force keyboard to hide on input field.
     element.setAttribute('disabled', 'true'); // Force keyboard to hide on textarea field.
     setTimeout(function() {
@@ -35,7 +46,7 @@ function jumpToWithoutClosingSidebar(spot) {
     s = s.replace(":", "");
     s = s.replace("(", "");
     s = s.replace(")", "");
-    console.log("jumpTo " + s);
+    // console.log("jumpTo " + s);
     var e = document.getElementById(s);
     if (e) {
         //e.scrollIntoView(true);
@@ -79,13 +90,13 @@ function fetchJsonFor(spot) {
         jreq = spanchor[0] + "?json=1" + "#" + anchor;
     } else jreq = s + "?json=1"
 
-    console.log("Requesting: " + jreq)
+    // console.log("Requesting: " + jreq)
     fetch(jreq).then(response => {
             console.log(response);
             return response.json();
         })
         .then(json => {
-            console.log("process json");
+            // console.log("process json");
             if (json.anchor == null) json.anchor = anchor;
             processJsonPage(json);
             window.history.pushState({
@@ -134,7 +145,7 @@ function LinkToLinkify(s, cls) {
     let show = text;
     if (show[0] == "/") show = show.slice(1, show.length);
 
-    console.log(s + " => " + text);
+    // console.log(s + " => " + text);
     var ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + text + '\')"><span class="i' + cls + '">' + show + "</span></div>\n";
     return ret;
 }
@@ -144,7 +155,7 @@ function updatePage(json) {
     if (typeof json.related !== "undefined") { // undefined means don't touch
         let relBubble = document.getElementById("related");
         if (Array.isArray(json.related) && (json.related.length > 0)) {
-            console.log(json.related);
+            // console.log(json.related);
             let relatedStr = "";
             for (let i = 0; i < json.related.length; i++) {
                 relatedStr = relatedStr.concat(LinkToLinkify(json.related[i], "rel"));
@@ -184,7 +195,7 @@ function updatePage(json) {
     if (typeof json.user.editProposal !== "undefined") {
         let epInput = document.getElementById("editProposal");
         if (epInput) {
-            console.log("EP: " + json.user.editProposal);
+            // console.log("EP: " + json.user.editProposal);
             epInput.value = json.user.editProposal;
         }
     }
@@ -295,8 +306,9 @@ function internalLinkOptimizer(doc, wnd, e) {
     //console.log("clicked on ", e);
     var loc = wnd.location;
     var tgt = e.target;
+    if (isMedia(e.target)) return true;
     if ((tgt.tagName == "A") || (tgt.tagName == "a")) {
-        console.log("its A", tgt.host, loc.host);
+        // console.log("its A", tgt.host, loc.host);
         if (tgt.host == loc.host) // I will handle this via JSON
         {
             e.preventDefault();
@@ -337,7 +349,6 @@ function setupLayout(document, window) {
 // Prints out a warning or error in a prominent location.  Json is a dictionary object that may have a "notification" member
 
 function clearNotification() {
-    console.log("NOTIFY: clear");
     document.getElementById('notifyText').innerText = "";
     //document.querySelector('div.notification').visibility = "hidden";
     document.querySelector('div.notification').style.display = "none";
@@ -345,8 +356,6 @@ function clearNotification() {
 
 function notification(json) {
     if (json.notification) {
-        console.log("NOTIFY: " + json.notification);
-        console.trace();
         document.getElementById('notifyText').innerText = json.notification;
         //document.querySelector('div.notification').visibility = "visible";
         document.querySelector('div.notification').style.display = "block";
@@ -380,7 +389,6 @@ function closeEditProposal() {
             fetch(locNoArgs + "?json=1").then(response => response.json().then(json => {
                 processJsonPage(json);
             }));
-            console.log("got here");
             notification(json);
             epEntry.value = "";
         }));
@@ -470,7 +478,7 @@ function search() {
             body: query, // body data type must match "Content-Type" header
         })
         .then(response => response.json().then(reply => {
-            console.log(JSON.stringify(reply));
+            // console.log(JSON.stringify(reply));
             showSidebar();
             processJsonPage(reply);
         }));

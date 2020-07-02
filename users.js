@@ -8,7 +8,9 @@ var users = config.USERS;
 
 (async () => {
     let hdl = await fs.open(USER_FILE, 'r');
-    let read = await hdl.readFile({ encoding: "utf-8" });
+    let read = await hdl.readFile({
+        encoding: "utf-8"
+    });
     let addedUsers = JSON.parse(read);
 
     for (let key in addedUsers) {
@@ -23,7 +25,14 @@ exports.known = function(identity) {
 
 // Create a new user, with only edit proposal and comment privileges
 exports.create = function(identity, handle, email) {
-    users[identity] = { "hdl": handle, "email": email, "push": false, "merge": false, "propose": true, "comment":true }
+    users[identity] = {
+        "hdl": handle,
+        "email": email,
+        "push": false,
+        "merge": false,
+        "propose": true,
+        "comment": true
+    }
 };
 
 exports.save = async function() {

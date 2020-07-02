@@ -14,11 +14,11 @@ function BadURL(req, res) {
 }
 
 
+// Returns [repoCfg, fullpath, canonicalSuffix, media]
 function determineRepoAndDir(uid, filepath) {
     let userDir = (uid == null) ? null : misc.userDir(uid);
-
+    console.log("determine repo and dir: " + filepath)
     let media = isMedia(filepath);
-
     let suffixPath = cleanupPath(filepath, media);
     let firstPath = null;
 
@@ -38,21 +38,21 @@ function determineRepoAndDir(uid, filepath) {
                 // maybe repo not cloned to the user
             }
 
-        if (suffixPath.startsWith("/" + repoCfg.PREFIX)) {
-            let tmp = suffixPath.slice(repoCfg.PREFIX.length + 1);
-            try {
-                console.log("trying: " + repoCfg.DIR + "/" + userDir + tmp);
-                let fullPath = path.resolve(repoCfg.DIR + "/" + userDir + tmp);
-                if (firstPath == null) firstPath = fullPath;
-                let mediaFileStats = fs.statSync(fullPath);
-                console.log("found!");
-                return [repoCfg, fullPath, "/" + repoCfg.PREFIX + tmp, media];
-            } catch (err) {
-                console.log("NO");
-                if (err.code != "ENOENT") console.log(err);
-                // Ok not in this repo
+            if (suffixPath.startsWith("/" + repoCfg.PREFIX)) {
+                let tmp = suffixPath.slice(repoCfg.PREFIX.length + 1);
+                try {
+                    console.log("trying: " + repoCfg.DIR + "/" + userDir + tmp);
+                    let fullPath = path.resolve(repoCfg.DIR + "/" + userDir + tmp);
+                    if (firstPath == null) firstPath = fullPath;
+                    let mediaFileStats = fs.statSync(fullPath);
+                    console.log("found!");
+                    return [repoCfg, fullPath, "/" + repoCfg.PREFIX + tmp, media];
+                } catch (err) {
+                    console.log("NO");
+                    if (err.code != "ENOENT") console.log(err);
+                    // Ok not in this repo
+                }
             }
-        }
         }
 
         // Check internal link in a repo.  TODO we might want to check the last session request to discover which repo its in.
@@ -91,11 +91,11 @@ function determineRepoAndDir(uid, filepath) {
 
     // for now, a nonexistent file is assumed to be a new file in the first repo
     // TODO figure out placement by subdir
-    return [config.REPOS[0], firstPath, media];
+    let repoCfg = config.REPOS[0]
+    return [repoCfg, firstPath, repoCfg.PREFIX + suffixPath, media];
 }
 
 function isMedia(filepath) {
-    let isMedia = -1;
     for (let i = 0; i < config.MEDIA_EXT.length; i++) {
         if (filepath.endsWith(config.MEDIA_EXT[i])) {
             return config.MEDIA_EXT[i];
@@ -106,7 +106,7 @@ function isMedia(filepath) {
 
 function cleanupPath(filepath, isMedia) {
     let decodedPath = decodeURI(filepath);
-    console.log(decodedPath);
+    // console.log(decodedPath);
     decodedPath = decodedPath.replace(" ", "__"); // replace spaces with double underscore
 
     // TODO
@@ -183,6 +183,7 @@ handleAPage = function(req, res) {
     console.log("hostname: " + req.hostname);
     console.log("originalUrl: " + req.originalUrl);
     console.log("readFrom: " + readFrom);
+    console.log("media: " + media);
 
     if (req.path == "/favicon.ico") {
         res.sendFile("public/images/icon.ico");
@@ -201,17 +202,33 @@ handleAPage = function(req, res) {
         console.log("CanonicalURL: " + canonicalURL);
     }
 
-
     if (media != null) {
         filepath = path.resolve(filepath);
         console.log("media file path: " + filepath);
-        if (!user.loggedIn) return res.sendFile(filepath);
+        if (!user.loggedIn) {
+            try {
+                let mediaFileStats = fs.statSync(filepath);
+                if (media == ".apk") res.contentType = 'application/vnd.android.package-archive';
+                return res.sendFile(filepath);
+            } catch (err) {
+                console.log(err);
+                return fs.readFile("noPageNoUser.html", 'utf8', function(err, htmlTemplateData) {
+                    jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
+                    return res.status(404).render('wikibrowse', jReply);
+                });
+            }
+        }
         try {
             let mediaFileStats = fs.statSync(filepath);
             if (req.query.upload) {
                 jReply["isMediaImage"] = true;
                 res.render('newMedia', jReply);
-            } else res.sendFile(filepath);
+            } else {
+                if (media == ".apk") res.contentType = 'application/vnd.android.package-archive';
+                res.sendFile(filepath, null, function(err) {
+                    if (err) console.log("send error: " + err);
+                });
+            }
         } catch (err) {
             res.status(404).render('newMedia', jReply);
         }
@@ -230,19 +247,19 @@ handleAPage = function(req, res) {
             });
             return;
         }
-	
-        let writeFilePath = readFrom;
-	let userDir = misc.userDir(req.session.uid);
 
-	let repoPrefix = path.resolve(repoCfg.DIR + "/" + userDir);
-	if (!writeFilePath.startsWith(repoPrefix)) {
-	    console.log("Attempt to edit " + writeFilePath + ", expecting " + repoPrefix);
-	    return res.json({
+        let writeFilePath = readFrom;
+        let userDir = misc.userDir(req.session.uid);
+
+        let repoPrefix = path.resolve(repoCfg.DIR + "/" + userDir);
+        if (!writeFilePath.startsWith(repoPrefix)) {
+            console.log("Attempt to edit " + writeFilePath + ", expecting " + repoPrefix);
+            return res.json({
                 notification: "unauthorized edit location!"
             });
-	}
-	
-	let repoRelativeFilePath = writeFilePath.slice(repoPrefix.length+1);  // +1 chops off the /
+        }
+
+        let repoRelativeFilePath = writeFilePath.slice(repoPrefix.length + 1); // +1 chops off the /
 
 
         var chFiles = git.changedFiles[req.session.uid];
@@ -322,7 +339,7 @@ handleAPage = function(req, res) {
         }
 
         if (req.query.raw) {
-            console.log(raw);
+            // console.log(raw);
             res.send(data);
             return;
         }
@@ -437,7 +454,7 @@ function htmlizeJsonReply(json) {
 }
 
 function wikiPageReplyWithMdHtml(req, res, md, jReply) {
-    console.log("wikiPageReplyWithMdHtml");
+    // console.log("wikiPageReplyWithMdHtml");
     jReply['rawMarkdown'] = md;
     jReply['ogType'] = 'website';
     if (typeof config.SITE_NAME !== "undefined")

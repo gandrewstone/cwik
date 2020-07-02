@@ -54,8 +54,15 @@ exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 
 exports.DEFAULT_COMMIT_MSG = "wiki commit";
 exports.ANON_REPO_SUBDIR = "mirror";
-exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav"]
+exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz"]
 
 exports.USERS = {
-        "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs": { "hdl":"Andrew Stone","email":"g.andrew.stone@gmail.com", "push": true, "merge": true, "propose": true, "comment": true }
-        }
+    "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs": {
+        "hdl": "Andrew Stone",
+        "email": "g.andrew.stone@gmail.com",
+        "push": true,
+        "merge": true,
+        "propose": true,
+        "comment": true
+    }
+}
