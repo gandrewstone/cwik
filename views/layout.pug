@@ -96,11 +96,11 @@ html
 
     textarea#rawMarkdown
 
-
     if user && user.loggedIn
       script.
         setEditProposalMenuVisibility("!{user.editProposal}");
     script.
+      var user = !{JSON.stringify(user)};  // This inanity sets the javascript user variable to the pug user variable
       var portrait = window.matchMedia("(orientation: portrait)").matches;
       
       // switch the search into the sidebar

@@ -65,7 +65,7 @@ pull = function(repositoryPath, remoteName, branch, cb) {
 
 pullRepo = function(repo, remoteName, branch, cb) {
     return new Promise(function(resolve, reject) {
-
+        console.log("pullRepo " + remoteName + " " + branch);
         var remoteBranch = remoteName + '/' + branch;
         repo.fetch(remoteName, {
             callbacks: {
@@ -107,11 +107,10 @@ push = function(repo, upstreamRepoName) {
 
 branch = function(repo, branchName, upstreamRepoName, create) {
     return new Promise(function(resolve, reject) {
-        console.log(repo);
         pullRepo(repo, branchName, upstreamRepoName).then(oid => {
             console.log("pulled branch " + branchName + "to " + oid);
             repo.checkoutBranch(branchName).then(resolve, reject);
-        }, err => {
+        }, err => {  // This is expected if the branch hasn't been created yet
             console.log("pull Repo error: " + JSON.stringify(err));
             if (err.errno != git.Error.CODE.ENOTFOUND) // its ok that the branch does not exist in the remote yet
             {
@@ -128,13 +127,18 @@ branch = function(repo, branchName, upstreamRepoName, create) {
                                     console.log("pulled branch " + branchName + "to " + oid);
                                     repo.checkoutBranch(branchName).then(resolve, reject);
                                 },
-                                err => { // Not a problem is the branch already exists
+                                err => { // Not a problem if the branch already exists
                                     if (err.errno == git.Error.CODE.EEXISTS) {
                                         pullRepo(repo, branchName, upstreamRepoName).then(oid => {
                                             console.log("pulled branch " + branchName + "to " + oid);
                                             repo.checkoutBranch(branchName).then(resolve, reject);
                                         });
-                                    } else reject(err);
+                                    }
+                                    else if (err.errno ==  git.Error.CODE.ENOTFOUND) {
+                                        console.log("branch not found on remote");
+                                        repo.checkoutBranch(branchName).then(resolve, reject);
+                                    }
+                                    else reject(err);
                                 });
                         },
                         err => { // Not a problem the branch already exists

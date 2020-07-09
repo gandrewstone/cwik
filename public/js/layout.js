@@ -15,6 +15,11 @@ function isMedia(filepath) {
     return null;
 }
 
+// see: https://stackoverflow.com/questions/384286/how-do-you-check-if-a-javascript-object-is-a-dom-object
+function isElement(element) {
+    return element instanceof Element || element instanceof HTMLDocument;  
+}
+
 // see: https://stackoverflow.com/questions/8335834/how-can-i-hide-the-android-keyboard-using-javascript
 function hideKeyboard(element) {
     // console.log(element);
@@ -229,6 +234,7 @@ function toggleSidebar() {
 function processJsonPage(json) {
     // Show any notifications
     notification(json);
+    if (json.user) user = json.user;  // update any user state change, such as EP open/close
 
     // Fix the title
     if ((typeof json.title !== "undefined") && (json.title != "")) {
@@ -306,7 +312,7 @@ function internalLinkOptimizer(doc, wnd, e) {
     //console.log("clicked on ", e);
     var loc = wnd.location;
     var tgt = e.target;
-    if (isMedia(e.target)) return true;
+    if (!isElement(tgt) && isMedia(tgt)) return true;
     if ((tgt.tagName == "A") || (tgt.tagName == "a")) {
         // console.log("its A", tgt.host, loc.host);
         if (tgt.host == loc.host) // I will handle this via JSON
@@ -484,3 +490,15 @@ function search() {
         }));
 
 }
+
+
+function runEditorIfPermitted(href, md) {
+        if (!user.loggedIn) notification({notification:"log in first"});
+        else {
+        // Its ok to check this on the client side because if defeated the user will be able to open the editor but still not commit anything that's changed
+        if (!user.perms.push && !user.editProposal && user.perms.propose) notification({notification:"open an edit proposal before editing"});
+        else if (!user.perms.push && !user.perms.propose) notification({notification:"contact an administrator to gain edit permissions"});
+        else
+            runeditor(href, md);
+        }
+    }

@@ -177,6 +177,7 @@ handleAPage = function(req, res) {
         user['loggedIn'] = true;
         user['editProposal'] = req.session.editProposal;
         userPerms = users.known(req.session.uid);
+        user['perms'] = userPerms;
     }
 
     console.log("handle a page: " + req.path);

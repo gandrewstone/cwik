@@ -586,7 +586,7 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
         }
 
         git.repoByUid(repocfg, req.session.uid).then(repo => {
-            console.log("repo is " + JSON.stringify(repo));
+            // console.log("repo is " + JSON.stringify(repo));
             git.branch(repo, ep, repocfg.UPSTREAM_NAME, true).then(result => {
                 console.log("branch " + result);
                 req.session.editProposal = ep;
@@ -597,13 +597,13 @@ router.get('/_editProposal_/open/*', function(req, res, next) {
             }, err => {
                 console.log("err " + err);
                 return res.json({
-                    notification: err,
+                    notification: err.message,
                     error: 1
                 });
             });
         }, err => {
             return res.json({
-                notification: err,
+                notification: err.message,
                 error: 1
             });
             console.log(err);
