@@ -312,7 +312,10 @@ function internalLinkOptimizer(doc, wnd, e) {
     //console.log("clicked on ", e);
     var loc = wnd.location;
     var tgt = e.target;
+    // Don't intervene for links to media or downloadable files
     if (!isElement(tgt) && isMedia(tgt)) return true;
+    if (isElement(tgt) && isMedia(tgt.href)) return true;
+    
     if ((tgt.tagName == "A") || (tgt.tagName == "a")) {
         // console.log("its A", tgt.host, loc.host);
         if (tgt.host == loc.host) // I will handle this via JSON
