@@ -1,4 +1,4 @@
-let USER_FILE = 'knownusers.json';
+let USER_FILE = 'knownusers';  // Don't make this .json or npm will auto-restart whenever this code writes to it
 
 var fs = require('fs').promises;
 var path = require('path');
@@ -7,6 +7,7 @@ var config = require('./config');
 var users = config.USERS;
 
 (async () => {
+    try {
     let hdl = await fs.open(USER_FILE, 'r');
     let read = await hdl.readFile({
         encoding: "utf-8"
@@ -16,7 +17,10 @@ var users = config.USERS;
     for (let key in addedUsers) {
         users[key] = addedUsers[key]
     }
-    hdl.close();
+        hdl.close();
+    } catch(e) {
+        console.error(e);  // if file is missing its ok
+    }
 })();
 
 exports.known = function(identity) {

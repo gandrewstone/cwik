@@ -66,11 +66,12 @@ router.get('/_commit_', function(req, res, next) {
 });
 
 
+// Any HTTP ok, but actually an error returns a status code of > 250
+// because 400+ status codes are handled by some clients as file not found
 function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
     console.log("processLogin");
     console.log(host + " " + addr + " " + cookie + " " + sig);
     if (!addr.includes(":")) addr = "bitcoincash:" + addr;
-    console.log("processLogin2");
 
     return new Promise(function(ok, err) {
 
@@ -83,8 +84,9 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                 let userInfo = users.known(addr);
                 if (!userInfo) {
                     console.log("unknown user " + addr);
-                    if (!allowUnknownUser) return ok([203, "unknown identity: " + addr]);
+                    if (!allowUnknownUser) return ok([251, "unknown identity: " + addr]);
                 }
+                
                 if (verifySig(host + "_bchidentity_" + op + "_" + session.challenge, addr, sig)) {
 
                     sessionStore.get(cookie, function(err, session2) {
@@ -105,10 +107,15 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                         session.challenge = "solved";
                         session.uid = addr;
                         git.ensureUserReposCreated(addr);
-                        git.repoBranchNameByUid(config.REPOS[0], req.session.uid).then(br => {
-                            if (br != config.REPOS[0].BRANCH_NAME) req.session.editProposal = br;
-                            sessionStore.set(cookie, session);
+                        git.repoBranchNameByUid(config.REPOS[0], addr).then(br => {
+                            console.log("setting EP to: " + br)
+                            if (br != config.REPOS[0].BRANCH_NAME) session.editProposal = br;
+                            console.log("setting cookie to: " + JSON.stringify(session));
+                            sessionStore.set(cookie, session, function(err) {
+                                console.log("error?:" + JSON.stringify(err));
+                            });
                         }, err => { // Even if we can't get the repo branch, still set the session
+                            console.log("get branch error: " + err)
                             sessionStore.set(cookie, session, function(err) {
                                 console.log("error?:" + JSON.stringify(err));
                             });
@@ -120,17 +127,17 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                     if (userInfo) {
                         ok([200, "accepted"]);
                     } else {
-                        ok([201, "accepted unknown user"]);
+                        ok([201, "accepted new user"]);
                     }
                     return;
                 } else {
                     console.log("bad signature for challenge " + host + "_login_" + session.challenge);
-                    ok([202, "bad signature"]);
+                    ok([252, "bad signature"]);
                     return;
                 }
             } else {
                 console.log("unknown session");
-                ok([404, "unknown session"]);
+                ok([253, "reload login page"]);
             }
         });
     });
@@ -145,14 +152,14 @@ router.post('/_reg_/auto', function(req, res, next) {
         console.log("registration login");
         processLogin("reg", req.headers.host, req.body.addr, req.body.cookie, req.body.sig, req, true).then(
             (result) => {
+                let changed = false;
                 const [code, response] = result;
                 console.log("sending: " + response);
                 if (code == 201) { // accepted unknown user, so add to database
                     users.create(req.body.addr, req.body.hdl, req.body.email);
-                    users.save();
+                    changed = true;
                 }
                 if (code == 200) { // accepted known user, see if user updated any data
-                    let changed = false;
                     user = users.known(req.body.addr);
                     if (req.body.hdl && (req.body.hdl != user.hdl)) {
                         changed = true;
@@ -162,9 +169,9 @@ router.post('/_reg_/auto', function(req, res, next) {
                         changed = true;
                         user.email = req.body.email;
                     }
-                    if (changed) users.save();
                 }
                 res.status(code).send(response);
+                if (changed) users.save();
             });
     } else {
         res.status(404).send("unknown operation");
@@ -191,8 +198,8 @@ router.get('/_login_/auto', function(req, res, next) {
 });
 
 router.get('/_login_/check', function(req, res, next) {
-    console.log("checking login status for:" + req.sessionID);
-    console.log(JSON.stringify(req.session));
+    console.log("checking login status for: " + req.sessionID);
+    console.log("session is: " + JSON.stringify(req.session));
 
     if (req.session.uid != undefined) {
         //res.status(201).send("logged in");
