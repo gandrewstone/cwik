@@ -10,6 +10,8 @@ var search = require("../search");
 var users = require("../users");
 var fs = require('fs');
 
+var myHost = config.MY_URL.split("//")[1];  // Don't use req.headers.host in case site is deployed with a load balancer or forwarder (nginx or apache2)
+
 // https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
 function zip(arrays) {
     return arrays[0].map(function(_, i) {
@@ -150,7 +152,7 @@ router.post('/_reg_/auto', function(req, res, next) {
 
     if (req.body.op == "reg") {
         console.log("registration login");
-        processLogin("reg", req.headers.host, req.body.addr, req.body.cookie, req.body.sig, req, true).then(
+        processLogin("reg", myHost, req.body.addr, req.body.cookie, req.body.sig, req, true).then(
             (result) => {
                 let changed = false;
                 const [code, response] = result;
@@ -186,7 +188,7 @@ router.get('/_login_/auto', function(req, res, next) {
     console.log("sig size: " + req.query.sig.length + " sig=" + req.query.sig);
     console.log("cookie=" + req.query.cookie);
     if (req.query.op == "login") {
-        processLogin("login", req.headers.host, req.query.addr, req.query.cookie, req.query.sig, req, false).then(
+        processLogin("login", myHost, req.query.addr, req.query.cookie, req.query.sig, req, false).then(
             (result) => {
                 const [code, response] = result;
                 console.log("sending: " + response);
@@ -213,8 +215,9 @@ router.get('/_login_', function(req, res, next) {
     if (req.session.challenge == undefined) {
         req.session.challenge = getChallengeString();
     }
+    
     console.log("session challenge: " + req.session.challenge);
-    let QRcodeText = "bchidentity://" + req.headers.host + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
     let user = {
         loggedIn: (req.session.uid != undefined) ? true : false
     };
@@ -225,11 +228,11 @@ router.get('/_login_', function(req, res, next) {
 
     let QRregisterText = null;
     if (config.allowRegistration.includes("bchidentity")) {
-        QRregisterText = "bchidentity://" + req.headers.host + '/_reg_/auto?op=reg&chal=' + req.session.challenge + "&cookie=" + req.sessionID + "&hdl=r&email=o";
+        QRregisterText = "bchidentity://" + myHost + '/_reg_/auto?op=reg&chal=' + req.session.challenge + "&cookie=" + req.sessionID + "&hdl=r&email=o";
     }
 
     res.render('login', {
-        challenge: req.headers.host + "_login_" + req.session.challenge,
+        challenge: myHost + "_login_" + req.session.challenge,
         history: historyHtml,
         allowRegistration: config.allowRegistration,
         QRsignCode: QRcodeText,
@@ -244,7 +247,7 @@ router.post('/_login_', function(req, res, next) {
     let error = "";
     let addr = req.body.addr;
     if (!addr.includes(":")) addr = "bitcoincash:" + addr;
-    if (req.headers.host + "_login_" + req.session.challenge != req.body.challenge) {
+    if (myHost + "_login_" + req.session.challenge != req.body.challenge) {
         error = "stale challenge string, try again";
         req.session.challenge = getChallengeString();
     } else if (KnownUser(addr) == false) {
@@ -263,11 +266,11 @@ router.post('/_login_', function(req, res, next) {
     if (typeof req.session.history !== "undefined") {
         historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
     }
-    let QRcodeText = "bchidentity://" + req.headers.host + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
     console.log("error: " + error);
     res.render('login', {
         notification: error,
-        challenge: req.headers.host + "_login_" + req.session.challenge,
+        challenge: myHost + "_login_" + req.session.challenge,
         history: historyHtml,
         QRsignCode: QRcodeText,
         user: user

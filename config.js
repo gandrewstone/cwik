@@ -40,6 +40,7 @@ if (typeof process.env.NXC !== "undefined") {
     exports.DEFAULT_PIC = "bunet.png";
     exports.MY_URL = "http://www.bitcoinunlimited.net";
     exports.STACKEDIT_URL = "http://stackedit.bitcoinunlimited.net/app";
+    exports.allowRegistration = "bchidentity";
 }
 
 // Override for dev env

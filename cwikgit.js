@@ -15,7 +15,7 @@ function ccred() {
     var nCalls = 0;
 
     function f(url, userName) {
-        console.log("credentials requsted url: " + url + " username: " + userName + "Call Num: " + nCalls);
+        console.log("credentials requsted url: " + url + " username: " + userName + " call count: " + nCalls);
         if (nCalls > 5) throw "Credential failure";
         nCalls += 1;
         return git.Cred.sshKeyFromAgent(userName);
@@ -73,7 +73,12 @@ pullRepo = function(repo, remoteName, branch, cb) {
             }
         }).then(function() {
             console.log("gitPull.fetch ok");
-            repo.mergeBranches(branch, remoteBranch).then(resolve, reject);
+            repo.mergeBranches(branch, remoteBranch).then(
+		resolve,
+		err => {
+		    console.log("No local branch");
+		    resolve();
+		});
         }, reject);
     });
 }
@@ -98,20 +103,49 @@ push = function(repo, upstreamRepoName) {
                 });
             },
             failure => {
-                console.log("remote create failed" + failure);
+                console.log("remote create failed: " + failure);
                 reject(failure);
             }
         );
     });
 }
 
+checkoutRemoteBranch = function(repo, upstreamRepoName, branchName) {
+    return new Promise(function(resolve, reject) {
+	repo.getBranchCommit("refs/remotes/" + upstreamRepoName + "/" + branchName)
+	    .then(function(commit) {
+		console.log("found remote branch: " + commit);
+		repo.createBranch(branchName, commit.id(), false).then(
+		    smth => {
+                            console.log("created branch off remote");
+                            repo.checkoutBranch(branchName).then(resolve, reject);
+                    },
+		    err => {
+			console.log("create branch error: " + err);
+			reject(err);
+		    });
+		// repo.checkoutRef(reference)
+	    });
+    });
+}
+		      
+
 branch = function(repo, branchName, upstreamRepoName, create) {
     return new Promise(function(resolve, reject) {
-        pullRepo(repo, branchName, upstreamRepoName).then(oid => {
-            console.log("pulled branch " + branchName + "to " + oid);
-            repo.checkoutBranch(branchName).then(resolve, reject);
+        pullRepo(repo, upstreamRepoName, branchName).then(oid => {
+            console.log("pulled branch " + branchName + " to " + oid);
+            repo.checkoutBranch(branchName).then(resolve,
+						 err => {
+						     console.log("local checkout errored with: " + err + ". Trying remote");
+						     checkoutRemoteBranch(repo, upstreamRepoName, branchName).then(resolve, reject);
+						 });
         }, err => {  // This is expected if the branch hasn't been created yet
-            console.log("pull Repo error: " + JSON.stringify(err));
+            console.log("pull Repo error: " + err + " " + JSON.stringify(err));
+	    if (err.errno == git.Error.CODE.ERROR)  // probably an auth problem
+	    {
+		reject(err);
+		return;
+	    }
             if (err.errno != git.Error.CODE.ENOTFOUND) // its ok that the branch does not exist in the remote yet
             {
                 repo.checkoutBranch(branchName).then(resolve, reject);
@@ -122,29 +156,12 @@ branch = function(repo, branchName, upstreamRepoName, create) {
                     repo.createBranch(branchName, commit.id(), false).then(
                         smth => {
                             console.log("created branch");
-                            pullRepo(repo, branchName, upstreamRepoName).then(
-                                oid => {
-                                    console.log("pulled branch " + branchName + "to " + oid);
-                                    repo.checkoutBranch(branchName).then(resolve, reject);
-                                },
-                                err => { // Not a problem if the branch already exists
-                                    if (err.errno == git.Error.CODE.EEXISTS) {
-                                        pullRepo(repo, branchName, upstreamRepoName).then(oid => {
-                                            console.log("pulled branch " + branchName + "to " + oid);
-                                            repo.checkoutBranch(branchName).then(resolve, reject);
-                                        });
-                                    }
-                                    else if (err.errno ==  git.Error.CODE.ENOTFOUND) {
-                                        console.log("branch not found on remote");
-                                        repo.checkoutBranch(branchName).then(resolve, reject);
-                                    }
-                                    else reject(err);
-                                });
-                        },
+                            repo.checkoutBranch(branchName).then(resolve, reject);
+                        },            
                         err => { // Not a problem the branch already exists
                             if (err.errno == git.Error.CODE.EEXISTS) {
                                 // pull it from the remote
-                                pullRepo(repo, branchName, upstreamRepoName).then(
+                                pullRepo(repo, upstreamRepoName, branchName).then(
                                     oid => {
                                         console.log("pulled branch " + branchName + "to " + oid);
                                         repo.checkoutBranch(branchName).then(resolve, reject);
@@ -202,19 +219,19 @@ commitEdits = function(req, res, repoCfg, comment, userInfo) {
                             refreshRepoEveryone();
                         },
                         function(failure) {
-                            console.log("push failed " + failure.message);
+                            console.log("push failed: " + failure.message);
                             res.json({
-                                notification: "push failed " + failure.message
+                                notification: "push failed: " + failure.message
                             });
                         });
                 },
                 function(failure) {
-                    console.log("remote create failed" + failure);
+                    console.log("remote create failed: " + failure);
                 }
             );
         },
         function(failure) {
-            console.log("failed" + failure);
+            console.log("failed: " + failure);
         });
 }
 
