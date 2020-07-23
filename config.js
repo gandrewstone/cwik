@@ -46,7 +46,7 @@ if (typeof process.env.NXC !== "undefined") {
 // Override for dev env
 if (typeof process.env.CWIK_DEV !== "undefined") {
     exports.MY_URL = "http://192.168.1.100:8000";
-    exports.STACKEDIT_URL = "http://192.168.1.100:8001/app";
+    exports.STACKEDIT_URL = "http://192.168.1.100:8002/app";
     //exports.STACKEDIT_URL = "https://stackedit.io/app";
 }
 

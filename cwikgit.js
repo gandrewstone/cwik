@@ -112,6 +112,7 @@ push = function(repo, upstreamRepoName) {
 
 checkoutRemoteBranch = function(repo, upstreamRepoName, branchName) {
     return new Promise(function(resolve, reject) {
+        console.log("checkoutRemoteBranch " + branchName + " from " + upstreamRepoName)
 	repo.getBranchCommit("refs/remotes/" + upstreamRepoName + "/" + branchName)
 	    .then(function(commit) {
 		console.log("found remote branch: " + commit);
@@ -125,7 +126,18 @@ checkoutRemoteBranch = function(repo, upstreamRepoName, branchName) {
 			reject(err);
 		    });
 		// repo.checkoutRef(reference)
-	    });
+	    },
+                  err => {
+                      console.log("no remote branch: " + err + ". Creating local branch");
+                      repo.getHeadCommit().then(commit => {
+                          repo.createBranch(branchName, commit.id(), false).then(
+                              smth => {
+                                  console.log("created branch");
+                                  repo.checkoutBranch(branchName).then(resolve, reject);
+                              })
+                      })
+                  }
+                 );
     });
 }
 		      

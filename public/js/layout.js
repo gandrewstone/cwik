@@ -7,6 +7,7 @@ var lastSearch = "";
 var MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz"];
 
 function isMedia(filepath) {
+    if (filepath == undefined) return null;
     for (let i = 0; i < MEDIA_EXT.length; i++) {
         if (filepath.endsWith(MEDIA_EXT[i])) {
             return MEDIA_EXT[i];
