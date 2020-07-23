@@ -123,6 +123,11 @@ async function mdToHtml(md) {
     appendHeading = function(tagName, text, attribs) {
         // console.log("TAG: " + tagName + " " + text)
         linktext = text.replace("/", ""); // drop any /s
+        linktext = linktext.replace("?", "");
+        linktext = linktext.replace(":", "");
+        linktext = linktext.replace("!", "");
+        linktext = linktext.replace("(", "");
+        linktext = linktext.replace(")", "");
         headings += '<div class="ltoc_' + tagName + '"' + ' onclick="jumpTo(\'' + linktext + '\')"><span class="itoc_' + tagName + '">' + text + "</span></div>\n"
     };
 

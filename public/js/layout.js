@@ -48,7 +48,10 @@ function jumpToWithoutClosingSidebar(spot) {
         LAYOUT_HEADER_PX = 30;
     }
     var s = spot.toLowerCase().split(/\s/).join("-");
+    s = s.replace("/", "");
     s = s.replace(":", "");
+    s = s.replace("?", "");
+    s = s.replace("!", "");
     s = s.replace("(", "");
     s = s.replace(")", "");
     // console.log("jumpTo " + s);
