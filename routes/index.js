@@ -689,7 +689,8 @@ router.post('/_upload_/*', function(req, res, next) {
     });
 
     let upload = multer({
-        storage: storage
+        storage: storage,
+        limits: { fileSize: 500000000 }
     });
     upload.single('file')(req, res, () => {}); // 3rd param is continuation if we need to process after file exists
 

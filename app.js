@@ -87,10 +87,11 @@ app.set('view engine', 'pug');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json({
+    limit: '100mb',
     verify: function(req, res, buf, encoding) {
         // get rawBody
-        req.rawBody = buf.toString();
-        console.log("raw body: " + req.rawBody);
+        //req.rawBody = buf.toString();
+        //console.log("raw body: " + req.rawBody);
     }
 }));
 
