@@ -210,6 +210,7 @@ handleAPage = function(req, res) {
             try {
                 let mediaFileStats = fs.statSync(filepath);
                 if (media == ".apk") res.contentType = 'application/vnd.android.package-archive';
+                if (media == ".dmg") res.contentType = 'application/octet-stream';
                 return res.sendFile(filepath);
             } catch (err) {
                 console.log(err);
@@ -226,6 +227,7 @@ handleAPage = function(req, res) {
                 res.render('newMedia', jReply);
             } else {
                 if (media == ".apk") res.contentType = 'application/vnd.android.package-archive';
+                if (media == ".dmg") res.contentType = 'application/octet-stream';
                 res.sendFile(filepath, null, function(err) {
                     if (err) console.log("send error: " + err);
                 });
