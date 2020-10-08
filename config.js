@@ -4,7 +4,7 @@ exports.allowRegistration = "";
 
 if (typeof process.env.NXC !== "undefined") {
     exports.REPOS = [{
-        URL: "ssh:git@gitlab.com:nextchain/www.git",
+        URL: "git@gitlab.com:nextchain/www.git",
         PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
         UPSTREAM_NAME: "origin",
         BRANCH_NAME: "master",
@@ -17,7 +17,8 @@ if (typeof process.env.NXC !== "undefined") {
     exports.MY_URL = "http://www.nextchain.cash";
     exports.STACKEDIT_URL = "http://stackedit.nextchain.cash/app";
     exports.allowRegistration = "bchidentity";
-
+    exports.COMMITTER_USERNAME = "buwiki";
+    exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 } else if (typeof process.env.BUNET !== "undefined") {
     console.log("Running www.bitcoinunlimited.net configuration");
     exports.REPOS = [{
@@ -41,7 +42,28 @@ if (typeof process.env.NXC !== "undefined") {
     exports.MY_URL = "http://www.bitcoinunlimited.net";
     exports.STACKEDIT_URL = "http://stackedit.bitcoinunlimited.net/app";
     exports.allowRegistration = "bchidentity";
+    exports.COMMITTER_USERNAME = "buwiki";
+    exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
+} else if (typeof process.env.BCHSPEC !== "undefined") {
+    console.log("Running reference.cash configuration");
+    exports.REPOS = [{
+        URL: "git@github.com:BitcoinUnlimited/BitcoinCashSpecification.git",
+        PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
+        UPSTREAM_NAME: "origin",
+        BRANCH_NAME: "master",
+        DIR: "bchspec",
+        PREFIX: "ref"
+    }]
+
+    exports.SITE_NAME = "Bitcoin Cash Specification";
+    exports.DEFAULT_PIC = "bunet.png";
+    exports.MY_URL = "http://reference.cash";
+    exports.STACKEDIT_URL = "https://stackedit.reference.cash/app";
+    exports.allowRegistration = "bchidentity";
+    exports.COMMITTER_USERNAME = "wiki";
+    exports.COMMITTER_EMAIL = "wiki@reference.cash";
 }
+
 
 // Override for dev env
 if (typeof process.env.CWIK_DEV !== "undefined") {
@@ -49,9 +71,6 @@ if (typeof process.env.CWIK_DEV !== "undefined") {
     exports.STACKEDIT_URL = "http://192.168.1.100:8002/app";
     //exports.STACKEDIT_URL = "https://stackedit.io/app";
 }
-
-exports.COMMITTER_USERNAME = "buwiki";
-exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 
 exports.DEFAULT_COMMIT_MSG = "wiki commit";
 exports.ANON_REPO_SUBDIR = "mirror";
