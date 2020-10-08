@@ -57,7 +57,7 @@ if (typeof process.env.NXC !== "undefined") {
 
     exports.SITE_NAME = "Bitcoin Cash Specification";
     exports.DEFAULT_PIC = "bunet.png";
-    exports.MY_URL = "http://reference.cash";
+    exports.MY_URL = "https://reference.cash";
     exports.STACKEDIT_URL = "https://stackedit.reference.cash/app";
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "wiki";

@@ -10,6 +10,7 @@ var search = require("../search");
 var users = require("../users");
 var fs = require('fs');
 
+var myProtocol = config.MY_URL.split(":")[0];
 var myHost = config.MY_URL.split("//")[1];  // Don't use req.headers.host in case site is deployed with a load balancer or forwarder (nginx or apache2)
 
 // https://stackoverflow.com/questions/4856717/javascript-equivalent-of-pythons-zip-function
@@ -217,7 +218,7 @@ router.get('/_login_', function(req, res, next) {
     }
     
     console.log("session challenge: " + req.session.challenge);
-    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
     let user = {
         loggedIn: (req.session.uid != undefined) ? true : false
     };
@@ -228,7 +229,7 @@ router.get('/_login_', function(req, res, next) {
 
     let QRregisterText = null;
     if (config.allowRegistration.includes("bchidentity")) {
-        QRregisterText = "bchidentity://" + myHost + '/_reg_/auto?op=reg&chal=' + req.session.challenge + "&cookie=" + req.sessionID + "&hdl=r&email=o";
+        QRregisterText = "bchidentity://" + myHost + '/_reg_/auto?op=reg&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID + "&hdl=r&email=o";
     }
 
     res.render('login', {
@@ -266,7 +267,7 @@ router.post('/_login_', function(req, res, next) {
     if (typeof req.session.history !== "undefined") {
         historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
     }
-    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
     console.log("error: " + error);
     res.render('login', {
         notification: error,
