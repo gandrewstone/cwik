@@ -132,7 +132,7 @@ async function mdToHtml(md) {
     };
 
     const page = await browser.newPage();
-    await page.goto(config.MY_URL + "/_cvt_");
+    await page.goto(config.MY_CVT_URL);
 
     await page.evaluate(function(md) {
         contentRenderCallback = function() {

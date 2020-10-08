@@ -24,6 +24,9 @@ function determineRepoAndDir(uid, filepath) {
 
     for (let j = 0; j < config.REPOS.length; j++) {
         let repoCfg = config.REPOS[j];
+        let slashpfx = "/" + repoCfg.PREFIX;
+        if (repoCfg.PREFIX == "") slashpfx = "";
+
         if (userDir) {
             try {
                 let canonicalSuffix = "/" + userDir + suffixPath;
@@ -31,7 +34,7 @@ function determineRepoAndDir(uid, filepath) {
                 let fullpath = path.resolve(repoCfg.DIR + canonicalSuffix);
                 if (firstPath == null) firstPath = fullpath;
                 let mediaFileStats = fs.statSync(fullpath);
-                return [repoCfg, fullpath, repoCfg.PREFIX + suffixPath, media];
+                return [repoCfg, fullpath, slashpfx + suffixPath, media];
             } catch (err) {
                 console.log("NO");
                 if (err.code != "ENOENT") console.log(err);
@@ -46,7 +49,7 @@ function determineRepoAndDir(uid, filepath) {
                     if (firstPath == null) firstPath = fullPath;
                     let mediaFileStats = fs.statSync(fullPath);
                     console.log("found!");
-                    return [repoCfg, fullPath, "/" + repoCfg.PREFIX + tmp, media];
+                    return [repoCfg, fullPath, slashpfx + tmp, media];
                 } catch (err) {
                     console.log("NO");
                     if (err.code != "ENOENT") console.log(err);
@@ -63,7 +66,7 @@ function determineRepoAndDir(uid, filepath) {
             if (firstPath == null) firstPath = fullpath;
             let mediaFileStats = fs.statSync(fullpath);
             console.log("found!");
-            return [repoCfg, fullpath, "/" + repoCfg.PREFIX + suffixPath, media];
+            return [repoCfg, fullpath, slashpfx + suffixPath, media];
         } catch (err) {
             console.log("NO");
             if (err.code != "ENOENT") console.log(err);
@@ -79,7 +82,7 @@ function determineRepoAndDir(uid, filepath) {
                 if (firstPath == null) firstPath = fullPath;
                 let mediaFileStats = fs.statSync(fullPath);
                 console.log("found!");
-                return [repoCfg, fullPath, "/" + repoCfg.PREFIX + tmp, media];
+                return [repoCfg, fullPath, slashpfx + tmp, media];
             } catch (err) {
                 console.log("NO");
                 if (err.code != "ENOENT") console.log(err);
@@ -92,7 +95,10 @@ function determineRepoAndDir(uid, filepath) {
     // for now, a nonexistent file is assumed to be a new file in the first repo
     // TODO figure out placement by subdir
     let repoCfg = config.REPOS[0]
-    return [repoCfg, firstPath, repoCfg.PREFIX + suffixPath, media];
+    let slashpfx = "/" + repoCfg.PREFIX;
+    if (repoCfg.PREFIX == "") slashpfx = "";
+
+    return [repoCfg, firstPath, slashpfx + suffixPath, media];
 }
 
 function isMedia(filepath) {
@@ -147,7 +153,7 @@ handleAPage = function(req, res) {
     let media = null;
 
     [repoCfg, readFrom, canonicalSuffix, media] = determineRepoAndDir(req.session.uid, req.path);
-    console.log("repoCfg: " + JSON.stringify(repoCfg) + " readFrom: " + readFrom + " media: " + media);
+    console.log("repoCfg: " + JSON.stringify(repoCfg) + " readFrom: " + readFrom + " media: " + media + " suffix: " + canonicalSuffix);
 
     let userPerms = {};
 

@@ -2,19 +2,20 @@ var path = require('path');
 
 exports.allowRegistration = "";
 
-if (typeof process.env.NXC !== "undefined") {
+if (typeof process.env.XNEX !== "undefined") {
     exports.REPOS = [{
         URL: "git@gitlab.com:nextchain/www.git",
         PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
         UPSTREAM_NAME: "origin",
         BRANCH_NAME: "master",
-        DIR: "nxc",
+        DIR: "xnex",
         PREFIX: ""
     }];
 
     exports.SITE_NAME = "NextChain";
     exports.DEFAULT_PIC = "NextChainFlag.png";
     exports.MY_URL = "http://www.nextchain.cash";
+    exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
     exports.STACKEDIT_URL = "http://stackedit.nextchain.cash/app";
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "buwiki";
@@ -40,6 +41,7 @@ if (typeof process.env.NXC !== "undefined") {
     exports.SITE_NAME = "BitcoinUnlimited";
     exports.DEFAULT_PIC = "bunet.png";
     exports.MY_URL = "http://www.bitcoinunlimited.net";
+    exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
     exports.STACKEDIT_URL = "http://stackedit.bitcoinunlimited.net/app";
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "buwiki";
@@ -52,12 +54,13 @@ if (typeof process.env.NXC !== "undefined") {
         UPSTREAM_NAME: "origin",
         BRANCH_NAME: "master",
         DIR: "bchspec",
-        PREFIX: "ref"
+        PREFIX: ""
     }]
 
     exports.SITE_NAME = "Bitcoin Cash Specification";
     exports.DEFAULT_PIC = "bunet.png";
     exports.MY_URL = "https://reference.cash";
+    exports.MY_CVT_URL = "http://reference.cash/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.reference.cash/app";
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "wiki";
@@ -68,6 +71,7 @@ if (typeof process.env.NXC !== "undefined") {
 // Override for dev env
 if (typeof process.env.CWIK_DEV !== "undefined") {
     exports.MY_URL = "http://192.168.1.100:8000";
+    exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
     exports.STACKEDIT_URL = "http://192.168.1.100:8002/app";
     //exports.STACKEDIT_URL = "https://stackedit.io/app";
 }
