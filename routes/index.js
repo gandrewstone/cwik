@@ -27,6 +27,7 @@ router.get('/', function(req, res, next) {
     return handleAPage(req, res);
 });
 
+
 router.get('/_logout_', function(req, res, next) {
     req.session.challenge = undefined;
     req.session.uid = undefined;

@@ -106,7 +106,8 @@ function xformKatex() {
         var text = katexes[i].firstChild.data;
         // if (typeof text === "undefined") console.log(katexes[i]);
         if (typeof text !== "undefined") katex.render(text, katexes[i], {
-            throwOnError: false
+            throwOnError: false,
+            displayMode: true
         });
     }
 }

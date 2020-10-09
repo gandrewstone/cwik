@@ -104,7 +104,7 @@ app.use(bodyParser.text({
 
 app.use(cookieParser());
 app.use("/_static_", express.static(path.join(__dirname, 'public'), {
-    extensions: ['js', 'css', 'json', 'html', 'ico', 'png', 'svg', 'jpg']
+    extensions: ['js', 'css', 'json', 'html', 'ico', 'png', 'svg', 'jpg','ttf',"woff","woff2"]
 }));
 //app.use("/_static_", express.static(path.join(__dirname, 'node_modules'),{extensions:['js','css','json','html']}));
 //app.use("/_static_/js", express.static(path.join(__dirname, 'node_modules'),{extensions:['js','css','json','html']}));
