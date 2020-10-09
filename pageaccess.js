@@ -431,6 +431,8 @@ function updateHistory(req, urlPath) {
         historyPath = historyPath.slice(0, historyPath.length - 3);
     }
 
+    // console.log("history: path " + urlPath + " -> " + historyPath);
+
     // Remove this url if we've already been there
     var index = req.session.history.indexOf(historyPath);
     if (index !== -1) req.session.history.splice(index, 1);
@@ -443,7 +445,6 @@ function updateHistory(req, urlPath) {
             req.session.history.splice(0, 10);
         }
     }
-
 
     historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
     return historyHtml;

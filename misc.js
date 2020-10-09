@@ -38,11 +38,15 @@ function JumpToLinkify(s, cls) {
 
 /* Creates a js-handled link to another document.  Click calls the client-side js function "linkTo" */
 function LinkToLinkify(s, cls) {
-    var text = s.split("/").slice(-1)[0].replace("__", " ");
-    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
-        text = text.slice(0, text.length - 3);
-    var ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + text + '\')"><span class="i' + cls + '">' + text + "</span></div>\n";
-    // console.log(ret);
+    let linkText = s.replace("__", " ");
+    let pagename = s.split("/").slice(-1)[0].replace("__", " ");
+    if (pagename.length >= 3 && pagename.slice(pagename.length - 3, pagename.length) == ".md")
+        pagename = pagename.slice(0, pagename.length - 3);
+    let pageloc = s.split("/").slice(1,-1)
+    pageloc = pageloc.join(":")
+    if (pageloc) pageloc = " (in " + pageloc + ")"
+    let ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + linkText + '\')"><span class="i' + cls + '">' + pagename + pageloc + "</span></div>\n";
+    //console.log("Link2Linkify " + s + " -> " + ret);
     return ret;
 }
 
