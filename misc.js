@@ -13,6 +13,17 @@ function updateDict(a, b) {
     }
 }
 
+function HeadingToAnchor(text) {
+    var s = text.toLowerCase().split(/\s/).join("-");
+    s = s.replace("/", "");
+    s = s.replace(":", "");
+    s = s.replace("?", "");
+    s = s.replace("!", "");
+    s = s.replace("(", "");
+    s = s.replace(")", "");
+    return s;
+}
+
 /* Turns a wiki path into a link */
 function WikiLinkify(s) {
     var text = s.split("/").slice(-1)[0].replace("__", " ")
@@ -45,9 +56,10 @@ function LinkToLinkify(s, cls) {
     let pageloc = s.split("/").slice(1,-1)
     pageloc = pageloc.join(":")
     if (pageloc) pageloc = " (in " + pageloc + ")"
-    let ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + linkText + '\')"><span class="i' + cls + '">' + pagename + pageloc + "</span></div>\n";
+    let ret = '<a class="l' + cls + '"' + ' href="' + linkText + '"><span class="i' + cls + '">' + pagename + pageloc + "</span></a>\n";
+    //let ret = '<a class="l' + cls + '"' + ' href="' + linkText + '">' + pagename + pageloc + "</a>\n"
     //console.log("Link2Linkify " + s + " -> " + ret);
-    return ret;
+    return ret
 }
 
 function flat1nullfilter(lst) {
@@ -104,3 +116,4 @@ exports.WikiLinkify = WikiLinkify;
 exports.updateDict = updateDict;
 exports.allSettled = allSettled;
 exports.userDir = userDir;
+exports.HeadingToAnchor = HeadingToAnchor;

@@ -29,8 +29,9 @@ html
     script(src="/_static_/js/layout.js")
     script.
       setupLayout(document, window);
-    
-    img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('/home')", title="home")
+
+    a(href="/")
+      img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('/home'); return false;", title="home")
 
 
     div#cwikheader

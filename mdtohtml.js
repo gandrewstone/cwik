@@ -128,7 +128,7 @@ async function mdToHtml(md) {
         linktext = linktext.replace("!", "");
         linktext = linktext.replace("(", "");
         linktext = linktext.replace(")", "");
-        headings += '<div class="ltoc_' + tagName + '"' + ' onclick="jumpTo(\'' + linktext + '\')"><span class="itoc_' + tagName + '">' + text + "</span></div>\n"
+        headings += '<a class="ltoc_' + tagName + '"' + ' onclick="jumpTo(\'' + linktext + '\'); return false;"' + ' href="#' + linktext + '"' + '><span class="itoc_' + tagName + '">' + text + "</span></a>\n"
     };
 
     const page = await browser.newPage();
@@ -161,7 +161,7 @@ async function mdToHtml(md) {
             "h1": (tagName, attribs) => {
                 return {
                     tagName: tagName,
-                    attribs: attribs
+                    attribs: attribs,
                 }
             },
         },
@@ -190,6 +190,13 @@ async function mdToHtml(md) {
                 return false;
             }
             return false; // Don't remove anything based on this filter -- I am just trying to extract headings
+        },
+        // This filter wraps an anchor around every heading to support section links
+        textFilter: function(text, tagName) {
+            if (tagName == "h1") {
+                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+            }
+            return text
         }
     });
 

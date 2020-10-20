@@ -6,6 +6,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 .irel {
@@ -14,6 +16,8 @@
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 /* inject a bigger thing so the hover doesn't change the element size */

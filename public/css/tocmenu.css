@@ -6,6 +6,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 .itoc_h1 {
@@ -14,6 +16,8 @@
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 /* inject a bigger thing so the hover doesn't change the element size */
@@ -49,6 +53,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 3ch;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 .itoc_h3 {
@@ -57,6 +63,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 5ch;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 .itoc_h4 {
@@ -65,6 +73,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 6ch;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 .itoc_h5 {
@@ -73,6 +83,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 7ch;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
 .itoc_h6 {
@@ -81,5 +93,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 8ch;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
 }
 
