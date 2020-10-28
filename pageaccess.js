@@ -1,4 +1,5 @@
 var fs = require('fs');
+var fsp = fs.promises;
 var path = require('path');
 var pagedown = require("pagedown");
 var mdToHtml = require('./mdtohtml');
@@ -8,6 +9,7 @@ var git = require("./cwikgit");
 var config = require("./config");
 var misc = require("./misc");
 var users = require("./users");
+var pug = require("pug");
 
 function BadURL(req, res) {
     res.status(404).send('Sorry, we cannot find that!')
@@ -133,6 +135,36 @@ function cleanupPath(filepath, isMedia) {
     console.log("cleanup path: " + decodedPath);
     return decodedPath;
 }
+
+
+async function handlePdfPageAsync(req, res) {
+    // Chop off the prefix
+    let webpath = req.path.slice("/_pdf_".length);
+
+    [repoCfg, readFrom, canonicalSuffix, media] = determineRepoAndDir(req.session.uid, webpath);
+
+    if (media != null)  // Can't ask for pdf conversion of some media
+    {
+        res.status(401).send("");
+        return;
+    }
+    let filepath = readFrom;
+    if (!filepath.endsWith(".md")) {
+        filepath = filepath + ".md";
+    }
+    let pdfFile = filepath.slice(0, filepath.length - 2) + "pdf";
+
+    await mdToHtml.pageToPdf(webpath, pdfFile);
+    let pdfData = await fsp.readFile(pdfFile, null);
+    res.writeHead(200, {'Content-Type': 'application/pdf'});
+    res.end(pdfData, 'binary');
+}
+
+handlePdfPage = function(req, res) {
+    handlePdfPageAsync(req,res);
+}
+
+
 
 // Return a requested page
 handleAPage = function(req, res) {
@@ -489,7 +521,11 @@ function wikiPageReplyWithMdHtml(req, res, md, jReply) {
     if (req.query.json) {
         console.log("json reply");
         res.json(jReply);
-    } else {
+    } else if (req.query.contentonly) {
+        console.log("content only html");
+        res.render('wikicontent', jReply);
+    } else
+    {
         console.log("html reply");
         htmlizeJsonReply(jReply);
         jReply['SITE_NAME'] = config.SITE_NAME;

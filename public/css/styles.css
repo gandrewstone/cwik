@@ -152,6 +152,15 @@ hr {
     background-color: transparent;
 }
 
+#pdfexport {
+    position: fixed;
+    left: 35px;
+    z-index: 6;
+    background-color: transparent;
+    width: 30px;
+    height: 30px;
+}
+
 .VertB {
     float: left;
     max-width: 90ch;

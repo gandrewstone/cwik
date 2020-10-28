@@ -7,7 +7,7 @@ var fs = fssync.promises;
 
 var path = require('path');
 
-const PuppeteerDebug = false; // true;
+const PuppeteerDebug = false;  // true;  // remember printToPdf won't work when debug is true
 
 let titles = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
@@ -113,6 +113,21 @@ async function init() {
             height: 1024
         }
     });
+}
+
+async function staticHtmlToPdf(html, destinationFile) {
+    const page = await browser.newPage();
+    await page.setContent(html);
+    //await page.goto(`data:text/html,${html}`, { waitUntil: 'networkidle0' });
+    await page.pdf({ path: destinationFile, format: 'A4' })
+    if (!PuppeteerDebug) page.close();
+}
+
+async function pageToPdf(link, destinationFile) {
+    const page = await browser.newPage();
+    await page.goto(config.MY_URL + link + "?contentonly=1", { waitUntil: 'networkidle0' });
+    await page.pdf({ path: destinationFile, format: 'A4' })
+    if (!PuppeteerDebug) page.close();
 }
 
 async function mdToHtml(md) {
@@ -300,3 +315,5 @@ exports.generate = generate;
 
 
 exports.mdToHtml = mdToHtml;
+exports.staticHtmlToPdf = staticHtmlToPdf;
+exports.pageToPdf = pageToPdf;

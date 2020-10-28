@@ -1,0 +1,44 @@
+doctype html
+html
+  head
+    title=title
+    link(rel='icon', type='image/png', href='/_static_/images/favicon.png')
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&Oswald:wght@500&display=swap")
+    link(rel='stylesheet', href='/_static_/css/styles.css')
+    link(rel="stylesheet", href="/_static_/css/katex.min.css")
+
+    meta(property="og:title" content=title)
+    if (typeof summary !== "undefined")
+      meta(property="og:description" content=summary)
+    if (typeof site !== "undefined")
+      meta(property="og:site_name" content=site)
+    if (typeof canonicalURL !== "undefined")
+      meta(property="og:url" content=canonicalURL)
+    if (typeof pic !== "undefined")
+      meta(property="og:image" content=pic)
+    if (typeof ogType !== "undefined")
+      meta(property="og:type" content=ogType)
+      
+  body
+    script(src="https://unpkg.com/web-animations-js@2.3.1/web-animations.min.js")
+    script(src="https://unpkg.com/hammerjs@2.0.8/hammer.min.js")
+    script(src="/_static_/js/muuri.js")
+    script.
+      var STACKEDITOR_URL="!{STACKEDITOR_URL}";
+      var SITE_NAME="!{SITE_NAME}";
+    script(src="/_static_/js/base64ArrayBuffer.js")
+    script(src="/_static_/js/layout.js")
+    script.
+      setupLayout(document, window);        
+
+    div.wikicontent !{ wikiPage }
+
+    script(src="/_static_/js/katex.min.js")
+    script(src="https://d3js.org/d3.v5.min.js")
+    script(src="/_static_/js/he.js")
+    script(src="/_static_/js/mermaid/mermaid.js")
+    script.
+      mermaid.initialize({logLevel:5, startOnLoad:true});
+    script(src="/_static_/js/mathjax/MathJax.js?config=TeX-AMS_HTML", type="text/javascript")
+    script(src="/_static_/js/se.js")
+    script(src="/_static_/js/editLinkage.js")      

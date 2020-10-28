@@ -663,6 +663,10 @@ router.get('/_cvt_', function(req, res, next) {
     res.render('cvt', jReply);
 });
 
+router.get('/_pdf_/*', function(req, res, next) {
+    console.log("PDF conversion: " + req.path);
+    handlePdfPage(req, res);
+});
 
 router.post('/_upload_/*', function(req, res, next) {
     if (req.session.uid == undefined) {

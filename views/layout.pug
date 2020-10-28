@@ -26,6 +26,7 @@ html
     script.
       var STACKEDITOR_URL="!{STACKEDITOR_URL}";
       var SITE_NAME="!{SITE_NAME}";
+    script(src="/_static_/js/base64ArrayBuffer.js")
     script(src="/_static_/js/layout.js")
     script.
       setupLayout(document, window);
@@ -36,6 +37,7 @@ html
 
     div#cwikheader
       img#sideBarButton(src='/_static_/images/closemenuIcon.svg', onclick="toggleSidebar()", title="toggle menu")
+      img#pdfexport(src='/_static_/images/pdfExportIcon.svg', onclick="pdfExport()", title="export to pdf")
       div.toolBar
         block toolBar
       div#headerPageTitle

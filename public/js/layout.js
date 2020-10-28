@@ -101,9 +101,9 @@ function fetchJsonFor(spot) {
 
     // console.log("Requesting: " + jreq)
     fetch(jreq).then(response => {
-            console.log(response);
-            return response.json();
-        })
+        // console.log(response);
+        return response.json();
+    })
         .then(json => {
             // console.log("process json");
             if (json.anchor == null) json.anchor = anchor;
@@ -125,6 +125,27 @@ function logout() {
 function login() {
     window.location.href = "/_login_";
 }
+
+
+function pdfExport() {
+    const url = new URL(window.location.href);
+    let split = url.pathname.split("/");
+    let filename = split[split.length-1] + ".pdf";
+    let element = document.createElement('a');
+
+    fetch("/_pdf_" + url.pathname)
+        .then(resp => resp.blob())
+        .then(blob => blob.arrayBuffer())
+        .then(function(data) {
+            element.setAttribute('href', 'data:application/pdf;base64,' + base64ArrayBuffer(data));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            element.remove();
+        });
+}
+
 
 function loginPolling() {
     var intervalID = setInterval(function() {
@@ -319,7 +340,7 @@ function internalLinkOptimizer(doc, wnd, e) {
     // Don't intervene for links to media or downloadable files
     if (!isElement(tgt) && isMedia(tgt)) return true;
     if (isElement(tgt) && isMedia(tgt.href)) return true;
-    
+
     if ((tgt.tagName == "A") || (tgt.tagName == "a")) {
         // console.log("its A", tgt.host, loc.host);
         if (tgt.host == loc.host) // I will handle this via JSON
