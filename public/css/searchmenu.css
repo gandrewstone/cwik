@@ -30,7 +30,7 @@
     /* color: #805000; */
     overflow: hidden;
     cursor: pointer;
-    background-image: linear-gradient(#cecece, #b8b8b8,#b8b8b8,#c0c0c0);
+    background: #073b3a;
 }
 
 .lsch:hover {

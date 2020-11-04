@@ -24,7 +24,6 @@
 .lrel::after {
     margin: 0px;
     content: " ";
-    font-weight: bold;
     font-size: 105%;
 }
 
@@ -34,12 +33,11 @@
     /* color: #805000; */
     overflow: hidden;
     cursor: pointer;
-    background-image: linear-gradient(#cecece, #b8b8b8,#b8b8b8,#c0c0c0);
+    background: #073b3a;
 }
 
 .lrel:hover {
     /* color: #805000; */
-    font-weight: bold;
     /* font-size: 105%; */
     /* margin: 0px; */
     overflow: hidden;
