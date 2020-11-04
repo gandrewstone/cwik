@@ -2,6 +2,7 @@ doctype html
 html
   head
     title=title
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
     link(rel='icon', type='image/png', href='/_static_/images/favicon.png')
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&Oswald:wght@500&display=swap")
     link(rel='stylesheet', href='/_static_/css/styles.css')
@@ -124,9 +125,10 @@ html
         }, false);
       }
       
-      var sidebarGrid = new Muuri('#sidebargrid', {
-        dragEnabled: true, dragAxis: 'y'
-      });
+      //var sidebarGrid = new Muuri('#sidebargrid', {
+      //  dragEnabled: true, dragAxis: 'y'
+      //});
+      var sidebarGrid = new Muuri('#sidebargrid');
 
       if (!portrait) sidebarGrid.hide(document.getElementById("searchResults"), {instant: true});
       sidebarGrid.refreshItems().layout();

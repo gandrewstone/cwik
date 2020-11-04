@@ -1,0 +1,47 @@
+.lhis {
+    display: inline-block;
+    width: 100%;
+    margin: 0px 0px 0px 0px;
+    padding: 0px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;  /* Wipe out the anchor styling in the history menu */
+    color: inherit;
+}
+
+.ihis {
+    margin: 0px 0px 0px 1ch;
+    padding: 0px;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none; /* Wipe out the anchor styling in the history menu */
+    color: inherit;
+}
+
+/* inject a bigger thing so the hover doesn't change the element size */
+.lhis::after {
+    margin: 0px;
+    content: " ";
+    font-weight: bold;
+    font-size: 100%;
+}
+
+.lhis:hover {
+    /* background-image: linear-gradient(#c0c0c0, #197717,#197717,#c0c0c0);
+    background-color: #3d1e0b; */
+    background-image: linear-gradient(#cecece, #b8b8b8,#b8b8b8,#c0c0c0);
+    /* color: #805000; */
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.lhis:hover {
+    /* color: #805000; */
+    font-weight: bold;
+    font-size: 100%;
+    /* margin: 0px; */
+    overflow: hidden;
+    cursor: pointer;
+}

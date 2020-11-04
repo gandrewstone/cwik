@@ -2,15 +2,12 @@
 @import "relatedmenu.css";
 @import "hismenu.css";
 @import "searchmenu.css";
-@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 html, body
 {
     height: 100%;
     margin: 0px;
-    font-family: 'Poppins', sans-serif;
-    background: #f8f8f8;
+    font-family: 'Lato', Arial, sans-serif;
 }
 
 /* #### Mobile Phones Portrait #### */
@@ -33,7 +30,7 @@ html, body
 
 h1, h2, h3, h4, h5
 {
-    font-family: 'Abril Fatface', cursive;
+    font-family: 'Oswald', Arial, sans-serif;
 }
 
 svg
@@ -63,17 +60,17 @@ hr {
 }
 
 #openEP, #closeEP, #diffEP, #commitMenuItem {
-        background: black;
+        background: #197717;
 }
 
 
 #cwikheader {
     display: block;
-    height: 50px;
+    height: 30px;
     margin: 0px;
-    background-color: #00bfb2;
-    background-image: linear-gradient(250deg, #00bfb2 0%, #028090 74%);
+    background: #197717;
     color: #fff;
+
     margin-top: 0px;
     margin: 0px;
     position: fixed;
@@ -81,23 +78,16 @@ hr {
     z-index: 4;
     overflow: hidden;
 }
-@media screen and (max-width: 1024px) {
-    #cwikheader {
-        background-color: #00bfb2;
-        background-image: linear-gradient(to left, #00bfb2 0%, #028090 74%);
-    }
-}
 
 .cwikcontent {
     display: block;
     position: absolute;
-    float: center;
-    width: 95%;
-    padding: 7.5px;
+    float: right;
+    width: 100%;
+    margin: 15px;
     z-index: 1;
-    background: #f8f8f8;
+    background: #ffffff;
     color: #000000;
-    overflow-x: hidden;
 }
 
 #rawMarkdown {
@@ -139,7 +129,6 @@ hr {
     z-index: 0;
     color: #fff;
     float: left;
-
 }
 .leftsidebar {
     flex-shrink:0;
@@ -149,9 +138,7 @@ hr {
     color: #fff;
     overflow: visible;
     float: left;
-
 }
-
 
 #lsb {
     position: fixed;
@@ -160,28 +147,19 @@ hr {
 
 #sideBarButton {
     position: fixed;
-    left: 65px;
-    top: 10px;
+    left: 5px;
     z-index: 6;
     background-color: transparent;
 }
 
 #pdfexport {
     position: fixed;
-    left: 97.5%;
-    top: 10px;
+    left: 35px;
     z-index: 6;
     background-color: transparent;
     width: 30px;
     height: 30px;
 }
-@media screen and (max-width: 1250px) {
-    #pdfexport {
-        left: 96%;
-        top: 10px;
-    }
-}
-
 
 .VertB {
     float: left;
@@ -195,39 +173,12 @@ hr {
 
 #sidebargrid {
     position: fixed;
-    background-color: #00bfb2;
-    background-image: linear-gradient(315deg, #00bfb2 0%, #028090 74%);
+    background: #eeeeee;
+    background-image: linear-gradient(#197017, #ffffff);
     color: #fff;
     width: 25ch;
-    height: 100vh !important;
-    overflow-y: scroll;
+    height: 100%;
 }
-@media screen and (max-width: 1024px) {
-    #sidebargrid {
-        width: 100% !important;
-        height: 75vh !important;
-        background-image: linear-gradient(to left, #00bfb2 0%, #028090 74%);
-    }
-}
-
-* {
-    scrollbar-width: thin;
-    scrollbar-color: transparent  white;
-  }
-
-  *::-webkit-scrollbar {
-    width: 7.5px;
-  
-  }
-  *::-webkit-scrollbar-track {
-    background: transparent;
-
-  }
-  *::-webkit-scrollbar-thumb {
-    background-color: white;
-    border-radius: 20px;
-    border: 2px solid#028090;
-  }
 
 
 .history {
@@ -280,34 +231,26 @@ hr {
     margin-left: 3px;
     margin-top: 5px;
     z-index: 2;
-    color: #f8f8f8;
-    text-align: inherit;
-    border-bottom: 1px solid navy
-}
-@media screen and (max-width: 767px) {
-    .sbBubble {
-        border-bottom: none
-    }
+    border-radius: 8px;
+    border: 2px solid #197717;
+    background: #d0d0d0;
+    color: #000000;
 }
 
 #structureI {
     margin: 0.5rem 0px 0.75rem 0px;
-    font-size: 1.2rem;
+    font-size: 90%;
 }
-
 
 #relatedI {
-    margin: 1.5rem 0px 0.75rem 0px;
-    font-size: 1.2rem;
-    
+    margin: 0.5rem 0px 0.75rem 0px;
+    font-size: 90%;
 }
-
 
 #historyI {
     margin: 0.5rem 0px 0.75rem 0px;
-    font-size: 1.2rem;
+    font-size: 90%;
 }
-
 
 
 .toolBar {
@@ -332,7 +275,6 @@ hr {
     z-index: 5;
     color: #ffffff;
     line-height: 30px;
-    vertical-align: middle;
 }
 
 #EpBar {
@@ -369,24 +311,18 @@ hr {
     padding-left: 5px;
     padding-right: 5px;
     padding-top: 4px;
-    vertical-align: middle;
 }
 
 #searchText {
-    background: white;
-    color: #111111;
-    vertical-align: middle;
-    border-radius: 2px;
-    border: none;
-    line-height: 21px !important;
-}
-#searchText::placeholder {
-    color: white;
+    background: #309030;
+    color: #ffffff;
+    vertical-align: top;
+    margin-top: 3px;
 }
 
 #searchText:focus {
-    background: white;
-    color: #111111;
+    background: #309030;
+    color: #ffffff;
     height: 100%;
     padding-top: 2px;
 }
@@ -398,23 +334,21 @@ hr {
 
 #searchButton:hover {
     cursor: pointer;
-    vertical-align: center;
 }
 
 #bchHeaderCoin
 {
     display: inline-block;
     position: fixed;
-    left: 10px;
-    top: 5px;
+    left: 22.5ch;
     z-index: 6;
     background-color: transparent;
-    width: 2.75rem;
+    width: 3.5rem;
     margin-left: 0%;
 }
 #bchHeaderCoin:hover
 {
-    width: 3.25rem;
+    width: 4.5rem;
     margin-left: 0%;
     cursor: pointer;
 }
@@ -434,77 +368,15 @@ hr {
     display: inline-block;
     position: absolute;
     z-index: 5;
-    font-size: 24px;
-    left: 15%;
-    top: 10px;
-}
-@media screen and (max-width: 850px) {
-    #headerPageTitle {
-        font-size: 19px;
-        left: 27.5%;
-        top: 20px;
-    }
+    text-align: center;
+    vertical-align: top;
+    margin-top: 4px;
+    font-weight: bold;
+    left: 28ch;
 }
 
 .wikicontent {
     height:100%;
-}
-
-.wikicontent h1 {
-    font-size: 36px;
-}
-
-.wikicontent h2 {
-    font-size: 27px;
-}
-
-.wikicontent h3 {
-    font-size: 21px;
-}
-
-.wikicontent p {
-    text-align: justify;
-    font-size: 18px;
-    line-height: 27px;
-} 
-
-.wikicontent ul, .wikicontent ol {
-    line-height: 27px;
-}
-.wikicontent li {
-    font-size: 18px;
-} 
-
-.wikicontent #glossary {
-    font-family: 'Poppins', sans-serif;
-    color: #4fb477;
-    text-align: initial;
-    font-weight: initial;
-}
-.wikicontent #glossary:visited {
-    color: #136f63
-}
-
-.wikicontent h1, .wikicontent h2, .wikicontent h3, .wikicontent h4, .wikicontent h5
-{
-    color: #073b3a;
-    text-align: center
-}
-
-.wikicontent a {
-    text-decoration: none;
-}
-.wikicontent a:link {
-    color: #4fb477
-}
-.wikicontent a:visited {
-    color: #136f63
-}
-.wikicontent a:hover {
-    color: #4fb477
-}
-.wikicontent a:active {
-    color: #136f63
 }
 
 .notification {
@@ -517,20 +389,7 @@ hr {
 }
 
 .headerText {
-    font-size: 1.7rem;
-    margin-top: 2rem;
-    border-top: 1px solid navy
-}
-@media screen and (max-width: 1024px) {
-    .headerText {
-        margin-top: 0.5rem;
-        border-top: none;
-    }
-}
-@media screen and (max-width: 767px) {
-    .headerText {
-        font-size: 1.5rem;
-    }
+    font-size: 125%;
 }
 
 #mdData {
@@ -614,6 +473,7 @@ tr:nth-child(odd) td { background: #FEFEFE; }
         margin-right: auto;
         margin-left: 5%;
         margin-bottom: 5px;
+        padding 2px;
         text-align: center;
     }
     
@@ -673,12 +533,17 @@ margin-right: auto;
         display: block;
     }
 
+    #sidebargrid {
+    background: transparent;
+    background-image: none;
+    }
+
     #cwikheader {
         height: 70px;
     }
 
     #bchHeaderCoin {
-  left: 5px;
+  left: 9ch;
   z-index: 6;
   width: 4rem;
   margin-left: 0%;
@@ -703,18 +568,17 @@ margin-right: auto;
     line-height: 60px;
 }
 
+#headerPageTitle {
+  height: 60px;
+  left: 14ch;
+  line-height: 60px;
+
+}
+
 #bchHeaderCoin:hover
 {
-    width: 4rem;
+    width: 80px;
+    margin-left: 0%;
 }
 
-
-}
-
-@media screen and (max-width: 850px) {
-    #pdfexport {
-        left: 87.5% !important;
-        width: 50px !important;
-        height: 50px !important;
-    }
 }
