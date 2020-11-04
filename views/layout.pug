@@ -59,23 +59,22 @@ html
             |  | 
             span.horizMenu#submitEP(onclick="submitEditProposal(); return false;") submit
         div#userBar
-         div#searchTextPositioner
-           form#searchBar
-              img#searchButton(src="/_static_/images/search.svg", onclick="search()")
-              input#searchText(type="text" placeholder="search" value=(lastSearch ? lastSearch : ""))
-              input#hiddenSubmit(type="submit", onclick="search(); return false;")
-         |   
-         div#LogInOutDiv 
-           if user && user.loggedIn
-              span.horizMenu(onclick="logout()") logout
-           else
-              span.horizMenu(onclick="login()") login
+          div#LogInOutDiv 
+            if user && user.loggedIn
+               span.horizMenu(onclick="logout()") logout
+            else
+               span.horizMenu(onclick="login()") login
         
 
     div#sidebarAndContent
      div.leftsidebar
       div#lsb
         div#sidebargrid
+          div#searchTextPositioner.sbBubble
+            div.item-content
+                form#searchBar
+                  input#searchText(type="text" placeholder="search" value=(lastSearch ? lastSearch : ""))
+                  input#hiddenSubmit(type="submit", onclick="search(); return false;")
           div#searchResults.sbBubble
              div.item-content
                 center#searchHeader.headerText Search
@@ -109,14 +108,14 @@ html
       var portrait = window.matchMedia("(orientation: portrait)").matches;
       
       // switch the search into the sidebar
-      if (portrait) {
+      if (1) {  // search always in sidebar now
         let sbSrch = document.getElementById("searchHeader");
         let srchEntry = document.getElementById("searchBar");
         sbSrch.after(srchEntry);
         
-        document.getElementById("searchTextPositioner").classList.add('searchTextPortraitPositioner');
-        document.getElementById("searchText").classList.add('searchTextPortrait');
-        document.getElementById("searchButton").style.display = "none";  // No magnifying glass in the sidebar
+        //document.getElementById("searchTextPositioner").classList.add('searchTextPortraitPositioner');
+        //document.getElementById("searchText").classList.add('searchTextPortrait');
+        //document.getElementById("searchButton").style.display = "none";  // No magnifying glass in the sidebar
 
         document.getElementById("searchBar").addEventListener("submit", function(event) {
             event.preventDefault();
@@ -125,12 +124,13 @@ html
         }, false);
       }
       
-      //var sidebarGrid = new Muuri('#sidebargrid', {
-      //  dragEnabled: true, dragAxis: 'y'
-      //});
-      var sidebarGrid = new Muuri('#sidebargrid');
+      var sidebarGrid = new Muuri('#sidebargrid', {
+        dragEnabled: true, dragAxis: 'y'
+      });
+      //var sidebarGrid = new Muuri('#sidebargrid');
 
-      if (!portrait) sidebarGrid.hide(document.getElementById("searchResults"), {instant: true});
+      // search always in sidebar now
+      if (0) sidebarGrid.hide(document.getElementById("searchResults"), {instant: true});
       sidebarGrid.refreshItems().layout();
 
 
