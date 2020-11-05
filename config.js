@@ -20,7 +20,7 @@ if (typeof process.env.XNEX !== "undefined") {
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "buwiki";
     exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
-} else if (typeof process.env.BUNET !== "undefined") {
+} else if (true) {
     console.log("Running www.bitcoinunlimited.net configuration");
     exports.REPOS = [{
         URL: "git@github.com:bitcoin-unlimited/BUwiki.git",
@@ -69,11 +69,10 @@ if (typeof process.env.XNEX !== "undefined") {
 
 
 // Override for dev env
-if (typeof process.env.CWIK_DEV !== "undefined") {
-    exports.MY_URL = "http://192.168.1.100:8000";
+if (true) {
+    exports.MY_URL = "http://127.0.0.1:8000";
     exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
-    exports.STACKEDIT_URL = "http://192.168.1.100:8002/app";
-    //exports.STACKEDIT_URL = "https://stackedit.io/app";
+    exports.STACKEDIT_URL = "https://stackedit.io/app";
 }
 
 exports.DEFAULT_COMMIT_MSG = "wiki commit";

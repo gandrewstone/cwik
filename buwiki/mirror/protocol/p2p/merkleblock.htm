@@ -1,0 +1,27 @@
+<div class="cwikmeta">{
+"title":"MERKLEBLOCK",
+"related":["/protocol", "/protocol/p2p/filteradd"]
+}</div>
+<p><em>Provides a block header and partial merkle proof tree to show that selected transaction ids exist in the block.</em></p>
+<p>Transactions are selected by honest servers if they match the bloom filter installed by the client.  However, note that servers can omit transactions and this cannot be detected except by receiving a MERKLEBLOCK message from an honest server.</p>
+<p>All selected transactions are subsequently sent as separate TX messages.  Due to multi-threading on the server, clients should not assume that these TX messages directly follow the MERKLEBLOCK message.</p>
+<p><strong>MERKLEBLOCK Message Format</strong></p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>…</th>
+<th>4 bytes</th>
+<th>…</th>
+<th>…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/block__header">block header</a></td>
+<td># tx in block</td>
+<td><a href="/protocol/p2p/vector">vector</a> of 32 byte hashes</td>
+<td><a href="/protocol/p2p/vector">vector</a> of bytes that define the merkle block traversal</td>
+</tr>
+</tbody>
+</table>
+</div>

@@ -1,0 +1,1 @@
+{"structure":"","title":"MERKLEBLOCK","related":["/protocol","/protocol/p2p/filteradd"],"summary":"Provides a block header and partial merkle proof tree to show that selected transaction ids exist in the block."}

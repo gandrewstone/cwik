@@ -1,0 +1,69 @@
+<div class="cwikmeta">{
+"title":"INV",
+"related":["/protocol","/protocol/p2p/getdata","/protocol/p2p/filterload","/protocol/p2p/filterclear"]
+}</div>
+<p><em>Notifies peers about the existence of some information (block or transaction)</em><br />
+Based on selected services in the <a href="%22/protocol/p2p/version%22">VERSION</a> message, INV messages may not be sent.</p>
+<p>If a bloom filter has been sent to this node via <a href="/protocol/p2p/filterload">FILTERLOAD</a>, transaction INVs will only be sent if they match the bloom filter.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>compact int</th>
+<th>4 bytes</th>
+<th>32 bytes</th>
+<th>…</th>
+<th>4 bytes</th>
+<th>32 bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/vector">vector</a> size N of</td>
+<td>type 1</td>
+<td>hash 1</td>
+<td></td>
+<td>type N</td>
+<td>hash N</td>
+</tr>
+</tbody>
+</table>
+</div><p>NOTE: Since a block header is a relatively small data structure, and block propagation speed is an important network metric, a peer may send HEADER messages in place of INV messages when a block arrives.</p>
+<h5 id="type">Type</h5>
+<p>The type of the object that is available.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Transaction</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Block</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Filtered Block (partial block with merkle proof)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Compact block</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Xthin block (Bitcoin Unlimited)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Graphene Block (Bitcoin Unlimited)</td>
+</tr>
+</tbody>
+</table>
+</div><p>Implementations: <a href="https://github.com/BitcoinUnlimited/BitcoinUnlimited/blob/eb264e627e231f7219e60eef41b4e37cc52d6d9d/src/protocol.h#L477">C++</a></p>
+<h5 id="hash">Hash</h5>
+<p>The <a href="/glossary/hash__identifier">hash identifier</a> of the available object.</p>

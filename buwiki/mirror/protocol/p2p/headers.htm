@@ -1,0 +1,25 @@
+<div class="cwikmeta">{
+"title":"HEADERS",
+"related":["/protocol","/protocol/p2p/getheaders"]
+}</div>
+<p><em>Provides a contiguous set of block headers</em></p>
+<p><strong>HEADERS Message Format</strong></p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>compact int</th>
+<th>…</th>
+<th>compact int</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/vector">vector</a> size N containing:</td>
+<td><a href="/protocol/p2p/block__header">block header</a></td>
+<td>number tx in block</td>
+</tr>
+</tbody>
+</table>
+</div><p><em><a href="/protocol/p2p/vector">vector</a> size N containing</em>:  This message contains a vector of block headers.  No more than 2000 block headers may be sent at one time.</p>
+<p><em>block header</em>:  A block header.  Block headers in this array MUST be sequential.</p>
+<p><em>number tx in block</em>: <strong>DEPRECATED</strong> This field should be ignored and servers may send 0 regardless of the actual number of transactions in the block.</p>
