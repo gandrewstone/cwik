@@ -1,3 +1,4 @@
+
 var EPHEMERAL_SIDEBAR_SIZE = 600; // If the screen width is smaller than this, auto-hide the sidebar
 var NOTIFICATION_DELAY = 15000;
 
@@ -283,14 +284,17 @@ function processJsonPage(json) {
             else {
                 let ih = "";
                 json.searchResults.forEach(r => {
-                    ih = ih.concat(LinkToLinkify(r.ref, "sch"));
+                    let tmp = r.ref;
+                    if (tmp[0] != "/") tmp = "/" + tmp;  // because search results must always be absolute, since current page could be anywhere
+                    ih = ih.concat(LinkToLinkify(tmp, "sch"));
                 });
                 srContents.innerHTML = ih;
             }
             sidebarGrid.show(srBubble);
             sidebarGrid.refreshItems().layout();
-        } else {
-            sidebarGrid.hide(srBubble);
+        } else { // Now search is always in sidebar
+            if (json.searchResults.length == 0) srContents.innerHTML = "";
+            sidebarGrid.show(srBubble);
             sidebarGrid.refreshItems().layout();
         }
     }
@@ -486,7 +490,12 @@ function search() {
 
     if (query == "") {
         if (lastSearch != "") {
-            sidebarGrid.hide(document.getElementById("searchResults"));
+            // Don't hide the search when there's nothing
+            //sidebarGrid.hide(document.getElementById("searchResults"));
+            // Just remove the search results
+            let srContents = document.getElementById("searchI")
+            srContents.innerHTML = "";
+            sidebarGrid.refreshItems().layout();
         } else
             notification({
                 notification: "enter search terms"
