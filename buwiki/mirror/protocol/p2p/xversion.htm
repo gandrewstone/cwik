@@ -1,0 +1,60 @@
+<div class="cwikmeta">{
+"title":"XVERSION",
+"related":["/protocol","/protocol/p2p/xupdate"]
+}</div>
+<p><em>Notifies peers about a protocol configuration value</em></p>
+<p>This message notifies a peer about extended protocol parameters.  This message MAY be sent during connection initialization.  If sent, it MUST be sent immediately subsequent to the receipt of the <a href="/protocol/p2p/verack.md">VERACK</a> message, and before other non-initialization messages are sent.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>compact int</th>
+<th>compact int</th>
+<th>variable bytes</th>
+<th>…</th>
+<th>compact int</th>
+<th>variable bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/vector">vector</a> size N of</td>
+<td>key 1</td>
+<td>value 1 <a href="/protocol/p2p/vector">vector</a> of bytes</td>
+<td></td>
+<td>key N</td>
+<td>value N <a href="/protocol/p2p/vector">vector</a> of bytes</td>
+</tr>
+</tbody>
+</table>
+</div><p>The <em>value</em> is a vector of bytes.  These bytes can be an object that is itself serialized, but <strong>MUST</strong> exist within the vector “envelope” so that implementations that do not recognize a field can skip it.   The serialization format of the bytes inside the “envelope” is defined by the creator of the key, however, Bitcoin P2P network serialization is recommended since it is also used to encode/decode all the messages of this protocol.</p>
+<p>See <a href="https://github.com/BitcoinUnlimited/BitcoinUnlimited/blob/bucash1.7.0.0/doc/xversionmessage.md">XVERSION specification</a> for additional details.</p>
+<h3 id="xversion-fields">XVERSION Fields</h3>
+<p>XVERSION field identifiers are 32 bits and split into a 16 bit prefix and 16 bit suffix.  Each development group is assigned a prefix so that new identifiers do not accidentally conflict.  Once a field identifier is created by group A, it should be used by other software both to receive that information from A and to present that information to other software.  Therefore, group A <strong>MUST NOT</strong> change the syntax or semantics of a field once defined.  To change a field, create a new identifier and deprecate (by no longer using the original identifier).</p>
+<h4 id="prefix-assignments">Prefix Assignments</h4>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bitcoin ABC</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Bitcoin Unlimited</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+</div><h4 id="field-assignments">Field Assignments</h4>
+<p>See <a href="https://github.com/BitcoinUnlimited/BitcoinUnlimited/blob/bucash1.7.0.0/src/xversionkeys.dat">xversionkeys.dat</a> for the most up-to-date field definitions defined by the BitcoinUnlimited full node.<br />
+Note that:</p>
+<ul>
+<li><em>u64c</em> refers to a <a href="/protocol/p2p/compact__int.md">compact int</a> serialization of an unsigned 64-bit value.</li>
+<li><em>Changeable</em> fields MAY be changed during the course of a connection via the <a href="/protocol/p2p/xupdate">XUPDATE</a> message.</li>
+</ul>
+<h3 id="support">Support</h3>
+<p>Supported by: <strong>Bitcoin Unlimited</strong></p>

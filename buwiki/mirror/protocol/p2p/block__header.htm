@@ -1,0 +1,24 @@
+<p>The block header appears in several P2P messages.  It’s serialization format is as follows:</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>4 bytes</th>
+<th>32 bytes</th>
+<th>32 bytes</th>
+<th>4 bytes</th>
+<th>4 bytes</th>
+<th>4 bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>version</td>
+<td>hash of previous block</td>
+<td>hash of merkle root</td>
+<td>block time in epoch seconds</td>
+<td>difficulty in “bits” format</td>
+<td>nonce</td>
+</tr>
+</tbody>
+</table>
+</div>

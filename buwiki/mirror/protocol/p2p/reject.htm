@@ -1,0 +1,96 @@
+<div class="cwikmeta">{
+"title":"REJECT",
+"related":["/protocol"]
+}</div>
+<p><em>Notifies peer that a message is invalid</em></p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th><a href="/protocol/p2p/compact__int.md">compact int</a> N (max 12)</th>
+<th>N bytes</th>
+<th>1 byte</th>
+<th><a href="/protocol/p2p/compact__int.md">compact int</a> M (max 111)</th>
+<th>M bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>command length</td>
+<td>command</td>
+<td>error code</td>
+<td>reason length</td>
+<td>reason string</td>
+</tr>
+</tbody>
+</table>
+</div><p><em>command length</em> and <em>command</em> form a <a href="/protocol/p2p/vector.md">vector</a> of bytes that identify the type of the problem message.  These bytes (less padded nulls) match the <em>command</em> field in the protocol <a href="/protocol.md">message envelope</a>.</p>
+<p><em>reason length</em> and <em>reason string</em> form a <a href="/protocol/p2p/vector.md">vector</a> of bytes that is a string providing a human language explanation of the reason the message was rejected.  This string is subject to change so client software <strong>SHOULD NOT</strong> use it programatically.</p>
+<p><em>error code</em> provides a succinct machine-interpretable reason why the message was rejected.</p>
+<h3 id="reject-error-codes">Reject Error Codes</h3>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Response To</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REJECT_MALFORMED</td>
+<td>0x01</td>
+<td>any</td>
+<td>message cannot be deserialized</td>
+</tr>
+<tr>
+<td>REJECT_INVALID</td>
+<td>0x10</td>
+<td>BLOCK, TX, FILTERSIZEXTHIN</td>
+<td>block or transaction is invalid, or xthin filter size is too small</td>
+</tr>
+<tr>
+<td>REJECT_OBSOLETE</td>
+<td>0x11</td>
+<td>VERSION</td>
+<td>This node no longer supports your client protocol version</td>
+</tr>
+<tr>
+<td>REJECT_DUPLICATE</td>
+<td>0x12</td>
+<td>unused</td>
+<td></td>
+</tr>
+<tr>
+<td>REJECT_NONSTANDARD</td>
+<td>0x40</td>
+<td>TX</td>
+<td>Transaction is <a href="/standard__transactions.md">non-standard</a>, or <a href="/final__transactions.md">not final</a> as per BIP68</td>
+</tr>
+<tr>
+<td>REJECT_DUST</td>
+<td>0x41</td>
+<td>TX</td>
+<td>Transaction has an output that is too small</td>
+</tr>
+<tr>
+<td>REJECT_INSUFFICIENTFEE</td>
+<td>0x42</td>
+<td>TX</td>
+<td>Transaction does not pay enough to be relayed</td>
+</tr>
+<tr>
+<td>REJECT_CHECKPOINT</td>
+<td>0x43</td>
+<td>unused</td>
+<td></td>
+</tr>
+<tr>
+<td>REJECT_WAITING</td>
+<td>0x44</td>
+<td>TX</td>
+<td>This transaction is <a href="/final__transactions.md">not final</a></td>
+</tr>
+</tbody>
+</table>
+</div>

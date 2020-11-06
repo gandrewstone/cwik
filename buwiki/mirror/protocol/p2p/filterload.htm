@@ -1,0 +1,36 @@
+<div class="cwikmeta">{
+"title":"INV",
+"related":["/protocol","/protocol/p2p/filterclear", "/protocol/p2p/inv", "/protocol/p2p/MERKLEBLOCK"]
+}</div>
+<p><em>Inserts a transaction and merkle block filter into the peer</em></p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>up to 36000 bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="objects/bloom_filter">bloom filter</a></td>
+</tr>
+</tbody>
+</table>
+</div><h3 id="effect-on-transactions">Effect on Transactions</h3>
+<p>This message installs a bloom filter into the peer.  Subsequent INV notifications and MERKLEBLOCK messages only provide transactions that in match this bloom filter in some manner.  The following items in a transaction are checked against the bloom filter:</p>
+<ul>
+<li>The transaction hash</li>
+<li>Each data field in every <a href="glossary/output__script">output script</a> in the transaction
+<ul>
+<li>Most importantly, this allows public keys and public key hashes (essentially bitcoin addresses) to be added to the bloom filter, allowing a wallet to detect an incoming transfer.</li>
+</ul>
+</li>
+<li>Each <a href="glossary/previous__output">previous output</a> in the transaction
+<ul>
+<li>This allows a wallet to detect that a different wallet has spent funds that are co-controlled</li>
+</ul>
+</li>
+<li>Each data field in every <a href="glossary/input__script">input script</a> in the transaction.</li>
+</ul>
+<p>See <a href="https://github.com/BitcoinUnlimited/BitcoinUnlimited/blob/bucash1.7.0.0/src/bloom.cpp#L186">CBloomFilter::MatchAndInsertOutputs</a>, and <a href="https://github.com/BitcoinUnlimited/BitcoinUnlimited/blob/eb264e627e231f7219e60eef41b4e37cc52d6d9d/src/bloom.cpp#L234">CBloomFilter::MatchInputs</a></p>
+<h3 id="effect-on-merkle-blocks">Effect on Merkle Blocks</h3>
+<p>If a <a href="https://github.com/BitcoinUnlimited/BitcoinUnlimited/blob/bucash1.7.0.0/src/protocol.h#L483">filtered block</a> is requested via in <a href="/protocols/p2p/inv">INV</a> message, the installed bloom filter is used to choose which transactions are included in the response using the same matching algorithm as described above for transaction INVs.</p>

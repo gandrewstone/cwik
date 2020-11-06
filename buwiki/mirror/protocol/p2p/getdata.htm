@@ -1,0 +1,30 @@
+<div class="cwikmeta">{
+"title":"GETDATA",
+"related":["/protocol","/protocol/p2p/inv"]
+}</div>
+<p>Requests information (generally previously announced via an INV) from a peer.</p>
+<p>A GETDATA request is formatted as a vector of INV data:</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>compact int</th>
+<th>4 bytes</th>
+<th>32 bytes</th>
+<th>…</th>
+<th>additional objects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/vector">vector</a> size N elements of</td>
+<td>element 1 type</td>
+<td>element 1 hash</td>
+<td>…</td>
+<td>element N type and hash</td>
+</tr>
+</tbody>
+</table>
+</div><h3 id="type">Type</h3>
+<p>The type of the desired object. See <a href="/protocol/p2p/inv">INV</a> for specific values</p>
+<h3 id="hash">Hash</h3>
+<p>The <a href="glossary/hash__identifier">hash identifier</a> of the desired object.</p>

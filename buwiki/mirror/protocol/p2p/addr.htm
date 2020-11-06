@@ -1,0 +1,29 @@
+<div class="cwikmeta">{
+"title":"ADDR",
+"related":["/protocol","/protocol/p2p/getaddr"]
+}</div>
+<p>Provide information about other prospective P2P protocol peers.  Peers SHOULD not send this message unsolicited, and nodes that receive an unsolicited ADDR message MUST ignore it.  This behavior helps prevent eclipse and partitioning attacks by not allowing an attacker to aggressively seed peer connection tables with its own nodes.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>compact int</th>
+<th>4 bytes</th>
+<th>8 bytes</th>
+<th>16 bytes</th>
+<th>2 bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/vector">vector</a> size N of</td>
+<td>time</td>
+<td>services</td>
+<td>IP address</td>
+<td>port</td>
+</tr>
+</tbody>
+</table>
+</div><p><em>services</em> is a bit field describing supported functionality, that is also used in the <a href="/protocol/p2p/version">version</a> message.  See <a href="/protocol/p2p/services__field">services field</a> for bit definitions.</p>
+<p><em>time</em> is a 4 byte unsigned little-endian integer denoting the last time in epoch seconds that this node was known to be “live”.</p>
+<p><em>IP address</em> is the IPv4 or IPv6 address of the prospective node.</p>
+<p><em>port</em> is the IP port of the prospective node, serialized as an unsigned 2 byte big-endian value.</p>

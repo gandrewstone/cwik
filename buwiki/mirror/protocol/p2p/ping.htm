@@ -1,0 +1,19 @@
+<div class="cwikmeta">
+{
+"title":"PING",
+"related":["/protocol/p2p/pong"]
+} </div>
+<p>Connection keep-alive, “aliveness” and latency discovery.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>nonce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8 bytes</td>
+</tr>
+</tbody>
+</table>
+</div><p>If a node receives a PING message, it replies as quickly as possible with a <a href="/protocol/p2p/pong">PONG</a> message with the provided <em>nonce</em>.</p>

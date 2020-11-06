@@ -1,0 +1,20 @@
+<div class="cwikmeta">{
+"title":"FILTERADD",
+"related":["/protocol","/protocol/p2p/getdata","/protocol/p2p/filterload","/protocol/p2p/filterclear"]
+}</div>
+<p>Add an entry into the installed bloom filter.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>compact int</th>
+<th>N bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/vector">vector</a> size N of</td>
+<td>data</td>
+</tr>
+</tbody>
+</table>
+</div><p><em>data</em> is inserted into the bloom filter, exactly as if the <a href="https://github.com/BitcoinUnlimited/BitcoinUnlimited/blob/eb264e627e231f7219e60eef41b4e37cc52d6d9d/src/bloom.cpp#L116">insert</a> operation had been called locally before sending the filter.</p>

@@ -1,3 +1,4 @@
+
 var EPHEMERAL_SIDEBAR_SIZE = 600; // If the screen width is smaller than this, auto-hide the sidebar
 var NOTIFICATION_DELAY = 15000;
 

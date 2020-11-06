@@ -1,0 +1,31 @@
+<div class="cwikmeta">{
+"title":"XUPDATE",
+"related":["/protocol","/protocol/p2p/xversion"]
+}</div>
+<p><em>Notifies peers about an XVERSION configuration value update</em></p>
+<p>This message notifies a peer about changes to protocol parameters.  It follows the same format as <a href="/protocol/p2p/xversion.md">XVERSION</a> protocol parameters.  Implementations <strong>SHOULD</strong> only send changed parameters, rather than every parameter.   Note that some XVERSION parameters are not changeable and therefore will be ignored if they appear in this message.</p>
+<p>See the <a href="/protocol/p2p/xversion.md">XVERSION</a> message for detailed information about each parameter.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>compact int</th>
+<th>compact int</th>
+<th>variable bytes</th>
+<th>…</th>
+<th>compact int</th>
+<th>32 bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/protocol/p2p/vector">vector</a> size N of</td>
+<td>key 1</td>
+<td><a href="/protocol/p2p/vector">vector</a> of bytes</td>
+<td></td>
+<td>key N</td>
+<td><a href="/protocol/p2p/vector">vector</a> of bytes</td>
+</tr>
+</tbody>
+</table>
+</div><h3 id="support">Support</h3>
+<p>Supported by: <strong>Bitcoin Unlimited</strong></p>

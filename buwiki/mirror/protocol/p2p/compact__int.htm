@@ -1,0 +1,74 @@
+<p>A “compact int” is serialized as follows:</p>
+<p>*If the number &lt; 253, store it in 1 byte<br />
+*If the number fits in 16 bits: store a 1 byte value 253, and the 2 byte little-endian number.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0xfd</td>
+<td>val&amp;255</td>
+<td>val&gt;&gt;8</td>
+</tr>
+</tbody>
+</table>
+</div><ul>
+<li>If the number fits in 32 bits (but not 8 or 16): store a 1 byte value 254, and the 4 byte little-endian number</li>
+</ul>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0xfe</td>
+<td>val&amp;255</td>
+<td>(val&gt;&gt;8)&amp;255</td>
+<td>(val&gt;&gt;16)&amp;255</td>
+<td>(val&gt;&gt;24)&amp;255</td>
+</tr>
+</tbody>
+</table>
+</div><ul>
+<li>If the number fits in 64 bits (but not 8, 16, or 32): store a 1 byte value 255 and the 8 byte little-endian number</li>
+</ul>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0xff</td>
+<td>val&amp;255</td>
+<td>val&gt;&gt;8</td>
+<td>val&gt;&gt;16</td>
+<td>val&gt;&gt;24</td>
+<td>val&gt;&gt;32</td>
+<td>val&gt;&gt;40</td>
+<td>val&gt;&gt;48</td>
+<td>val&gt;&gt;56</td>
+</tr>
+</tbody>
+</table>
+</div>
