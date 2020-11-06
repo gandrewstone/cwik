@@ -34,7 +34,15 @@ function hideKeyboard(element) {
     }, 100);
 }
 
+function closeSidebarIfBigSidebar() {
+    if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches))
+    {
+        setTimeout(hideSidebar, 50); // by delaying a tiny bit the user sees click feedback
+    }
+}
+
 function jumpTo(spot) {
+    clearNotification();
     // the innerWidth check lets us simulate this on the PC
     if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
         // by delaying a tiny bit the user sees click feedback
@@ -44,6 +52,7 @@ function jumpTo(spot) {
 }
 
 function jumpToWithoutClosingSidebar(spot) {
+    clearNotification();
     let LAYOUT_HEADER_PX = document.getElementById("cwikheader").offsetHeight;
     if (LAYOUT_HEADER_PX == undefined) {
         LAYOUT_HEADER_PX = 30;
@@ -72,6 +81,7 @@ function jumpToWithoutClosingSidebar(spot) {
 }
 
 function linkTo(spot) {
+    clearNotification();
     // the innerWidth check lets us simulate this on the PC
     if ((window.innerWidth < EPHEMERAL_SIDEBAR_SIZE) || (window.matchMedia("(orientation: portrait)").matches)) {
         // by delaying a tiny bit the user sees click feedback
@@ -385,7 +395,14 @@ function setupLayout(document, window) {
 
 // Prints out a warning or error in a prominent location.  Json is a dictionary object that may have a "notification" member
 
+var notificationTimeoutHandle = null;
+
 function clearNotification() {
+    if (notificationTimeoutHandle != null)
+    {
+        clearTimeout(notificationTimeoutHandle);
+        notificationTimeoutHandle=null;
+    }
     document.getElementById('notifyText').innerText = "";
     //document.querySelector('div.notification').visibility = "hidden";
     document.querySelector('div.notification').style.display = "none";
@@ -396,9 +413,11 @@ function notification(json) {
         document.getElementById('notifyText').innerText = json.notification;
         //document.querySelector('div.notification').visibility = "visible";
         document.querySelector('div.notification').style.display = "block";
-        setTimeout(function() {
+        notificationTimeoutHandle = setTimeout(function() {
             if (document.getElementById('notifyText').innerText == json.notification) clearNotification();
         }, NOTIFICATION_DELAY);
+        closeSidebarIfBigSidebar();  // Because we can't see the notification
+        
     }
 }
 
@@ -416,6 +435,7 @@ function openEditProposal() {
 }
 
 function closeEditProposal() {
+    clearNotification();
     let epEntry = document.getElementById("editProposal");
     // Commit any pending edits first
     fetch("/_commit_").then(r => r.json().then(j => {
@@ -478,6 +498,7 @@ function setEditProposalMenuVisibility(ep) {
 }
 
 function logout() {
+    clearNotification();
     window.location.href = '/_logout_';
 }
 
@@ -529,12 +550,30 @@ function search() {
 
 
 function runEditorIfPermitted(href, md) {
-        if (!user.loggedIn) notification({notification:"log in first"});
-        else {
+    clearNotification();
+    if (!user.loggedIn) notification({notification:"log in first"});
+    else {
         // Its ok to check this on the client side because if defeated the user will be able to open the editor but still not commit anything that's changed
         if (!user.perms.push && !user.editProposal && user.perms.propose) notification({notification:"open an edit proposal before editing"});
         else if (!user.perms.push && !user.perms.propose) notification({notification:"contact an administrator to gain edit permissions"});
-        else
-            runeditor(href, md);
+        else runeditor(href, md);
         }
     }
+
+function MoveEditProposalBarIntoSidebar()
+{
+    let epBar = document.getElementById("EpBar");
+    if (typeof epBar !== "undefined")
+    {
+        // epBar.remove();
+        epBar.style.height = null;
+        epBar.style.lineHeight = null;
+        epBar.style.textAlign = "center";
+        epBar.style.display = "block";
+        epBar.style.fontSize = "12px";
+        let wrapper = document.createElement("div");
+        wrapper.appendChild(epBar);
+        sidebarGrid.add(wrapper, {index: 0});
+    }
+
+}

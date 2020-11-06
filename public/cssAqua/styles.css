@@ -65,7 +65,7 @@ hr {
 }
 
 #openEP, #closeEP, #diffEP, #commitMenuItem {
-        background: black;
+        /* background: #028090; */
 }
 
 
@@ -120,12 +120,14 @@ hr {
     height: 100%;
 }
 
+/*
 #LogInOutDiv {
     position:relative;
     display: inline-block;
     vertical-align: top;
-}
+}*/
 
+/*
 @media screen and (max-width: 850px) {
     .horizMenu {
         line-height: 10px !important;
@@ -135,6 +137,8 @@ hr {
         right: 10ch;
     }
 }
+
+
 @media screen and (max-width: 580px) {
     .horizMenu {
         line-height: 20px !important;
@@ -144,6 +148,7 @@ hr {
 
     }
 }
+*/
 
 .horizMenu:hover {
     color: #f8f8f8;
@@ -350,17 +355,53 @@ hr {
 }
 
 
+#titleMenus {
+    display: inline-block;
+    position: absolute;
+    top: 5px;
+    right: 5ch;
+    z-index: 45;
+    color: #ffffff;
+    line-height: 30px;
+    overflow: hidden;
+}
 
 .toolBar {
     display: inline-block;
     position: absolute;
-    height:100%;
-    width: 24ch;
+    width: 6ch;
+    left: 90px;
     z-index: 5;
     color: #ffffff;
-    line-height: 30px;
     text-align:center;
+    top: 50%;
+    transform: translateY(-50%);
 }
+/* tight, so stack edit and logout */
+@media (orientation: portrait) {
+/* @media screen and (max-width: 850px) { */
+    .toolBar {
+        left: unset !important;
+        right: 100px;
+        line-height: 30px;
+        top: 3px;
+        transform: unset;
+    }
+    #titleMenus {
+        top: unset;
+        bottom: 3px;
+        right: 100px;
+    }
+}
+@media screen and (max-width: 600px) {
+    .toolBar {
+        font-size: 12px;
+    }
+    #titleMenus {
+        font-size: 12px;
+    }
+}
+
 
 #editBar {
     display: inline-block;
@@ -372,8 +413,8 @@ hr {
     display: inline-block;
     z-index: 5;
     color: #ffffff;
-    line-height: 30px;
-    vertical-align: middle;
+    margin-left: 20px;
+    margin-right: 10px;
 }
 
 #EpBar {
@@ -381,11 +422,12 @@ hr {
     position: relative;
     z-index: 6;
     color: #ffffff;
-    line-height: 30px;
     vertical-align: top;
     margin-top: 1px;
-    height: 20px;
+    margin-right: 10px;
 }
+
+
 
 #searchBarPos {
     display: inline-block;
@@ -415,14 +457,18 @@ hr {
 }
 
 #searchText {
-    background: white;
-    color: #111111;
     vertical-align: middle;
-    border-radius: 2px;
-    border: none;
     line-height: 21px !important;
     width: 100% !important;
 }
+
+.textEntry {
+    background: white;
+    color: #111111;
+    border-radius: 2px;
+    border: none;
+}
+
 @media screen and (max-width: 1024px) {
     #searchText {
         margin-left: 10px !important;
@@ -468,18 +514,6 @@ hr {
     cursor: pointer;
 }
 
-#titleMenus {
-    display: inline-block;
-    position: fixed;
-    height: 30px;
-    top: 5px;
-    right: 7.5ch;
-    z-index: 45;
-    color: #ffffff;
-    line-height: 30px;
-    overflow: hidden;
-}
-
 #headerPageTitle {
     display: inline-block;
     position: absolute;
@@ -488,6 +522,7 @@ hr {
     left: 15%;
     top: 10px;
 }
+
 @media screen and (max-width: 850px) {
     #headerPageTitle {
         font-size: 19px;
@@ -502,7 +537,7 @@ hr {
     position: fixed;
     width: 100%;
     background-color: orange;
-    z-index: 10;
+    z-index: 2;
     display: none;
 }
 
@@ -519,6 +554,9 @@ hr {
 }
 @media screen and (max-width: 767px) {
     .headerText {
+        font-size: 1.5rem;
+    }
+    .notification {
         font-size: 1.5rem;
     }
 }
@@ -543,13 +581,17 @@ input#sig
     width: 99%;
 }
 
-
+/*
+#editProposal::placeholder {
+    color: #e0e000;
+}
 #editProposal {
-    background: #309030;
+    background: #027090;
     color: #ffffff;
     height: 20px;
     width: 20ch;
 }
+*/
 
 /* new media */
 
@@ -558,41 +600,41 @@ input#sig
 }
 
 #dropArea {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-  border: 2px dashed #ccc;
-  border-radius: 20px;
-  min-width: 500px;
-  min-height: 400px;
-  font-family: sans-serif;
-  padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    border: 2px dashed #ccc;
+    border-radius: 20px;
+    min-width: 500px;
+    min-height: 400px;
+    font-family: sans-serif;
+    padding: 20px;
 }
 
 #dropArea.highlight {
-  border-color: purple;
+    border-color: purple;
 }
 
 #fileElem {
-  display: none;
+    display: none;
 }
 /* @media screen and (max-device-width: 640px){ */
 
 .searchTextPortraitPositioner {
-        display: inline-block;
-        width: 90%;
-        margin-right: auto;
-        margin-left: 5%;
-        margin-bottom: 5px;
-        text-align: center;
-    }
-    
+    display: inline-block;
+    width: 90%;
+    margin-right: auto;
+    margin-left: 5%;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
 .searchTextPortrait {
-        font-size: 100%;
-        width: 100%;
-        text-align: center;
-    }
+    font-size: 100%;
+    width: 100%;
+    text-align: center;
+}
 
 
 #register {
@@ -607,9 +649,9 @@ input#sig
 }
 
 #login h2 {
-display: block;
-margin-left: auto;
-margin-right: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #bchidentity_op_reg {
@@ -617,9 +659,9 @@ margin-right: auto;
 }
 
 #RegQRcode,#LoginQRCode {
-display: block;
-margin-left: auto;
-margin-right: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 
@@ -631,9 +673,9 @@ margin-right: auto;
     }
 
     #sideBarButton {
-       width: 64px;
-       height: 64px;
-       top: 5px;
+        width: 64px;
+        height: 64px;
+        top: 5px;
     }
 
     .VertB {
@@ -649,37 +691,24 @@ margin-right: auto;
     }
 
     #bchHeaderCoin {
-  left: 5px;
-  z-index: 6;
-  width: 4rem;
-  margin-left: 0%;
-}
+        left: 5px;
+        z-index: 6;
+        width: 4rem;
+        margin-left: 0%;
+    }
 
+/*
+    #EpBar {
+        display: none;
+    }
+    */
 
-.toolBar {
-    width: 5ch;
-    left: 60px;
-  z-index: 5;
-  color: #ffffff;
-  line-height: 60px;
-  text-align:center;
-}
+    #bchHeaderCoin:hover
+    {
+        width: 4rem;
+    }
 
-#userBar {
-  line-height: 60px;
-}
-
-/* TO DO, make this a dropdown */
-#EpBar {
-    display: none;
-    line-height: 60px;
-}
-
-#bchHeaderCoin:hover
-{
-    width: 4rem;
-}
-
+/*
 @media screen and (max-width: 580px) {
     .horizMenu {
         font-size: 1.25rem !important;
@@ -687,6 +716,7 @@ margin-right: auto;
         top: 25px !important
     }
 }
+*/
 }
 
 @media screen and (max-width: 850px) {
@@ -721,22 +751,24 @@ margin-right: auto;
     #pdfexport {
         left: 82% !important;
     }
-
+/*
     .horizMenu {
         font-size: 1.25rem !important;
         left: 55%;
         top: 25px !important
     }
+*/
 }
 
 @media screen and (max-height: 414px) and (orientation: landscape) {
     #pdfexport {
         width: 30px !important;
         height: 30px !important;
-        left: 90% !important;
+        left: 95% !important;
     }
-
+/*
     .horizMenu {
         font-size: 0.8rem !important;
     }
+*/
 }

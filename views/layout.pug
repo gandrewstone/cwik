@@ -47,7 +47,7 @@ html
         div#EpBar
           //- v also check if user has commit priviledges
           if user && user.loggedIn
-            input#editProposal(type="text" placeholder="edit proposal" value=user.editProposal)
+            input#editProposal.textEntry(type="text" placeholder="edit proposal" value=user.editProposal)
             |  
             span.horizMenu#closeEP(onclick="return closeEditProposal();") close
             span.horizMenu#openEP(onclick="return openEditProposal();") open
@@ -73,7 +73,7 @@ html
           div#searchTextPositioner.sbBubble
             div.item-content
                 form#searchBar
-                  input#searchText(type="text" placeholder="search" value=(lastSearch ? lastSearch : ""))
+                  input#searchText.textEntry(type="text" placeholder="search" value=(lastSearch ? lastSearch : ""))
                   input#hiddenSubmit(type="submit", onclick="search(); return false;")
           div#searchResults.sbBubble
              div.item-content
@@ -104,8 +104,9 @@ html
       script.
         setEditProposalMenuVisibility("!{user.editProposal}");
     script.
-      var user = !{JSON.stringify(user)};  // This inanity sets the javascript user variable to the pug user variable
-      var portrait = window.matchMedia("(orientation: portrait)").matches;
+      let user = !{JSON.stringify(user)};  // This inanity sets the javascript user variable to the pug user variable
+      let portrait = window.matchMedia("(orientation: portrait)").matches;
+      let width = window.innerWidth;
       
       // switch the search into the sidebar
       if (1) {  // search always in sidebar now
@@ -123,11 +124,17 @@ html
             search();
         }, false);
       }
+
       
-      var sidebarGrid = new Muuri('#sidebargrid', {
-        dragEnabled: true, dragAxis: 'y'
-      });
-      //var sidebarGrid = new Muuri('#sidebargrid');
+      //var sidebarGrid = new Muuri('#sidebargrid', {
+      //  dragEnabled: true, dragAxis: 'y'
+      //});
+      var sidebarGrid = new Muuri('#sidebargrid');
+
+      if (width < 1024)
+      {
+          MoveEditProposalBarIntoSidebar();
+      }
 
       // search always in sidebar now
       if (0) sidebarGrid.hide(document.getElementById("searchResults"), {instant: true});
@@ -135,7 +142,7 @@ html
 
 
       if (portrait) {
-          document.getElementById("EpBar").style.display = "none";  // No room in portrait mode to offer this
+          //document.getElementById("EpBar").style.display = "none";  // No room in portrait mode to offer this
           document.querySelector(".leftsidebar").style.display = "none";
           document.getElementById("sideBarButton").src = '/_static_/images/openmenuIcon.svg';
       }
