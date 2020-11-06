@@ -55,3 +55,5 @@ block endScript
     {
         document.getElementById('rawMarkdown').value = origMdData;
     }
+    // In case the page changed the sidebar (like adding related items)
+    sidebarGrid.refreshItems().layout();
