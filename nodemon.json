@@ -1,0 +1,6 @@
+{
+  "verbose": true,
+  "ignore": ["buwiki/*", "bchspec/*", "buipText/*","bchunlimited/*","xnex/*"],
+  "execMap": {
+  }
+}
