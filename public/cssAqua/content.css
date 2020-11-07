@@ -62,6 +62,10 @@
 table {
     border-collapse: collapse;
     border-spacing: 0;
+    display: block;
+    position: relative;
+    max-width: fit-content;
+    overflow-x: auto;
 }
 
 th {
@@ -79,3 +83,8 @@ td {
 tr:nth-child(even) td { background: #F1F1F1; }
 tr:nth-child(odd) td { background: #FEFEFE; }
 
+@media (orientation: portrait) {
+    table {
+        font-size: 0.5rem;
+    }
+}

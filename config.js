@@ -36,7 +36,23 @@ if (typeof process.env.XNEX !== "undefined") {
         BRANCH_NAME: "master",
         DIR: "bchspec",
         PREFIX: "ref"
-    }]
+    },{
+        URL: "git@github.com:BitcoinUnlimited/BUIP.git",
+        PUSH_BRANCHES: null, // no pushing allowed
+        UPSTREAM_NAME: "origin",
+        BRANCH_NAME: "master",
+        DIR: "buipText",
+        PREFIX: "buipRef"
+    },{
+        URL: "git@gitlab.com:bitcoinunlimited/BCHUnlimited.git",
+        PUSH_BRANCHES: null, // no pushing allowed
+        UPSTREAM_NAME: "origin",
+        BRANCH_NAME: "release",
+        DIR: "bchunlimited",
+        PREFIX: "bchunlimited"
+    }
+                     
+                    ]
 
     exports.SITE_NAME = "BitcoinUnlimited";
     exports.DEFAULT_PIC = "bunet.png";
@@ -81,7 +97,7 @@ exports.ANON_REPO_SUBDIR = "mirror";
 exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz", ".dmg"]
 
 exports.USERS = {
-    "bitcoincash:qr8ruwyx0u7fqeyu5n49t2paw0ghhp8xsgmffesqzs": {
+    "bitcoincash:qpt0fvkshya5xxqec2njjx2wsr85ft7u0ces7vn6rf": {
         "hdl": "Andrew Stone",
         "email": "g.andrew.stone@gmail.com",
         "push": true,
