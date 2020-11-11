@@ -57,7 +57,8 @@ function jumpToWithoutClosingSidebar(spot) {
     if (LAYOUT_HEADER_PX == undefined) {
         LAYOUT_HEADER_PX = 30;
     }
-    var s = spot.toLowerCase().split(/\s/).join("-");
+    //var s = spot.toLowerCase().split(/\s/).join("-");
+    var s = spot.split(/\s/).join("-");
     s = s.replace("/", "");
     s = s.replace(":", "");
     s = s.replace("?", "");
@@ -98,7 +99,8 @@ function fetchJsonFor(spot) {
         return;
     }
 
-    var s = spot.toLowerCase().split(/\s+/).join("__");
+    //var s = spot.toLowerCase().split(/\s+/).join("__");
+    var s = spot.split(/\s+/).join("__");
     if (s.endsWith(".md")) s = s.slice(0, s.length - 3);
 
     let anchor = null;

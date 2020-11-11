@@ -37,12 +37,12 @@ if (typeof process.env.XNEX !== "undefined") {
         DIR: "bchspec",
         PREFIX: "ref"
     },{
-        URL: "git@github.com:BitcoinUnlimited/BUIP.git",
+        URL: "git@gitlab.com:bitcoinunlimited/BUIP.git",
         PUSH_BRANCHES: null, // no pushing allowed
         UPSTREAM_NAME: "origin",
         BRANCH_NAME: "master",
-        DIR: "buipText",
-        PREFIX: "buipRef"
+        DIR: "buipref",
+        PREFIX: "buipref"
     },{
         URL: "git@gitlab.com:bitcoinunlimited/BCHUnlimited.git",
         PUSH_BRANCHES: null, // no pushing allowed
@@ -51,8 +51,7 @@ if (typeof process.env.XNEX !== "undefined") {
         DIR: "bchunlimited",
         PREFIX: "bchunlimited"
     }
-                     
-                    ]
+]
 
     exports.SITE_NAME = "BitcoinUnlimited";
     exports.DEFAULT_PIC = "bunet.png";
