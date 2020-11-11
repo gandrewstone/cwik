@@ -122,7 +122,8 @@ function cleanupPath(filepath, isMedia) {
     if (decodedPath.includes("..")) throw BadURL(req, res);
 
     if (isMedia == null) {
-        decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
+        // To support the use of external projects that have .md files, we need to preserve the case
+        // decodedPath = decodedPath.toLowerCase(); // wiki pages are not case sensitive
         if (decodedPath == "/") decodedPath = "/home"; // hard code / to home.md
     }
 
