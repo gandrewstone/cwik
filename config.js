@@ -23,41 +23,19 @@ if (typeof process.env.XNEX !== "undefined") {
 } else if (typeof process.env.BUNET !== "undefined") {
     console.log("Running www.bitcoinunlimited.net configuration");
     exports.REPOS = [{
-        URL: "git@github.com:bitcoin-unlimited/BUwiki.git",
-        PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
+        URL: "https://github.com/bitcoin-unlimited/BUwiki.git",
+        PUSH_BRANCHES: [],
         UPSTREAM_NAME: "origin",
         BRANCH_NAME: "master",
         DIR: "buwiki",
         PREFIX: ""
-    }, {
-        URL: "git@github.com:BitcoinUnlimited/BitcoinCashSpecification.git",
-        PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
-        UPSTREAM_NAME: "origin",
-        BRANCH_NAME: "master",
-        DIR: "bchspec",
-        PREFIX: "ref"
-    },{
-        URL: "git@gitlab.com:bitcoinunlimited/BUIP.git",
-        PUSH_BRANCHES: null, // no pushing allowed
-        UPSTREAM_NAME: "origin",
-        BRANCH_NAME: "master",
-        DIR: "buipref",
-        PREFIX: "buipref"
-    },{
-        URL: "git@gitlab.com:bitcoinunlimited/BCHUnlimited.git",
-        PUSH_BRANCHES: null, // no pushing allowed
-        UPSTREAM_NAME: "origin",
-        BRANCH_NAME: "release",
-        DIR: "bchunlimited",
-        PREFIX: "bchunlimited"
-    }
-]
+    }]
 
     exports.SITE_NAME = "BitcoinUnlimited";
     exports.DEFAULT_PIC = "bunet.png";
-    exports.MY_URL = "http://www.bitcoinunlimited.net";
+    exports.MY_URL = "http://104.131.127.168";
     exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
-    exports.STACKEDIT_URL = "http://stackedit.bitcoinunlimited.net/app";
+    exports.STACKEDIT_URL = "https://stackedit.io/app";
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "buwiki";
     exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
@@ -74,7 +52,7 @@ if (typeof process.env.XNEX !== "undefined") {
 
     exports.SITE_NAME = "Bitcoin Cash Specification";
     exports.DEFAULT_PIC = "bunet.png";
-    exports.MY_URL = "https://reference.cash";
+    exports.MY_URL = "https://104.131.127.168";
     exports.MY_CVT_URL = "http://reference.cash/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.reference.cash/app";
     exports.allowRegistration = "bchidentity";

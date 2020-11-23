@@ -7,7 +7,7 @@ var fs = fssync.promises;
 
 var path = require('path');
 
-const PuppeteerDebug = false;  // true;  // remember printToPdf won't work when debug is true
+const PuppeteerDebug = false; //true; // false;  // true;  // remember printToPdf won't work when debug is true
 
 let titles = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
@@ -167,18 +167,58 @@ async function mdToHtml(md) {
     okTags = okTags.concat(svgTags);
     okTags = okTags.concat(acceptableTags);
 
+    let firstH1 = true;
     let meta = {};
+    let firstBold = true;
+    let firstEm = true;
     xformedhtml = sanitizer(contentHtml, {
         allowedTags: okTags,
         allowedAttributes: false,
         allowedClasses: false,
         transformTags: {
             "h1": (tagName, attribs) => {
+                if (firstH1)
+                {
+                    attribs["class"] = "title";
+                    firstH1 = false;
+                }
                 return {
                     tagName: tagName,
-                    attribs: attribs,
+                    attribs: attribs
                 }
             },
+            "strong": (tagName, attribs) => {
+                if (firstBold)
+                {
+                    attribs["class"] = "author";
+                    // There can be multiple authors firstBold = false;
+                }
+                return {
+                    tagName: tagName,
+                    attribs: attribs
+                }
+            },
+            "em": (tagName, attribs) => {
+                if (firstBold)
+                {
+                    attribs["class"] = "abstract";
+                    firstBold = false;
+                    firstEm = false;
+                }
+                return {
+                    tagName: tagName,
+                    attribs: attribs
+                }
+            },
+            "h2": (tagName, attribs) => {
+                firstH1 = false;
+                firstBold = false;
+                firstItalics = false;
+                return {
+                    tagName: tagName,
+                    attribs: attribs
+                }
+            }
         },
         exclusiveFilter: function(frame) {
             // console.log(JSON.stringify(frame));
@@ -209,6 +249,21 @@ async function mdToHtml(md) {
         // This filter wraps an anchor around every heading to support section links
         textFilter: function(text, tagName) {
             if (tagName == "h1") {
+                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+            }
+            if (tagName == "h2") {
+                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+            }
+            if (tagName == "h3") {
+                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+            }
+            if (tagName == "h4") {
+                return '<a  href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+            }
+            if (tagName == "h5") {
+                return '<a  href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+            }
+            if (tagName == "h6") {
                 return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
             }
             return text
