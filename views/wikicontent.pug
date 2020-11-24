@@ -31,6 +31,8 @@ html
     script.
       setupLayout(document, window);        
 
+    div#titlePlacement
+    div#authorPlacement
     div.wikicontent !{ wikiPage }
 
     script(src="/_static_/js/katex.min.js")
@@ -41,4 +43,18 @@ html
       mermaid.initialize({logLevel:5, startOnLoad:true});
     script(src="/_static_/js/mathjax/MathJax.js?config=TeX-AMS_HTML", type="text/javascript")
     script(src="/_static_/js/se.js")
-    script(src="/_static_/js/editLinkage.js")      
+    script(src="/_static_/js/editLinkage.js")
+    script.
+      let titlePlace = document.getElementById("titlePlacement");
+      let authorPlace = document.getElementById("authorPlacement");
+      if (titlePlace)
+      {
+          let allTitles = document.querySelectorAll(".title");
+          allTitles.forEach( e => { titlePlace.appendChild(e) });
+      }
+      if (authorPlace)
+      {
+          let allAuthors = document.querySelectorAll(".author");
+          allAuthors.forEach( e => { authorPlace.appendChild(e) });
+      }
+      
