@@ -1,0 +1,153 @@
+
+@import "tocmenu.css";
+@import "relatedmenu.css";
+@import "hismenu.css";
+@import "searchmenu.css";
+@import "content.css";
+
+* {
+    color: black !important;
+}
+
+html, body
+{
+    height: 100%;
+    font-family: 'Cambria', sans-serif;
+    background: white;
+    width:100%;
+    margin: 0;
+}
+
+body {
+    justify-content: center;
+}
+
+h1, h2, h3, h4, h5
+{
+    font-family: 'Calibri', cursive;
+    color: black;
+}
+
+h2, h3, h4, h5 {
+    text-align: left !important;
+}
+
+h1 {
+    text-align: center;
+}
+
+#titlePlacement {
+    text-decoration: none;
+    text-align: center;
+    width: 50%;
+    margin: 1rem auto;
+}
+
+#authorPlacement {
+    width: 100%;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+@media print { 
+ /* All your print styles go here */
+    #titlePlacement {
+        width: 75%;
+    }
+}
+
+.title a {
+    text-decoration: none;
+}
+
+.title, .author {
+    display: inline-block;
+}
+
+.author {
+    text-align: center;
+    width: 20%;
+}
+
+.author a {
+    word-wrap: break-word;
+}
+
+.wikicontent li {
+    font-size: 14px !important;
+}
+
+.prism, pre{
+    max-width:100%;
+    overflow-wrap: break-word;
+}
+
+span.katex-html {
+
+    width: 100%;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+}
+
+.wikicontent {
+    width:70%;
+    margin: 0 auto !important;
+}
+
+.wikicontent p {
+    font-size: 12px !important;
+    line-height:16px !important;
+}
+
+.wikicontent p em {
+    display: block;
+    width: 70% !important;
+    margin: 0 auto 1.5rem !important;
+}
+
+.wikicontent h1  {
+    font-size: 30px !important;
+}
+
+
+.wikicontent h2 {
+    font-size: 21px !important;
+}
+
+.wikicontent h3 {
+    font-size: 18px !important;
+}
+
+pre, code, pre code {
+    white-space: pre-wrap;
+}
+
+.katex {
+    font-size: 1.2em !important;
+}
+
+img {
+    width: 50% !important;
+}
+
+p em.abstract::before {
+    content: "Abstract - ";
+    font-size: 16px;
+    font-weight: bold;
+    display: inline-block;
+    font-family: 'Calibri';
+    margin: 0;
+}
+
+.cwikmeta {
+    visibility: hidden;
+    display: none;
+}
+
+@page { margin: 1.5cm 0; }
+
