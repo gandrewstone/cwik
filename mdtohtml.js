@@ -137,12 +137,7 @@ async function mdToHtml(md) {
     let picFromDoc = null
     appendHeading = function(tagName, text, attribs) {
         // console.log("TAG: " + tagName + " " + text)
-        linktext = text.replace("/", ""); // drop any /s
-        linktext = linktext.replace("?", "");
-        linktext = linktext.replace(":", "");
-        linktext = linktext.replace("!", "");
-        linktext = linktext.replace("(", "");
-        linktext = linktext.replace(")", "");
+        linktext = misc.HeadingToAnchor(text);
         headings += '<a class="ltoc_' + tagName + '"' + ' onclick="jumpTo(\'' + linktext + '\'); return false;"' + ' href="#' + linktext + '"' + '><span class="itoc_' + tagName + '">' + text + "</span></a>\n"
     };
 
@@ -249,22 +244,22 @@ async function mdToHtml(md) {
         // This filter wraps an anchor around every heading to support section links
         textFilter: function(text, tagName) {
             if (tagName == "h1") {
-                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+                return '<a name="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
             }
             if (tagName == "h2") {
-                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+                return '<a name="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
             }
             if (tagName == "h3") {
-                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+                return '<a name="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
             }
             if (tagName == "h4") {
-                return '<a  href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+                return '<a name="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
             }
             if (tagName == "h5") {
-                return '<a  href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+                return '<a name="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
             }
             if (tagName == "h6") {
-                return '<a href="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
+                return '<a name="' + misc.HeadingToAnchor(text) + '">' + text + '</a>';
             }
             return text
         }
