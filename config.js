@@ -1,7 +1,7 @@
 var path = require('path');
 
-// If your site redirects http to https, the URL and conversion URL config parameters *MUST* refer to the https sites because the conversion logic
-// can't handle redirects.
+// If your site redirects http to https, the conversion URLs are very picky because some must use http and other can't handle the redirects.
+// use MY_URL and STACKEDIT_URL with https and MY_CVT_URL with http.
 
 exports.allowRegistration = "";
 
@@ -14,11 +14,12 @@ if (typeof process.env.XNEX !== "undefined") {
         DIR: "xnex",
         PREFIX: ""
     }];
-
+    
+    console.log("Running www.nextchain.cash configuration");
     exports.SITE_NAME = "NextChain";
     exports.DEFAULT_PIC = "NextChainFlag.png";
     exports.MY_URL = "https://www.nextchain.cash";
-    exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
+    exports.MY_CVT_URL = "http://www.nextchain.cash/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.nextchain.cash/app";
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "buwiki";
@@ -59,7 +60,7 @@ if (typeof process.env.XNEX !== "undefined") {
     exports.SITE_NAME = "BitcoinUnlimited";
     exports.DEFAULT_PIC = "bunet.png";
     exports.MY_URL = "https://www.bitcoinunlimited.net";
-    exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
+    exports.MY_CVT_URL = "http://www.bitcoinunlimited.net/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.bitcoinunlimited.net/app";
     exports.allowRegistration = "bchidentity";
     exports.COMMITTER_USERNAME = "buwiki";
