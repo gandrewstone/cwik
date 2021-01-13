@@ -51,7 +51,7 @@ function processFetchedMd(text) {
         // var seEditor = document.getElementsByClassName('stackedit-hidden-container')[0];
         if (true) // typeof seEditor === "undefined")
         {
-            console.log("open file");
+            console.log("give data to stackedit");
 
             sedit.openFile({
                 name: "",
@@ -66,10 +66,10 @@ function processFetchedMd(text) {
             console.log(seEditor);
             element.innerHTML = text;
         }
-        // console.log("render");
+        console.log("render");
 
         var hdlr = function(file) {
-            // console.log("render complete");
+            console.log("stackedit render complete");
             resolve(file.content.html);
             document.querySelector('.wikicontent').innerHTML = file.content.html;
             // timedXformations();

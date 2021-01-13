@@ -44,6 +44,7 @@ function SearchFinisher() {
     }
 }
 
+searchNotAllowed = [".git"]
 
 async function reindex() {
     config.REPOS.forEach(async (repoCfg) => {
@@ -52,7 +53,7 @@ async function reindex() {
 
         let sf = new SearchFinisher();
 
-        for await (const f of misc.getFiles(dirPrefix)) {
+        for await (const f of misc.getFiles(dirPrefix, searchNotAllowed)) {
             if (f.endsWith(".md")) {
                 sf.qty += 1;
                 metaf = f.slice(0, f.length - 2) + "meta";

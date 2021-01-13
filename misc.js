@@ -96,16 +96,41 @@ function allSettled() {
 }
 
 // See https://stackoverflow.com/questions/5827612/node-js-fs-readdir-recursive-directory-search
-async function* getFiles(dir) {
+async function* getFiles(dir, notAllowed) {
     const dirents = await fs.readdir(dir, {
         withFileTypes: true
     });
-    for (const dirent of dirents) {
+    for (const dirent of dirents)
+    {
+        //console.log("ITEM: ", dirent.name);
         const res = path.resolve(dir, dirent.name);
-        if (dirent.isDirectory()) {
-            yield* getFiles(res);
-        } else {
-            yield res;
+
+        var skip = false;
+        for (var i=0; i<notAllowed.length; i++)
+            {
+                if (res.includes(notAllowed[i]))
+                {
+                    skip = true;
+                    break;
+                }
+            }
+
+        if (dirent.isDirectory())
+        {
+            if (!skip)
+            {
+                console.log("DIR (recurse): ", res);
+                yield* getFiles(res, notAllowed);
+            }
+            else
+            {
+                console.log("SKIPPING DIR: ", res);
+            }
+        }
+        else
+        {
+            // console.log("FILE: ", res);
+            if (!skip) yield res;
         }
     }
 }

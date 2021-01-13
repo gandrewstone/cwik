@@ -7,7 +7,7 @@ var fs = fssync.promises;
 
 var path = require('path');
 
-const PuppeteerDebug = false; //true; // false;  // true;  // remember printToPdf won't work when debug is true
+const PuppeteerDebug = false;  // true;  // remember printToPdf won't work when debug is true
 
 let titles = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
@@ -142,14 +142,17 @@ async function mdToHtml(md) {
     };
 
     const page = await browser.newPage();
+    page.on('console', consoleObj => console.log(consoleObj.text()));
     await page.goto(config.MY_CVT_URL);
-
+    console.log("cvt page loaded");
     await page.evaluate(function(md) {
+        console.log("executing function in puppeteer");
         contentRenderCallback = function() {
             console.log("content rendered")
         };
         return processFetchedMd(md);
     }, md);
+    console.log("puppeteer complete");
     //await page.waitFor(250);  // Do I need to wait for the katex, mermaid, etc to render or is that done synchronously?  If so, can wait for custom event: https://github.com/puppeteer/puppeteer/blob/master/examples/custom-event.js
     const contentHtml = await page.evaluate("document.querySelector('.wikicontent').innerHTML");
     if (!PuppeteerDebug) page.close();
@@ -304,6 +307,7 @@ function Finisher(cb) {
     }
 }
 
+let generateSkipPaths = [".git",".meta",".htm",".pdf"];
 
 async function generate() {
 
@@ -312,7 +316,7 @@ async function generate() {
         let results = [];
 
 
-        for await (const f of misc.getFiles(dirPrefix)) {
+        for await (const f of misc.getFiles(dirPrefix, generateSkipPaths)) {
             if (f.endsWith(".md")) {
                 console.log("converting " + f);
                 let htmlFile = f.slice(0, f.length - 2) + "htm";
@@ -329,7 +333,8 @@ async function generate() {
                 }
 
 
-                if (regenerate) try {
+                if (regenerate) try
+                {
                     console.log("regeneration of " + f + " required.");
                     let hdl = await fs.open(f, 'r');
                     let data = await hdl.readFile({
@@ -348,7 +353,9 @@ async function generate() {
                     await fs.writeFile(metaFile, JSON.stringify(result), function(err) {
                         if (err != null) console.log("write error for: " + metaFile + ": " + err);
                     })
-                } catch (err) {
+                }
+                catch (err)
+                {
                     console.log("Error transforming: " + f + ": " + err);
                     console.log(err.stack);
                 }
