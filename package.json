@@ -28,7 +28,7 @@
     "ncp": "^2.0.0",
     "nodegit": "^0.27.0",
     "pagedown": "^1.1.0",
-    "pug": "^3.0.0",
+    "pug": "^3.0.1",
     "puppeteer": "^5.5.0",
     "qrcode-generator": "^1.4.4",
     "sanitize-html": "^2.3.0",
