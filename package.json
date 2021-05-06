@@ -31,7 +31,7 @@
     "pug": "^3.0.0",
     "puppeteer": "^5.5.0",
     "qrcode-generator": "^1.4.4",
-    "sanitize-html": "^2.3.0",
+    "sanitize-html": "^2.3.2",
     "scope-css": "^1.2.1",
     "serve-favicon": "^2.5.0",
     "stackedit-js": "^1.0.7"
