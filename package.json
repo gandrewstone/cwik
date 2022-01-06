@@ -21,7 +21,7 @@
     "lunr": "^2.3.9",
     "mathjax-node": "^2.1.1",
     "memorystore": "^1.6.4",
-    "mermaid": "^8.8.4",
+    "mermaid": "^8.13.8",
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "muuri": "^0.9.3",
