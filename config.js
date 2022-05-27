@@ -5,7 +5,56 @@ var path = require('path');
 
 exports.allowRegistration = "";
 
-if (typeof process.env.XNEX !== "undefined") {
+
+if (typeof process.env.NEXA !== "undefined") {
+    exports.REPOS = [{
+        URL: "git@gitlab.com:nexa/specification.git",
+        PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
+        UPSTREAM_NAME: "origin",
+        BRANCH_NAME: "master",
+        DIR: "nexaspec",
+        PREFIX: ""
+    },{
+        URL: "git@gitlab.com:nexa/nexa.git",
+        PUSH_BRANCHES: null, // no pushing allowed
+        UPSTREAM_NAME: "origin",
+        BRANCH_NAME: "dev",
+        DIR: "nexa",
+        PREFIX: "nexa"
+    }];
+    
+    console.log("Running spec.nexa.org configuration");
+    exports.SITE_NAME = "Nexa";
+    exports.DEFAULT_PIC = "NextChainFlag.png";
+    exports.MY_URL = "https://spec.nexa.org";
+    exports.MY_CVT_URL = "http://spec.nexa.org/_cvt_";
+    exports.STACKEDIT_URL = "https://stackedit.nexa.org/app";
+    exports.allowRegistration = "bchidentity";
+    exports.COMMITTER_USERNAME = "buwiki";
+    exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
+}
+if (typeof process.env.COMPSCI461 !== "undefined") {
+
+console.log("Running compsci461/661 configuration");
+    exports.REPOS = [{
+        URL: "git@gitlab.com:gandrewstone/compsci_461_661.git",
+        PUSH_BRANCHES: ["refs/heads/main:refs/heads/main"],
+        UPSTREAM_NAME: "origin",
+        BRANCH_NAME: "main",
+        DIR: "compsci461_661",
+        PREFIX: ""
+    }]
+
+    exports.SITE_NAME = "UMASS compsci461/661";
+    exports.DEFAULT_PIC = "bunet.png";
+    exports.MY_URL = "http://192.168.1.100:8000";
+    exports.MY_CVT_URL = "http://192.168.1.100:8000/_cvt_";
+    //exports.STACKEDIT_URL = "https://stackedit.bitcoinunlimited.net/app";
+    exports.allowRegistration = "bchidentity";
+    exports.COMMITTER_USERNAME = "AndrewStone";
+    exports.COMMITTER_EMAIL = "g.andrew.stone@gmail.com";
+
+} else if (typeof process.env.XNEX !== "undefined") {
     exports.REPOS = [{
         URL: "git@gitlab.com:nextchain/www.git",
         PUSH_BRANCHES: ["refs/heads/master:refs/heads/master"],
@@ -97,7 +146,9 @@ if (typeof process.env.CWIK_DEV !== "undefined") {
 
 exports.DEFAULT_COMMIT_MSG = "wiki commit";
 exports.ANON_REPO_SUBDIR = "mirror";
-exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz", ".dmg"]
+
+// NOTE Also set in public/js/layout.js
+exports.MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz", ".dmg",".pdf"]
 
 exports.USERS = {
     "bitcoincash:qpt0fvkshya5xxqec2njjx2wsr85ft7u0ces7vn6rf": {
@@ -112,6 +163,18 @@ exports.USERS = {
 
 if (exports.MY_URL == undefined)
 {
-    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or XNEX.");
+    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or XNEX.  For local dev set CWIK_DEV=1.");
+    process.exit(-1);
+}
+
+if (exports.STACKEDIT_URL == undefined)
+{
+    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or XNEX.  For local dev set CWIK_DEV=1.");
+    process.exit(-1);
+}
+
+if (exports.MY_CVT_URL == undefined)
+{
+    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or XNEX.  For local dev set CWIK_DEV=1.");
     process.exit(-1);
 }

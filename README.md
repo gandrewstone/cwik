@@ -206,12 +206,19 @@ sudo a2enmod lbmethod_byrequests
 #### Starting the servers
 
 In release mode, a process manager is good practice.  I use pm2:
+```
+npm install pm2 -g
+```
 
 ```
 pm2 start index.js --name "stackedit"
 pm2 start start.sh --interpreter bash --name "cwik"
 ```
 
+Make pm2 autostart:
+
+pm2 save
+(as root) pm2 startup
 
 ### Troubleshooting
 

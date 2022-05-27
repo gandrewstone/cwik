@@ -306,7 +306,7 @@ repoBranchByDir = function(userSpace) {
             repo.getCurrentBranch().then(branch => {
                 console.log("got branch");
                 resolve(branch);
-            }, reject);
+            }, reject);  // perhaps this should return the default in config.js "BRANCH_NAME"
         }, reject);
     });
 }

@@ -4,7 +4,7 @@ function processFetchedMd_old(text) {
         console.log("processing data 2");
         document.getElementById('rawMarkdown').value = text;
         var se = new Stackedit({
-            url: STACKEDITOR_URL
+            url: STACKEDIT_URL
         });
 
         se.openFile({
@@ -23,9 +23,8 @@ function processFetchedMd_old(text) {
     });
 }
 
-
 var sedit = new Stackedit({
-    url: STACKEDITOR_URL
+    url: STACKEDIT_URL
 });
 
 var contentRenderCallback = undefined;
@@ -48,18 +47,50 @@ function processFetchedMd(text) {
     return new Promise(function(resolve, reject) {
         document.getElementById('rawMarkdown').value = text;
 
+        var hdlr = function(file) {
+            console.log("stackedit render complete");
+            if (typeof file === "undefined")
+            {
+                console.log("stackedit empty render");
+                resolve(null);
+            }
+            else
+            {
+                console.log("stackedit render complete");
+                resolve(file.content.html);
+                document.querySelector('.wikicontent').innerHTML = file.content.html;
+            }
+            // timedXformations();
+            //console.log(JSON.stringify(sedit));
+            sedit.off('fileChange', hdlr);
+            sedit.off('close', hdlr);
+        }
+
+        sedit.on('fileChange', hdlr);
+        sedit.on('close', hdlr);
+
         // var seEditor = document.getElementsByClassName('stackedit-hidden-container')[0];
         if (true) // typeof seEditor === "undefined")
         {
-            console.log("give data to stackedit");
-
-            sedit.openFile({
-                name: "",
-                content: {
-                    text: text
-                }
-            }, true); // true == silent mode
-        } else {
+            console.log("give data to stackedit: " + sedit.url + " global: " + STACKEDIT_URL);
+            if (typeof sedit.url === "undefined") sedit.url = STACKEDIT_URL;
+            if (typeof sedit.url === "undefined")
+            {
+                console.log("FATAL: configuration error config.STACKEDIT_URL is NOT DEFINED!");
+                reject(Error("FATAL: configuration error config.STACKEDIT_URL is NOT DEFINED!"));
+            }
+            else
+            {
+                sedit.openFile({
+                    name: "",
+                    content: {
+                        text: text
+                    }
+                }, true); // true == silent mode
+            }
+        }
+        else
+        {
             var iframe = seEditor.getElementsByClassName('stackedit-iframe')[0];
             var element = iframe.contentWindow.document.getElementsByClassName("hidden-rendering-container")[0];
             console.log("reuse");
@@ -68,16 +99,6 @@ function processFetchedMd(text) {
         }
         console.log("render");
 
-        var hdlr = function(file) {
-            console.log("stackedit render complete");
-            resolve(file.content.html);
-            document.querySelector('.wikicontent').innerHTML = file.content.html;
-            // timedXformations();
-            //console.log(JSON.stringify(sedit));
-            sedit.off('fileChange', hdlr);
-        }
-
-        sedit.on('fileChange', hdlr);
     });
 }
 
@@ -191,17 +212,29 @@ function runeditor(url, domElem) {
     // console.log(url);
     // Open the iframe
     let stackedit = new Stackedit({
-        url: STACKEDITOR_URL
+        url: STACKEDIT_URL
     });
 
-    stackedit.openFile({
-        name: "", // with an optional filename
-        content: {
-            text: domElem.value // and the Markdown content.
-        }
-    });
+    try
+    {
+        stackedit.openFile({
+            name: "", // with an optional filename
+            content: {
+                text: domElem.value // and the Markdown content.
+            }
+        });
 
-    handleEditorResponse(stackedit, url, domElem);
+        handleEditorResponse(stackedit, url, domElem);
+    }
+    catch(error)
+    {
+        console.log("stackedit can't open:");
+        console.log(error);
+        notification({
+            notification: "Server error: Editor is not accessible at location '" + STACKEDIT_URL + "'"
+        });
+
+    }
 
     return false;
 }
@@ -213,7 +246,7 @@ function editWithTemplate(tmplName) {
     fetch(tmplName + "?json=1").then(response => response.json().then(json => {
 
         var stackedit = new Stackedit({
-            url: STACKEDITOR_URL
+            url: STACKEDIT_URL
         });
 
         if (typeof json.rawMarkdown !== "undefined")

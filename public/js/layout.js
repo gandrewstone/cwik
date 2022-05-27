@@ -4,7 +4,7 @@ var NOTIFICATION_DELAY = 15000;
 var lastSearch = "";
 
 // TODO, get this from config.js
-var MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz"];
+var MEDIA_EXT = [".svg", ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".webm", ".ogg", ".wav", ".apk", ".zip", ".tgz", ".dmg",".pdf"]
 
 function isMedia(filepath) {
     if (filepath == undefined) return null;
@@ -111,13 +111,13 @@ function fetchJsonFor(spot) {
         jreq = spanchor[0] + "?json=1" + "#" + anchor;
     } else jreq = s + "?json=1"
 
-    // console.log("Requesting: " + jreq)
+    console.log("Requesting: " + jreq)
     fetch(jreq).then(response => {
-        // console.log(response);
+        console.log(response);
         return response.json();
     })
         .then(json => {
-            // console.log("process json");
+            console.log("process json");
             if (json.anchor == null) json.anchor = anchor;
             processJsonPage(json);
             window.history.pushState({
@@ -268,7 +268,9 @@ function toggleSidebar() {
     }
 }
 
-function processJsonPage(json) {
+function processJsonPage(json)
+{
+    console.log(json);
     // Show any notifications
     notification(json);
     if (json.user) user = json.user;  // update any user state change, such as EP open/close
@@ -352,9 +354,33 @@ function internalLinkOptimizer(doc, wnd, e) {
     //console.log("clicked on ", e);
     var loc = wnd.location;
     var tgt = e.target;
+
+
     // Don't intervene for links to media or downloadable files
-    if (!isElement(tgt) && isMedia(tgt)) return true;
-    if (isElement(tgt) && isMedia(tgt.href)) return true;
+    var mediaFile = null;
+    if (!isElement(tgt) && isMedia(tgt))
+    {
+        mediaFile = tgt;
+    }
+    else if (isElement(tgt) && isMedia(tgt.href))
+    {
+        mediaFile = tgt.href.split('/').pop().split('#')[0].split('?')[0];
+    }
+
+    if (mediaFile != null)
+    {
+        if (tgt.host == loc.host)
+        {
+            notification({ notification: "File '" + mediaFile + "' is being downloaded" });
+        }
+        else  // Open any foreign link in a new window (it might not actually be a file, but html)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(tgt, "_blank");
+        }
+        return true;
+    }
 
     if ((tgt.tagName == "A") || (tgt.tagName == "a")) {
         // console.log("its A", tgt.host, loc.host);
@@ -363,6 +389,12 @@ function internalLinkOptimizer(doc, wnd, e) {
             e.preventDefault();
             e.stopPropagation();
             let r = fetchJsonFor(tgt.href);
+        }
+        else  // Open any foreign link in a new window
+        {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(tgt, "_blank");
         }
         return false;
     }

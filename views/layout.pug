@@ -25,15 +25,17 @@ html
     script(src="https://unpkg.com/hammerjs@2.0.8/hammer.min.js")
     script(src="/_static_/js/muuri.js")
     script.
-      var STACKEDITOR_URL="!{STACKEDITOR_URL}";
+      var STACKEDIT_URL="!{STACKEDIT_URL}";
       var SITE_NAME="!{SITE_NAME}";
     script(src="/_static_/js/base64ArrayBuffer.js")
     script(src="/_static_/js/layout.js")
     script.
       setupLayout(document, window);
 
+    //a(href="/")
+    //  img#headerCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('/home'); return false;", title="home")
     a(href="/")
-      img#bchHeaderCoin(src="/_static_/images/bchCoin.svg", onclick="linkTo('/home'); return false;", title="home")
+      img#headerCoin(src="/_static_/images/homeIcon.png", onclick="linkTo('/home'); return false;", title="home")
 
 
     div#cwikheader

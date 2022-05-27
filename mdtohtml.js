@@ -4,7 +4,6 @@ var config = require("./config");
 var misc = require("./misc");
 var fssync = require('fs');
 var fs = fssync.promises;
-
 var path = require('path');
 
 const PuppeteerDebug = false;  // true;  // remember printToPdf won't work when debug is true
@@ -145,14 +144,16 @@ async function mdToHtml(md) {
     page.on('console', consoleObj => console.log(consoleObj.text()));
     await page.goto(config.MY_CVT_URL);
     console.log("cvt page loaded");
-    await page.evaluate(function(md) {
+    var result = await page.evaluate(function(md) {
         console.log("executing function in puppeteer");
+        // Note that this is happening inside the puppeteer client side browser, so the namespace is there, not node.js
+        // This explains how I can call the client side processFetchedMd function below.
         contentRenderCallback = function() {
             console.log("content rendered")
         };
         return processFetchedMd(md);
     }, md);
-    console.log("puppeteer complete");
+    console.log("puppeteer complete: " + result);
     //await page.waitFor(250);  // Do I need to wait for the katex, mermaid, etc to render or is that done synchronously?  If so, can wait for custom event: https://github.com/puppeteer/puppeteer/blob/master/examples/custom-event.js
     const contentHtml = await page.evaluate("document.querySelector('.wikicontent').innerHTML");
     if (!PuppeteerDebug) page.close();

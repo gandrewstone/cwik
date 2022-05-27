@@ -90,7 +90,7 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                     console.log("unknown user " + addr);
                     if (!allowUnknownUser) return ok([251, "unknown identity: " + addr]);
                 }
-                
+
                 if (verifySig(host + "_bchidentity_" + op + "_" + session.challenge, addr, sig)) {
 
                     sessionStore.get(cookie, function(err, session2) {
@@ -638,7 +638,6 @@ router.post('/_search_', function(req, res, next) {
         user['editProposal'] = req.session.editProposal;
     }
     jReply['STACKEDIT_URL'] = config.STACKEDIT_URL;
-    jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
 
     let result = search.search(req.body);
     jReply['searchResults'] = result;
@@ -657,7 +656,6 @@ router.get('/_cvt_', function(req, res, next) {
     let jReply = {};
 
     jReply['STACKEDIT_URL'] = config.STACKEDIT_URL;
-    jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
     jReply['wikiPage'] = "";
     jReply['rawMarkdown'] = "";
     res.render('cvt', jReply);

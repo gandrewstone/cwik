@@ -17,7 +17,8 @@ function BadURL(req, res) {
 
 
 // Returns [repoCfg, fullpath, canonicalSuffix, media]
-function determineRepoAndDir(uid, filepath) {
+function determineRepoAndDir(uid, filepath)
+{
     let userDir = (uid == null) ? null : misc.userDir(uid);
     console.log("determine repo and dir: " + filepath)
     let media = isMedia(filepath);
@@ -185,6 +186,8 @@ handleAPage = function(req, res) {
 
     let media = null;
 
+    console.log("handleAPage: " + req.originalUrl);
+
     [repoCfg, readFrom, canonicalSuffix, media] = determineRepoAndDir(req.session.uid, req.path);
     console.log("repoCfg: " + JSON.stringify(repoCfg) + " readFrom: " + readFrom + " media: " + media + " suffix: " + canonicalSuffix);
 
@@ -242,39 +245,54 @@ handleAPage = function(req, res) {
         console.log("CanonicalURL: " + canonicalURL);
     }
 
-    if (media != null) {
+    if (media != null)
+    {
         filepath = path.resolve(filepath);
         console.log("media file path: " + filepath);
-        if (!user.loggedIn) {
-            try {
+        if (!user.loggedIn)
+        {
+            try
+            {
                 let mediaFileStats = fs.statSync(filepath);
                 if (media == ".apk") res.contentType = 'application/vnd.android.package-archive';
                 if (media == ".dmg") res.contentType = 'application/octet-stream';
+                if (media == ".pdf") res.contentType = 'application/pdf';
                 return res.sendFile(filepath);
-            } catch (err) {
-                console.log(err);
+            }
+            catch (err)
+            {
+                console.log("ERROR: " + err);
                 return fs.readFile("noPageNoUser.html", 'utf8', function(err, htmlTemplateData) {
                     jReply['wikiPage'] = htmlTemplateData; // place override html directly into the page
                     return res.status(404).render('wikibrowse', jReply);
                 });
             }
         }
-        try {
+        try
+        {
             let mediaFileStats = fs.statSync(filepath);
-            if (req.query.upload) {
+            if (req.query.upload)
+            {
                 jReply["isMediaImage"] = true;
                 res.render('newMedia', jReply);
-            } else {
+            }
+            else
+            {
                 if (media == ".apk") res.contentType = 'application/vnd.android.package-archive';
                 if (media == ".dmg") res.contentType = 'application/octet-stream';
+                if (media == ".pdf") res.contentType = 'application/pdf';
+                console.log("sending " + filepath);
                 res.sendFile(filepath, null, function(err) {
                     if (err) console.log("send error: " + err);
                 });
             }
-        } catch (err) {
+        }
+        catch (err)
+        {
             res.status(404).render('newMedia', jReply);
         }
 
+        console.log("Media handler finished");
         return;
     }
 
@@ -334,7 +352,7 @@ handleAPage = function(req, res) {
     console.log("reading " + filepath);
 
     if (!req.query.raw) {
-        jReply['STACKEDITOR_URL'] = config.STACKEDIT_URL;
+        jReply['STACKEDIT_URL'] = config.STACKEDIT_URL;
         jReply['history'] = updateHistory(req, urlPath);
         jReply['related'] = "";
         jReply['title'] = "";
@@ -392,17 +410,21 @@ handleAPage = function(req, res) {
         let htmlFile = filepath.slice(0, filepath.length - 2) + "htm";
         let metaFile = filepath.slice(0, filepath.length - 2) + "meta";
         let regenerate = false;
-        try {
+        try
+        {
             let htmlFileStats = fs.statSync(htmlFile);
             let mdFileStats = fs.statSync(filepath);
             console.log("Times: html: " + htmlFileStats.mtime + " md: " + mdFileStats.mtime);
             if (htmlFileStats.mtime <= mdFileStats.mtime) regenerate = true;
-        } catch (err) {
+        }
+        catch (err)
+        {
             console.log("html vs md fstat: " + err);
             regenerate = true;
         }
 
-        if (regenerate) {
+        if (regenerate)
+        {
             // Convert markdown to html
             console.log("regenerate " + htmlFile);
             mdToHtml.mdToHtml(doc).then(data => {
@@ -420,8 +442,13 @@ handleAPage = function(req, res) {
                     if (err != null) console.log("write error for: " + metaFile + ": " + err);
                 })
 
+            }, err => {
+                console.log("conversion failed for: " + htmlFile + ": " + err);
+                console.log("Is your conversion URL correct?");
             });
-        } else {
+        }
+        else
+        {
             console.log("read metafile");
             fs.readFile(metaFile, 'utf8', function(err, metaData) {
                 if (err) metaData = {}; // Just ignore if metadata file does not exist
