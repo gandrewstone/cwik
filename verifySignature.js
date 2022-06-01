@@ -1,7 +1,8 @@
 'use strict';
 
 var bitcore = require("bitcore-lib");
-var bchaddr = require("bchaddrjs");
+var nexaaddr = require("nexaaddrjs");
+//var buffer = require("buffer");
 
 //var Message = bitcore.Message;
 //var AddrFormat = bchaddr.AddrFormat;
@@ -14,7 +15,15 @@ var bchaddr = require("bchaddrjs");
  * @return {String}         [The corresponding legacy address.]
  */
 const fixAddressFormat = address => {
-    return !bchaddr.isLegacyAddress(address) ? bchaddr.toLegacyAddress(address) : address;
+    let addrBytes = nexaaddr.decode(address);
+    console.log("decoded nexaaddr:");
+    console.log(addrBytes);
+    let buf = addrBytes.hash.buffer.slice(1,21);  // ignore the type byte
+    let buf2 = Buffer.from(buf);
+    console.log(buf);
+    console.log(buf2);
+    return bitcore.Address.fromPublicKeyHash(buf2, "livenet")
+    // return !bchaddr.isLegacyAddress(address) ? bchaddr.toLegacyAddress(address) : address;
 }
 
 /*
@@ -36,10 +45,10 @@ const messageVerify = message => {
     console.log("challenge: '" + challenge + "'");
     console.log("signature: '" + signature + "'");
     console.log("pubkey: '" + pubkey + "'");
-    const fixedPubKey = fixAddressFormat(pubkey);
-    console.log("fixed pubkey: " + fixedPubKey);
+    const fixedAddress = fixAddressFormat(pubkey);
+    console.log("fixed pubkey: " + fixedAddress);
     try {
-        return new bitcore.Message(challenge).verify(fixedPubKey, signature);
+        return new bitcore.Message(challenge).verify(fixedAddress, signature);
     } catch (e) {
         console.log(e.message);
         return false;

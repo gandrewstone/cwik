@@ -179,16 +179,25 @@ function commitEdits() {
 
 /* Creates a js-handled link to another document.  Click calls the client-side js function "linkTo" */
 function LinkToLinkify(s, cls) {
-    //var text = s.split("/").slice(-1)[0].replace("__", " ");
-    let text = s.replace("__", " ");
-    if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
-        text = text.slice(0, text.length - 3);
+    var ret = "";
+    if (text.startsWith("https://") || text.startsWith("http://"))
+    {
+        let text = s;
+        let show = text;
+        ret = '<div class="l' + cls + '"' + ' onclick="window.location = \'' + text + '\'"><span class="i' + cls + '">' + show + "</span></div>\n";
+    }
+    else
+    {
+        let text = s.replace("__", " ");
+        if (text.length >= 3 && text.slice(text.length - 3, text.length) == ".md")
+            text = text.slice(0, text.length - 3);
 
-    let show = text;
-    if (show[0] == "/") show = show.slice(1, show.length);
+        let show = text;
+        if (show[0] == "/") show = show.slice(1, show.length);
 
-    // console.log(s + " => " + text);
-    var ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + text + '\')"><span class="i' + cls + '">' + show + "</span></div>\n";
+        // console.log(s + " => " + text);
+        ret = '<div class="l' + cls + '"' + ' onclick="linkTo(\'' + text + '\')"><span class="i' + cls + '">' + show + "</span></div>\n";
+    }
     return ret;
 }
 

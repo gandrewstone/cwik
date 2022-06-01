@@ -25,25 +25,25 @@ block wikipage
    div#login
      center
       H2 Sign-in
-      p Sign-in via BCH Identity Protocol
+      p Sign-in via Nexa Identity Protocol
       div#LoginQRcode QR graphic here
       small
-          a(href=QRsignCode, id="bchidentity_op_login") login with local app
+          a(href=QRsignCode, id="nexid_op_login") login with local app
    div#register
      center
       H2 Registration
-      if allowRegistration.includes("bchidentity")
-        p Register via BCH Identity Protocol
+      if allowRegistration.includes("nexid")
+        p Register via Nexa Identity Protocol
         div#RegQRcode QR registration graphic here
         small
-            a(href=QRregCode, id="bchidentity_op_reg") register with local app
+            a(href=QRregCode, id="nexid_op_reg") register with local app
       else
-        p Contact the site administrator and provide a BCH address to gain edit access to this site.
+        p Contact the site administrator and provide a Nexa pubkeyhash address (it begins with a 'q') to gain edit access to this site.
    div#manualLogin  
     center
       H2 Manual Entry
       form(action="/_login_", method="POST")
-      p Many Bitcoin Cash wallets support "sign message" functionality.  You may sign into this site by using that wallet to sign challenge below and provide the resulting address and signature.  This can be inconvenient to do manually, but once you've logged in, your session will persist for a month or until the server is restarted.
+      p Many wallets support "sign message" functionality.  You may sign into this site by using that wallet to sign the challenge below and provide the resulting address and signature.  This can be inconvenient to do manually, but once you've logged in, your session will persist for a month or until the server is restarted.
     center
       | Challenge
       input#challenge(type="text", name='challenge',readonly='true', value=challenge)
@@ -54,7 +54,7 @@ block wikipage
       input(type="submit", value="login")
 
   script(type="text/javascript",src="/_static_/js/qrcode.js")
-  if allowRegistration.includes("bchidentity")
+  if allowRegistration.includes("nexid")
     script.
       let typeNumber = 12;
       let errorCorrectionLevel = 'L';

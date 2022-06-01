@@ -91,7 +91,7 @@ function processLogin(op, host, addr, cookie, sig, req, allowUnknownUser) {
                     if (!allowUnknownUser) return ok([251, "unknown identity: " + addr]);
                 }
 
-                if (verifySig(host + "_bchidentity_" + op + "_" + session.challenge, addr, sig)) {
+                if (verifySig(host + "_nexid_" + op + "_" + session.challenge, addr, sig)) {
 
                     sessionStore.get(cookie, function(err, session2) {
                         console.log("reloaded session: " + JSON.stringify(session2));
@@ -219,18 +219,22 @@ router.get('/_login_', function(req, res, next) {
     }
     
     console.log("session challenge: " + req.session.challenge);
-    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    let QRcodeText = "nexid://" + myHost + '/_login_/auto?op=login&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
     let user = {
         loggedIn: (req.session.uid != undefined) ? true : false
     };
     let historyHtml = "";
-    if (typeof req.session.history !== "undefined") {
+    if (typeof req.session.history !== "undefined")
+    {
         historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
     }
 
     let QRregisterText = null;
-    if (config.allowRegistration.includes("bchidentity")) {
-        QRregisterText = "bchidentity://" + myHost + '/_reg_/auto?op=reg&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID + "&hdl=r&email=o";
+    console.log("reg: " + config.allowRegistration);
+    if (config.allowRegistration.includes("nexid"))
+    {
+        QRregisterText = "nexid://" + myHost + '/_reg_/auto?op=reg&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID + "&hdl=r&email=o";
+        console.log("Allows reg with " + QRregisterText);
     }
 
     res.render('login', {
@@ -268,7 +272,7 @@ router.post('/_login_', function(req, res, next) {
     if (typeof req.session.history !== "undefined") {
         historyHtml = req.session.history.reverse().map(s => misc.LinkToLinkify(s, "his")).join("\n");
     }
-    let QRcodeText = "bchidentity://" + myHost + '/_login_/auto?op=login&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
+    let QRcodeText = "nexid://" + myHost + '/_login_/auto?op=login&proto=' + myProtocol + '&chal=' + req.session.challenge + "&cookie=" + req.sessionID;
     console.log("error: " + error);
     res.render('login', {
         notification: error,

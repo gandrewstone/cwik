@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "bchaddrjs": "^0.5.2",
-    "bitcore-lib": "^8.24.1",
+    "bitcore-lib": "^8.25.28",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
@@ -26,6 +26,7 @@
     "multer": "^1.4.2",
     "muuri": "^0.9.3",
     "ncp": "^2.0.0",
+    "nexaaddrjs": "file:../nexaaddrjs/nexaaddrjs-1.0.0.tgz",
     "nodegit": "^0.27.0",
     "pagedown": "^1.1.0",
     "pug": "^3.0.0",

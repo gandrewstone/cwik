@@ -29,7 +29,7 @@ if (typeof process.env.NEXA !== "undefined") {
     exports.MY_URL = "https://spec.nexa.org";
     exports.MY_CVT_URL = "http://spec.nexa.org/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.nexa.org/app";
-    exports.allowRegistration = "bchidentity";
+    exports.allowRegistration = "nexid";
     exports.COMMITTER_USERNAME = "buwiki";
     exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 }
@@ -50,7 +50,7 @@ console.log("Running compsci461/661 configuration");
     exports.MY_URL = "http://192.168.1.100:8000";
     exports.MY_CVT_URL = "http://192.168.1.100:8000/_cvt_";
     //exports.STACKEDIT_URL = "https://stackedit.bitcoinunlimited.net/app";
-    exports.allowRegistration = "bchidentity";
+    exports.allowRegistration = "nexid";
     exports.COMMITTER_USERNAME = "AndrewStone";
     exports.COMMITTER_EMAIL = "g.andrew.stone@gmail.com";
 
@@ -70,7 +70,7 @@ console.log("Running compsci461/661 configuration");
     exports.MY_URL = "https://www.nextchain.cash";
     exports.MY_CVT_URL = "http://www.nextchain.cash/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.nextchain.cash/app";
-    exports.allowRegistration = "bchidentity";
+    exports.allowRegistration = "nexid";
     exports.COMMITTER_USERNAME = "buwiki";
     exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 } else if (typeof process.env.BUNET !== "undefined") {
@@ -111,7 +111,7 @@ console.log("Running compsci461/661 configuration");
     exports.MY_URL = "https://www.bitcoinunlimited.net";
     exports.MY_CVT_URL = "http://www.bitcoinunlimited.net/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.bitcoinunlimited.net/app";
-    exports.allowRegistration = "bchidentity";
+    exports.allowRegistration = "nexid";
     exports.COMMITTER_USERNAME = "buwiki";
     exports.COMMITTER_EMAIL = "buwiki@protonmail.com";
 } else if (typeof process.env.BCHSPEC !== "undefined") {
@@ -130,7 +130,7 @@ console.log("Running compsci461/661 configuration");
     exports.MY_URL = "https://reference.cash";
     exports.MY_CVT_URL = "http://reference.cash/_cvt_";
     exports.STACKEDIT_URL = "https://stackedit.reference.cash/app";
-    exports.allowRegistration = "bchidentity";
+    exports.allowRegistration = "nexid";
     exports.COMMITTER_USERNAME = "wiki";
     exports.COMMITTER_EMAIL = "wiki@reference.cash";
 }
@@ -163,18 +163,18 @@ exports.USERS = {
 
 if (exports.MY_URL == undefined)
 {
-    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or XNEX.  For local dev set CWIK_DEV=1.");
+    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or NEXA.  For local dev set CWIK_DEV=1.");
     process.exit(-1);
 }
 
 if (exports.STACKEDIT_URL == undefined)
 {
-    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or XNEX.  For local dev set CWIK_DEV=1.");
+    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or NEXA.  For local dev set CWIK_DEV=1.");
     process.exit(-1);
 }
 
 if (exports.MY_CVT_URL == undefined)
 {
-    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or XNEX.  For local dev set CWIK_DEV=1.");
+    console.log("\nERROR: You must specify configuration parameters (see config.js).  For BU websites, you can set an environment variable: BCHSPEC, BUNET, or NEXA.  For local dev set CWIK_DEV=1.");
     process.exit(-1);
 }
