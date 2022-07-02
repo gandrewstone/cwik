@@ -20,7 +20,7 @@ html, body
 @media screen and (max-device-width: 480px) and (orientation: portrait){
     html, body
     {
-        font-size: 150%;
+        font-size: 90%;
     }
 
 }
@@ -29,7 +29,7 @@ html, body
 @media screen and (max-device-width: 640px) and (orientation: landscape){
     html, body
     {
-        font-size: 125%;
+        font-size: 95%;
     }
 }
 
@@ -123,35 +123,6 @@ hr {
     height: 100%;
 }
 
-/*
-#LogInOutDiv {
-    position:relative;
-    display: inline-block;
-    vertical-align: top;
-}*/
-
-/*
-@media screen and (max-width: 850px) {
-    .horizMenu {
-        line-height: 10px !important;
-        position: fixed;
-        z-index: 15;
-        top: 10px !important;
-        right: 10ch;
-    }
-}
-
-
-@media screen and (max-width: 580px) {
-    .horizMenu {
-        line-height: 20px !important;
-        position: fixed;
-        z-index: 15;
-        right: 10ch;
-
-    }
-}
-*/
 
 .horizMenu:hover {
     color: #f8f8f8;
@@ -169,22 +140,16 @@ hr {
     float: left;
 
 }
+
 .leftsidebar {
     flex-shrink:0;
-    width: 25ch;
     height: 100%;
     z-index: 3;
     color: #fff;
     overflow: visible;
     float: left;
-
 }
 
-
-#lsb {
-    position: fixed;
-    overflow: visible;
-}
 
 #sideBarButton {
     position: fixed;
@@ -212,6 +177,7 @@ hr {
 
 .VertB {
     width: 100%;
+    max-width: 152ch;
     height: 100%;
     vertical-align: top;
 }
@@ -239,20 +205,64 @@ hr {
 
 
 #sidebargrid {
-    position: fixed;
+    position: relative;
     background-color: #3A3048;
     background-image: linear-gradient(250deg, #3A3048 0%, #422272 75%);
     color: #fff;
-    width: 30ch;
+    width: 100%;
     height: 100vh !important;
     overflow-y: scroll;
 }
+
+@media screen and (min-width: 1250px) {
+#lsb {
+    overflow: visible;
+    position: fixed;
+    width: 20%;
+}
+}
 @media screen and (max-width: 1250px) {
+#lsb {
+    overflow: visible;
+    position: absolute;
+    width: 100%;
+}
+}
+
+@media screen and (max-width: 1250px) {
+    .leftsidebar {
+        width: 15%;
+    }
     #sidebargrid {
-        width: 25ch;
+        position: relative;
+        width: 100%;
+        height: 75vh !important;
+    }
+}
+
+@media screen and (max-width: 2000px) {
+    .leftsidebar {
+        width: 20%;
+    }
+}
+@media screen and (min-width: 2000px) {
+    .leftsidebar {
+        width: 30%;
+    }
+    #lsb {
+        overflow: visible;
+        position: fixed;
+        width: 30%;
+    }
+    #sidebargrid {
+        position: relative;
+        width: 100%;
     }
 }
 @media screen and (max-width: 1024px) {
+    .leftsidebar {
+        width: 100% !important;
+    }
     #sidebargrid {
         width: 100% !important;
         height: 75vh !important;
@@ -673,8 +683,9 @@ input#sig
 /* nav menu will auto-close so it should cover over text */
 @media (orientation: portrait) {
     .leftsidebar {
-        display: none;
-        position: fixed;
+        display: flex;
+        position: absolute;
+        width: 100% !important;
     }
 
     #sideBarButton {
@@ -684,11 +695,14 @@ input#sig
     }
 
     .VertB {
+        display:flex;
+        flex-grow:1;
     }
 
     #sidebarAndContent {
         margin-top:70px;
-        display: block;
+        display: flex;
+        flex-direction: column;
     }
 
     #cwikheader {
@@ -701,12 +715,6 @@ input#sig
         width: 4rem;
         margin-left: 0%;
     }
-
-/*
-    #EpBar {
-        display: none;
-    }
-    */
 
     #bchHeaderCoin:hover
     {
@@ -739,10 +747,11 @@ input#sig
 
 @media screen and (max-width: 480px) {
     #bchHeaderCoin {
-        width: 2.75rem;
+        width: 2.5rem;
       }
       #bchHeaderCoin:hover {
-        width: 2.75rem;
+          width: 2.5rem;
+          height: 2.5rem;
       }
 }
 

@@ -180,7 +180,7 @@ function commitEdits() {
 /* Creates a js-handled link to another document.  Click calls the client-side js function "linkTo" */
 function LinkToLinkify(s, cls) {
     var ret = "";
-    if (text.startsWith("https://") || text.startsWith("http://"))
+    if (s.startsWith("https://") || s.startsWith("http://"))
     {
         let text = s;
         let show = text;

@@ -116,6 +116,12 @@ cd cwik
 npm start
 ```
 
+### Grep this project only
+
+```
+grep "something" * public/css/*/* routes/* views/* | cut -c 1-160
+```
+
 ### Production
 
 A production environment should run a web front end so that both cwik and stackedit can be served from port 80 while still running as the wiki user and in two separate processes.  Configure your DNS settings to point both your "main" site name and "stackedit.yourdomain.yourtld" to this machine.  Next, Nginx or Apache can be used to proxy requests to either cwik or stackedit.
