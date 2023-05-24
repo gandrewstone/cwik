@@ -35,7 +35,7 @@ sudo apt-get install git
 
 These packages are required so that the server can simulate a client to render markdown.  If you have installed a web browser, your linux installation may already have these dependencies, but if you are running a console only 
 ```
-sudo apt-get install libx11-xcb-dev libxcomposite1 libxcb-dri3-0 libnss3 libxss-dev libgbm-dev gconf-service libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxss1 libxtst6 libappindicator1 libnss3 libasound2 libatk1.0-0 libc6 ca-certificates fonts-liberation lsb-release xdg-utils
+sudo apt-get install libx11-xcb-dev libxcomposite1 libxcb-dri3-0 libnss3 libxss-dev libgbm-dev gconf-service libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxss1 libxtst6 libappindicator1 libnss3 libasound2 libatk1.0-0 libc6 ca-certificates fonts-liberation lsb-release xdg-utils bzip2
 ```
 
 Make a separate user:
@@ -87,8 +87,8 @@ npm install
 Install a process manager and start up the node processes
 ```
 sudo npm install pm2 -g
-(cd /opt/stackedit; pm2 start index.js --name "stackedit")
-(cd /opt/cwik; pm2 start start.sh --interpreter bash --name "cwik")
+(cd /opt/git/stackedit; pm2 start index.js --name "stackedit")
+(cd /opt/git/cwik; pm2 start start.sh --interpreter bash --name "cwik")
 ```
 
 ### JS file format
@@ -163,12 +163,16 @@ server {
 
 ##### Install Required Modules
 
+sudo apt-get install -y apache2
 sudo a2enmod proxy
 sudo a2enmod proxy_http
 sudo a2enmod proxy_balancer
 sudo a2enmod lbmethod_byrequests
 
+systemctl restart apache2
+
 ##### Apache2 configuration
+cd /etc/apache2/sites-enabled
 
 ```
 <VirtualHost *:80>

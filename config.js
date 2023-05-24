@@ -138,9 +138,9 @@ console.log("Running compsci461/661 configuration");
 
 // Override for dev env
 if (typeof process.env.CWIK_DEV !== "undefined") {
-    exports.MY_URL = "http://192.168.1.100:8000";
+    exports.MY_URL = "http://192.168.1.5:8000";
     exports.MY_CVT_URL = exports.MY_URL + "/_cvt_";
-    exports.STACKEDIT_URL = "http://192.168.1.100:8002/app";
+    exports.STACKEDIT_URL = "http://192.168.1.5:8002/app";
     //exports.STACKEDIT_URL = "https://stackedit.io/app";
 }
 
